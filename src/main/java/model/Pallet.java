@@ -7,9 +7,10 @@ import lombok.Data;
 public class Pallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int palletId;
+    @Column(name = "PalletID")
+    private Integer palletID; // Khóa chính của bảng Pallets
 
     @ManyToOne
-    @JoinColumn(name = "lotId", nullable = false)
-    private Lot lot;
+    @JoinColumn(name = "LotID", nullable = false)
+    private Lot lot; // Khóa ngoại tham chiếu đến bảng Lots
 }

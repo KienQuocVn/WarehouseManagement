@@ -5,10 +5,12 @@ import lombok.Data;
 @Entity
 @Table(name = "ProductionGroups")
 public class ProductionGroup {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int groupId;
+    @Column(name = "GroupID")
+    private Integer groupID; // Khóa chính của bảng ProductionGroups
 
-    @Column(nullable = false)
-    private String groupName;
+    @Column(name = "GroupName", nullable = false)
+    private String groupName; // Tên nhóm sản xuất (ví dụ: "Tổ 1", "Tổ 2", ...)
 }
