@@ -23,67 +23,77 @@ public class MainFrame extends JFrame {
 
   private void initDashboard() {
     dashboardPanel = new JPanel();
-    dashboardPanel.setLayout(null); // Sử dụng layout null để custom vị trí
+    dashboardPanel.setLayout(null);
     dashboardPanel.setBackground(new Color(33, 150, 83));
-    dashboardPanel.setPreferredSize(new Dimension(220, getHeight()));
+    dashboardPanel.setPreferredSize(new Dimension(getWidth(), 70));
 
     // Hiển thị "HI! Admin"
     JLabel lblGreeting = new JLabel("HI !", SwingConstants.CENTER);
     lblGreeting.setFont(new Font("Arial", Font.BOLD, 18));
     lblGreeting.setForeground(Color.WHITE);
-    lblGreeting.setBounds(0, 20, 220, 30);
+    lblGreeting.setBounds(20, 10, 100, 30);
 
     JLabel lblRole = new JLabel("Admin", SwingConstants.CENTER);
     lblRole.setFont(new Font("Arial", Font.PLAIN, 16));
     lblRole.setForeground(Color.WHITE);
-    lblRole.setBounds(0, 50, 220, 30);
+    lblRole.setBounds(20, 40, 100, 30);
     dashboardPanel.add(lblGreeting);
     dashboardPanel.add(lblRole);
 
-
-
     // Các nút chức năng với tên và vị trí giữ nguyên
-    JButton btnHome = createButton("Thống kê");
-    btnHome.setBounds(10, 100, 200, 40);
+    JButton btnHome = createButton("Trang chủ");
+    btnHome.setBounds(150, 30, 90, 20);
     btnHome.addActionListener(e -> showPanel("Home"));
 
-    JButton btnInputWeight = createButton("Nhập mẻ cân");
-    btnInputWeight.setBounds(10, 150, 200, 40);
-    btnInputWeight.addActionListener(e -> showPanel("InputWeight"));
+    JButton btnOrder = createButton("Cài đơn");
+    btnOrder.setBounds(250, 30, 90, 20);
+    btnOrder.addActionListener(e -> showPanel("Order"));
 
-    JButton btnProductSpec = createButton("Quản lý quy cách");
-    btnProductSpec.setBounds(10, 200, 200, 40);
-    btnProductSpec.addActionListener(e -> showPanel("ProductSpec"));
-
-    JButton btnHistory = createButton("Lịch sử cân");
-    btnHistory.setBounds(10, 250, 200, 40);
-    btnHistory.addActionListener(e -> showPanel("History"));
-
-    JButton btnWarehouse = createButton("Quản lý kho");
-    btnWarehouse.setBounds(10, 300, 200, 40);
-    btnWarehouse.addActionListener(e -> showPanel("Warehouse"));
-
-    JButton btnReport = createButton("Xuất báo cáo");
-    btnReport.setBounds(10, 350, 200, 40);
+    JButton btnReport = createButton("Thống kê");
+    btnReport.setBounds(350, 30, 90, 20);
     btnReport.addActionListener(e -> showPanel("Report"));
 
-    JButton btnChangeInfo = createButton("Đổi thông tin");
-    btnChangeInfo.setBounds(10, getHeight() - 120, 200, 40);
+    JButton btnImportExport = createButton("Xuất nhập");
+    btnImportExport.setBounds(450, 30, 90, 20);
+    btnImportExport.addActionListener(e -> showPanel("Import/Export"));
 
-    JButton btnLogout = createButton("Đăng xuất");
-    btnLogout.setBounds(10, getHeight() - 70, 200, 40);
-    btnLogout.addActionListener(e -> System.exit(0));
+    JButton btnLogin = createButton("Đăng nhập");
+    btnLogin.setBounds(550, 30, 90, 20);
+    btnLogin.addActionListener(e -> {
+      this.setVisible(false); // Ẩn MainFrame
+      JFrame loginFrame = new JFrame("Đăng nhập");
+      loginFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      loginFrame.setSize(600, 500);
+      loginFrame.add(new Login());
+      loginFrame.setLocationRelativeTo(null);
+      loginFrame.setVisible(true);
+
+      // Khi login thành công, hiển thị lại MainFrame
+      loginFrame.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+          MainFrame.this.setVisible(true);
+        }
+      });
+    });
+
+
+    JButton btnConnect = createButton("Chưa kết nối");
+    btnConnect.setBounds(1280, 30, 100, 20);
+
+    JButton btnSetting = createButton("Cài đặt");
+    btnSetting.setBounds(1380, 30, 90, 20);
+    btnSetting.addActionListener(e -> System.exit(0));
 
     dashboardPanel.add(btnHome);
-    dashboardPanel.add(btnInputWeight);
-    dashboardPanel.add(btnProductSpec);
-    dashboardPanel.add(btnHistory);
-    dashboardPanel.add(btnWarehouse);
+    dashboardPanel.add(btnOrder);
+    dashboardPanel.add(btnImportExport);
+    dashboardPanel.add(btnLogin);
     dashboardPanel.add(btnReport);
-    dashboardPanel.add(btnChangeInfo);
-    dashboardPanel.add(btnLogout);
+    dashboardPanel.add(btnConnect);
+    dashboardPanel.add(btnSetting);
 
-    add(dashboardPanel, BorderLayout.WEST);
+    add(dashboardPanel, BorderLayout.SOUTH);
   }
 
   private JButton createButton(String text) {
@@ -101,11 +111,11 @@ public class MainFrame extends JFrame {
     contentPanel = new JPanel(cardLayout);
 
     contentPanel.add(new HomePanel(), "Home");
-    contentPanel.add(new InputWeightPanel(), "InputWeight");
-    contentPanel.add(new ProductSpecPanel(), "ProductSpec");
-    contentPanel.add(new HistoryPanel(), "History");
-    contentPanel.add(new WarehousePanel(), "Warehouse");
-    contentPanel.add(new ReportPanel(), "Report");
+    contentPanel.add(new CaiDonPanel(), "Order");
+    contentPanel.add(new ThongKePanel(), "Report");
+    contentPanel.add(new XuatNhapPanel(), "Import/Export");
+    contentPanel.add(new Login(), "Login");
+
 
     add(contentPanel, BorderLayout.CENTER);
 

@@ -3,8 +3,8 @@ package view;
 import javax.swing.*;
 import java.awt.*;
 
-public class ProductSpecPanel extends JPanel {
-  public ProductSpecPanel() {
+public class XuatNhapPanel extends JPanel {
+  public XuatNhapPanel() {
     setLayout(new BorderLayout());
 
     // Tiêu đề
