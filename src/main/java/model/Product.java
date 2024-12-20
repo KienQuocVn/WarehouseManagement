@@ -7,10 +7,12 @@ import lombok.Data;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int productId;
+    @Column(name = "ProductID")
+    private Integer productID; // Khóa chính của bảng Products
 
-    @Column(nullable = false)
-    private String productName;
+    @Column(name = "ProductName", nullable = false)
+    private String productName; // Tên sản phẩm
 
-    private String color;
+    @Column(name = "Color")
+    private String color; // Màu sắc sản phẩm
 }

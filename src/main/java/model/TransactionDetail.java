@@ -8,18 +8,19 @@ import lombok.Data;
 public class TransactionDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int detailId;
+    @Column(name = "DetailID")
+    private Integer detailID; // Khóa chính của bảng TransactionDetails
 
     @ManyToOne
-    @JoinColumn(name = "transactionId", nullable = false)
-    private Transaction transaction;
+    @JoinColumn(name = "TransactionID", nullable = false)
+    private Transaction transaction; // Khóa ngoại tham chiếu đến bảng Transactions
 
     @ManyToOne
-    @JoinColumn(name = "lotId", nullable = false)
-    private Lot lot;
+    @JoinColumn(name = "LotID", nullable = false)
+    private Lot lot; // Khóa ngoại tham chiếu đến bảng Lots
 
-    @Column(nullable = false)
-    private double quantity;
+    @Column(name = "Quantity", nullable = false)
+    private Double quantity; // Số lượng của giao dịch
 }
 
 

@@ -7,11 +7,12 @@ import lombok.Data;
 @Table(name = "Users")
 public class User {
     @Id
-    private String username;
+    @Column(name = "Username")
+    private String username; // Tên người dùng (Khóa chính)
 
-    @Column(nullable = false)
-    private String fullName;
+    @Column(name = "FullName", nullable = false)
+    private String fullName; // Tên đầy đủ của người dùng
 
-    @Column(nullable = false)
-    private String role;
+    @Column(name = "Role", nullable = false)
+    private String role; // Vai trò (Thủ kho, Quản lý, Nhân viên)
 }
