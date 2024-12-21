@@ -6,8 +6,9 @@ import lombok.Data;
 @Table(name = "WarehouseStaff")
 public class WarehouseStaff {
     @Id
+    @Column(name = "StaffID")
     private int staffId;
 
-    @Column(nullable = false)
+    @Column(name = "StaffName")
     private String staffName;
 }

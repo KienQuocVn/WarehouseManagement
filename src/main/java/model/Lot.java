@@ -2,43 +2,38 @@ package model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 @Table(name = "Lots")
 public class Lot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int lotId;
+    @Column(name = "LotID")
+    private Integer lotID;
+
+    @Column(name = "LotIDU", unique = true, length = 20, nullable = false)
+    private String lotIDU; // Đảm bảo LotIDU là duy nhất
 
     @ManyToOne
-    @JoinColumn(name = "productId", nullable = false)
-    private Product product;
+    @JoinColumn(name = "ProductID", nullable = false)
+    private Product product; // Khóa ngoại đến bảng Products
 
-    @Column(nullable = false)
-    private String productionTime;
+    @Column(name = "ProductionTime", nullable = false)
+    private LocalDateTime productionTime; // Thời gian sản xuất
 
-    @Column(nullable = false)
-    private int expirationDays;
+    @Column(name = "ExpirationDays", nullable = false)
+    private Integer expirationDays; // Hạn sử dụng
 
-    @Column(nullable = false)
-    private double weight;
+    @Column(name = "Weight", nullable = false)
+    private BigDecimal weight; // Khối lượng tịnh
 
-    @Column(nullable = false)
-    private double warehouseWeight;
+    @Column(name = "WarehouseWeight", nullable = false)
+    private BigDecimal warehouseWeight; // Khối lượng cân
 
-    @Column(nullable = false)
-    private double weightDeviation;
-
-    @ManyToOne
-    @JoinColumn(name = "shiftId", nullable = false)
-    private Shift shift;
-
-    @ManyToOne
-    @JoinColumn(name = "groupId", nullable = false)
-    private ProductionGroup group;
-
-    @ManyToOne
-    @JoinColumn(name = "warehouseStaff", nullable = false)
-    private WarehouseStaff warehouseStaff;
+    @Column(name = "WeightDeviation", nullable = false)
+    private BigDecimal weightDeviation; // Khối lượng bì
 }
 

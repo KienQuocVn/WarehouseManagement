@@ -1,23 +1,28 @@
 package model;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 @Table(name = "Transactions")
 public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int transactionId;
+    @Column(name = "TransactionID")
+    private Integer transactionID; // Khóa chính của bảng Transactions
 
-    @Column(nullable = false)
-    private String transactionType;
+    @Column(name = "TransactionType", nullable = false)
+    private String transactionType; // Loại giao dịch ("Xuất" hoặc "Nhập")
 
-    @Column(nullable = false)
-    private String date;
+    @Column(name = "Date", nullable = false)
+    private LocalDateTime date; // Ngày giao dịch
 
-    private String customer;
+    @Column(name = "Customer")
+    private String customer; // Khách hàng (Chỉ áp dụng cho giao dịch "Xuất")
 
     @ManyToOne
-    @JoinColumn(name = "staff", nullable = false)
-    private User staff;
+    @JoinColumn(name = "Staff", nullable = false)
+    private User staff; // Nhân viên thực hiện giao dịch (khóa ngoại tham chiếu đến bảng Users)
 }
