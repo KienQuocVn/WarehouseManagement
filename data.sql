@@ -1,8 +1,11 @@
-﻿Create Database weighing_management
+﻿Create Database warehouse_management
 Go
 
-use weighing_management
+use warehouse_management
 Go
+
+
+DROP DATABASE warehouse_management
 
 -- Bảng Products
 CREATE TABLE Products (

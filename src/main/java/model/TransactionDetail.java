@@ -1,15 +1,21 @@
 package model;
 import jakarta.persistence.*;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Data
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "TransactionDetails")
 public class TransactionDetail {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "DetailID")
-    private Integer detailID; // Khóa chính của bảng TransactionDetails
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID detailID;
 
     @ManyToOne
     @JoinColumn(name = "TransactionID", nullable = false)
@@ -19,8 +25,9 @@ public class TransactionDetail {
     @JoinColumn(name = "LotID", nullable = false)
     private Lot lot; // Khóa ngoại tham chiếu đến bảng Lots
 
-    @Column(name = "Quantity", nullable = false)
+    @Column(name = "Quantity", columnDefinition = "DECIMAL(10, 2)", nullable = false)
     private Double quantity; // Số lượng của giao dịch
 }
+
 
 
