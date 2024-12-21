@@ -4,9 +4,9 @@
         <properties>
             <!-- Driver và URL kết nối -->
             <property name="hibernate.connection.driver_class" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-            <property name="hibernate.connection.url" value="jdbc:sqlserver://localhost;databaseName=warehouse_management;encrypt=false" />
-            <property name="hibernate.connection.username" value="sa" />
-            <property name="hibernate.connection.password" value="12345" />
+            <property name="hibernate.connection.url" value="${DB_URL}" />
+            <property name="hibernate.connection.username" value="${DB_USERNAME}" />
+            <property name="hibernate.connection.password" value="${DB_PASSWORD}" />
 
             <!-- Dialect của SQL Server -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect" />
