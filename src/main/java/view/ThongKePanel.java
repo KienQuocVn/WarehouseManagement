@@ -39,6 +39,7 @@ public class ThongKePanel extends JPanel {
 
     filterPanel.add(createColumn("Từ Ngày:", fromDateChooser));
     filterPanel.add(createColumn("Đến Ngày:", toDateChooser));
+
     filterPanel.add(createColumnBlue("Xóa Chọn:", new JButton(resizeIcon("/img/reset.png", 25, 25))));
     filterPanel.add(createColumnBlue("Tìm Kiếm:", new JButton(resizeIcon("/img/search.png", 25, 25))));
     filterPanel.add(createColumn("Loại Report:", new JComboBox<>(new String[]{"Loại 1", "Loại 2"})));
