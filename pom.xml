@@ -31,8 +31,10 @@
     <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
+      <version>12.2.0.jre11</version> <!-- Choose the appropriate version -->
       <scope>runtime</scope>
     </dependency>
+
 
     <dependency>
       <groupId>jakarta.persistence</groupId>
@@ -45,6 +47,12 @@
       <artifactId>hibernate-core</artifactId>
       <version>6.2.10.Final</version> <!-- Kiểm tra phiên bản mới nhất -->
     </dependency>
+    <dependency>
+      <groupId>com.toedter</groupId>
+      <artifactId>jcalendar</artifactId>
+      <version>1.4</version>
+    </dependency>
+
 
 
   </dependencies>
