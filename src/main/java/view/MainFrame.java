@@ -14,6 +14,10 @@ public class MainFrame extends JFrame {
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setLayout(new BorderLayout());
     setLocationRelativeTo(null);
+
+    // logo = new ImageIcon(ClassLoader.getSystemResource("/img/logo.png"));
+    //setIconImage(logo.getImage());
+
     initDashboard();
     initContentPanel();
     setVisible(true);
