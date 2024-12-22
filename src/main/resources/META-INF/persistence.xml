@@ -1,18 +1,20 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" version="2.1">
-    <persistence-unit name="CanXuatNhapKhoPU">
+    <persistence-unit name="CanXuatNhapKho">
+        <class>model.User</class> <!-- Thêm class User -->
         <properties>
-            <!-- Cấu hình kết nối SQL Server -->
+            <!-- Driver và URL kết nối -->
             <property name="hibernate.connection.driver_class" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
-            <property name="hibernate.connection.url" value="jdbc:sqlserver://localhost;databaseName=weighing_management;encrypt=false" />
-            <property name="hibernate.connection.username" value="sa" />
-            <property name="hibernate.connection.password" value="123" />
+            <property name="hibernate.connection.url" value="${DB_URL}" />
+            <property name="hibernate.connection.username" value="${DB_USERNAME}" />
+            <property name="hibernate.connection.password" value="${DB_PASSWORD}" />
 
             <!-- Dialect của SQL Server -->
             <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServerDialect" />
 
-            <!-- Hibernate properties -->
+            <!-- Tự động tạo bảng -->
             <property name="hibernate.hbm2ddl.auto" value="update" />
+
+            <!-- Hibernate options -->
             <property name="hibernate.show_sql" value="true" />
             <property name="hibernate.format_sql" value="true" />
         </properties>

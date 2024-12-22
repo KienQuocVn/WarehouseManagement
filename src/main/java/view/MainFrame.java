@@ -14,8 +14,10 @@ public class MainFrame extends JFrame {
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     setLayout(new BorderLayout());
     setLocationRelativeTo(null);
+
     // logo = new ImageIcon(ClassLoader.getSystemResource("/img/logo.png"));
     //setIconImage(logo.getImage());
+
     initDashboard();
     initContentPanel();
     setVisible(true);
@@ -24,41 +26,28 @@ public class MainFrame extends JFrame {
   private void initDashboard() {
     dashboardPanel = new JPanel();
     dashboardPanel.setLayout(null);
-    dashboardPanel.setBackground(new Color(33, 150, 83));
-    dashboardPanel.setPreferredSize(new Dimension(getWidth(), 70));
-
-    // Hiển thị "HI! Admin"
-    JLabel lblGreeting = new JLabel("HI !", SwingConstants.CENTER);
-    lblGreeting.setFont(new Font("Arial", Font.BOLD, 18));
-    lblGreeting.setForeground(Color.WHITE);
-    lblGreeting.setBounds(20, 10, 100, 30);
-
-    JLabel lblRole = new JLabel("Admin", SwingConstants.CENTER);
-    lblRole.setFont(new Font("Arial", Font.PLAIN, 16));
-    lblRole.setForeground(Color.WHITE);
-    lblRole.setBounds(20, 40, 100, 30);
-    dashboardPanel.add(lblGreeting);
-    dashboardPanel.add(lblRole);
+    dashboardPanel.setBackground(Color.WHITE);
+    dashboardPanel.setPreferredSize(new Dimension(getWidth(), 50));
 
     // Các nút chức năng với tên và vị trí giữ nguyên
     JButton btnHome = createButton("Trang chủ");
-    btnHome.setBounds(150, 30, 90, 20);
+    btnHome.setBounds(50, 10, 90, 30);
     btnHome.addActionListener(e -> showPanel("Home"));
 
     JButton btnOrder = createButton("Cài đơn");
-    btnOrder.setBounds(250, 30, 90, 20);
+    btnOrder.setBounds(150, 10, 90, 30);
     btnOrder.addActionListener(e -> showPanel("Order"));
 
     JButton btnReport = createButton("Thống kê");
-    btnReport.setBounds(350, 30, 90, 20);
+    btnReport.setBounds(250, 10, 90, 30);
     btnReport.addActionListener(e -> showPanel("Report"));
 
     JButton btnImportExport = createButton("Xuất nhập");
-    btnImportExport.setBounds(450, 30, 90, 20);
+    btnImportExport.setBounds(350, 10, 90, 30);
     btnImportExport.addActionListener(e -> showPanel("Import/Export"));
 
     JButton btnLogin = createButton("Đăng nhập");
-    btnLogin.setBounds(550, 30, 90, 20);
+    btnLogin.setBounds(450, 10, 90, 30);
     btnLogin.addActionListener(e -> {
       this.setVisible(false); // Ẩn MainFrame
       JFrame loginFrame = new JFrame("Đăng nhập");
@@ -78,11 +67,16 @@ public class MainFrame extends JFrame {
     });
 
 
-    JButton btnConnect = createButton("Chưa kết nối");
-    btnConnect.setBounds(1280, 30, 100, 20);
+    JButton btnConnect = new JButton("Chưa kết nối");
+    btnConnect.setBackground(Color.RED);
+    btnConnect.setFont(new Font("Arial", Font.BOLD, 15));
+    btnConnect.setBounds(1230, 10, 110, 30);
+    btnConnect.setForeground(Color.BLACK);
+    btnConnect.setBorder(BorderFactory.createLineBorder(Color.RED));
+    btnConnect.setFocusPainted(false);
 
     JButton btnSetting = createButton("Cài đặt");
-    btnSetting.setBounds(1380, 30, 90, 20);
+    btnSetting.setBounds(1350, 10, 90, 30);
     btnSetting.addActionListener(e -> System.exit(0));
 
     dashboardPanel.add(btnHome);
@@ -98,13 +92,14 @@ public class MainFrame extends JFrame {
 
   private JButton createButton(String text) {
     JButton button = new JButton(text);
-    button.setFont(new Font("Arial", Font.BOLD, 14));
-    button.setBackground(new Color(33, 150, 83));
-    button.setForeground(Color.WHITE);
-    button.setBorder(BorderFactory.createLineBorder(new Color(33, 150, 83)));
+    button.setFont(new Font("Arial", Font.BOLD, 15));
+    button.setBackground(new Color(70, 130, 180)); // Đặt màu nền nút
+    button.setForeground(Color.BLACK); // Đặt màu chữ
+    button.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180))); // Viền cùng màu nền
     button.setFocusPainted(false);
     return button;
   }
+
 
   private void initContentPanel() {
     cardLayout = new CardLayout();

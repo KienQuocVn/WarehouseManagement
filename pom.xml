@@ -31,8 +31,9 @@
     <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
-      <scope>runtime</scope>
+      <version>12.2.0.jre11</version>
     </dependency>
+
 
     <dependency>
       <groupId>jakarta.persistence</groupId>
@@ -45,6 +46,18 @@
       <artifactId>hibernate-core</artifactId>
       <version>6.2.10.Final</version> <!-- Kiểm tra phiên bản mới nhất -->
     </dependency>
+    <dependency>
+      <groupId>com.toedter</groupId>
+      <artifactId>jcalendar</artifactId>
+      <version>1.4</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.github.cdimascio</groupId>
+      <artifactId>dotenv-java</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+
 
 
   </dependencies>

@@ -1,14 +1,23 @@
 package model;
 import jakarta.persistence.*;
+import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-@Data
+import lombok.NoArgsConstructor;
+
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "WarehouseStaff")
 public class WarehouseStaff {
     @Id
-    @Column(name = "StaffID")
-    private int staffId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID staffId;
 
-    @Column(name = "StaffName")
+    @Column(name = "StaffName", columnDefinition = "VARCHAR(255)")
     private String staffName;
 }
+
