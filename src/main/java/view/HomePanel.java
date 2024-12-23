@@ -91,7 +91,7 @@ public class HomePanel extends JPanel {
     // Màu
     gbc.gridx = 0;
     gbc.gridy = 2;
-    JLabel mauLabel = new JLabel("Màu:");
+    JLabel mauLabel = new JLabel("Màu Giấy In:");
     leftPanel.add(mauLabel, gbc);
 
     gbc.gridx = 1;
@@ -103,7 +103,7 @@ public class HomePanel extends JPanel {
     // Hạn SD
     gbc.gridx = 0;
     gbc.gridy = 3;
-    JLabel hanSDLabel = new JLabel("Hạn SD (Ngày):");
+    JLabel hanSDLabel = new JLabel("Hạn Sử Dụng(Ngày):");
     leftPanel.add(hanSDLabel, gbc);
 
     gbc.gridx = 1;
@@ -125,7 +125,7 @@ public class HomePanel extends JPanel {
     // KL Bi
     gbc.gridx = 0;
     gbc.gridy = 5;
-    JLabel klBiLabel = new JLabel("KL BÌ (Kg):");
+    JLabel klBiLabel = new JLabel("Khối Lượng BÌ (Kg):");
     leftPanel.add(klBiLabel, gbc);
 
     gbc.gridx = 1;

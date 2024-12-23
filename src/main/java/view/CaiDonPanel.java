@@ -454,11 +454,108 @@ public class CaiDonPanel extends JPanel {
   }
 
   private JPanel createCauHinhPanel() {
-    JPanel panel = new JPanel(new BorderLayout());
-    panel.add(new JLabel("Nội dung tab Cấu Hình", JLabel.CENTER), BorderLayout.CENTER);
+    // Panel chính
+    JPanel containerPanel = new JPanel(new BorderLayout());
 
-    return panel;
+    // Panel chứa các thành phần form
+    JPanel panel = new JPanel(new GridBagLayout());
+    panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Khoảng cách xung quanh
+
+    // Cài đặt chiều rộng cố định cho panel để nó sát bên trái
+    panel.setPreferredSize(new Dimension(800, 0));
+
+    GridBagConstraints gbc = new GridBagConstraints();
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.insets = new Insets(10, 20, 10, 10); // Điều chỉnh khoảng cách chiều ngang (left và right)
+
+    // Thêm các thành phần vào form
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    panel.add(new JLabel("THƯ MỤC LƯU:"), gbc);
+
+    gbc.gridx = 1;
+    gbc.weightx = 1.0; // Cho phép JTextField chiếm toàn bộ chiều rộng
+    JTextField thuMucField = new JTextField("D:\\Export", 10);
+    panel.add(thuMucField, gbc);
+
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    panel.add(new JLabel("TÊN FILE:"), gbc);
+
+    gbc.gridx = 1;
+    JTextField tenFileField = new JTextField("Export.xlsx", 10);
+    panel.add(tenFileField, gbc);
+
+    gbc.gridx = 0;
+    gbc.gridy = 2;
+    panel.add(new JLabel("NGƯỠNG CẢN:"), gbc);
+
+    gbc.gridx = 1;
+    JTextField nguongCanField = new JTextField("10.00", 10);
+    panel.add(nguongCanField, gbc);
+
+    gbc.gridx = 0;
+    gbc.gridy = 3;
+    panel.add(new JLabel("MÁY IN:"), gbc);
+
+    gbc.gridx = 1;
+    JComboBox<String> mayInComboBox = new JComboBox<>(new String[] {
+            "Foxit PhantomPDF Printer", "Microsoft Print to PDF", "Canon LBP6030"
+    });
+    panel.add(mayInComboBox, gbc);
+
+    // Tạo panel trên form và thêm label
+    JPanel headerPanel = new JPanel(new BorderLayout());
+    headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.yellow)); // Border dưới
+    JLabel headerLabel = new JLabel("Cấu Hình Hệ Thống");
+    headerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    headerLabel.setHorizontalAlignment(SwingConstants.LEFT); // Căn trái
+    headerPanel.add(headerLabel, BorderLayout.WEST);
+
+    // Tạo panel chứa PanelD và buttonPanel
+    JPanel bottomPanel = new JPanel(new BorderLayout());
+
+    // Các nút chức năng
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)); // Đặt FlowLayout.LEFT để căn chỉnh nút sang trái
+    buttonPanel.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.black));
+    JButton btnThem = new JButton("Lưu");
+    btnThem.setBackground(new Color(152, 201, 226, 255)); // Màu xanh lá
+    btnThem.setOpaque(true);  // Đảm bảo màu nền được hiển thị
+    btnThem.setBorderPainted(false);  // Bỏ viền của nút
+
+    // Thêm các nút vào panel
+    buttonPanel.add(btnThem);
+
+    bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+    // Đặt panel vào vị trí sát bên trái
+    containerPanel.add(headerPanel, BorderLayout.NORTH); // Đặt panel header lên trên
+    containerPanel.add(panel, BorderLayout.CENTER); // Đặt panel form vào giữa
+    containerPanel.add(bottomPanel, BorderLayout.SOUTH);  // Thêm bottomPanel vào panel chính
+
+    return containerPanel;
   }
+
+
+  private JPanel createSoftwarePanel2() {
+    JPanel softwarePanel = new JPanel();
+    softwarePanel.setBackground(Color.WHITE);
+    softwarePanel.setBorder(new RoundedBorder(0));
+
+    JLabel softwareLabel = new JLabel("CÀI ĐẶT ĐƠN HÀNG");
+    softwareLabel.setVerticalAlignment(SwingConstants.TOP);
+    softwareLabel.setFont(new Font("Arial", Font.BOLD, 16));
+    softwarePanel.add(softwareLabel);
+
+    JPanel containerPanel = new JPanel(new BorderLayout());
+    containerPanel.setBackground(Color.WHITE);
+    containerPanel.setPreferredSize(new Dimension(0, 40));
+    containerPanel.add(softwarePanel, BorderLayout.CENTER);
+
+    return containerPanel;
+  }
+
+
 
   // Phương thức tùy chỉnh bảng JTable
   private void styleTable(JTable table) {
