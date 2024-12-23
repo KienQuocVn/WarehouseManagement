@@ -16,10 +16,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "Lots")
 public class Lot {
-    //test
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID lotID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer lotID;
 
     @Column(name = "LotIDU", columnDefinition = "NVARCHAR(255)", unique = true, length = 20, nullable = false)
     private String lotIDU;
