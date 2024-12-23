@@ -26,7 +26,7 @@ public class CaiDonPanel extends JPanel {
     dashboard.setPreferredSize(new Dimension(170, 0));
 
     // Tải icon từ file và thay đổi kích thước
-    ImageIcon originalIcon = new javax.swing.ImageIcon(getClass().getResource("/img/document.png"));
+    ImageIcon originalIcon = new javax.swing.ImageIcon(getClass().getResource("/img/document2.png"));
     Image iconImage = originalIcon.getImage(); // Lấy hình ảnh từ ImageIcon
 
 // Thay đổi kích thước của icon (ví dụ: 20x20 pixels)
