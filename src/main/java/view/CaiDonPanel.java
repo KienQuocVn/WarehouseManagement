@@ -1,17 +1,24 @@
 package view;
 
 import Utils.RoundedBorder;
+import controller.CaiDonController;
+import dao.DaoProduct;
+import model.Product;
 
 import javax.swing.*;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.util.List;
 public class CaiDonPanel extends JPanel {
   private CardLayout cardLayout;
   private JPanel mainPanel;
+  private DaoProduct daoProduct;
 
   public CaiDonPanel() {
     setLayout(new BorderLayout());
@@ -122,17 +129,18 @@ public class CaiDonPanel extends JPanel {
   }
 
   // MA HANG
+  // bien public
+  JTable table;
+  JTextField DHField;
+  JTextField HSDField;
+  JComboBox<String> ThukhoComboBox;
+  private DefaultTableModel tableModel;
   private JPanel createMaHangPanel() {
     JPanel panel = new JPanel(new BorderLayout());
-
+    ActionListener ac = new CaiDonController(this);
+    table = new JTable(); // Khởi tạo JTable tại đây
     // Bảng dữ liệu
-    String[] columnNames = {"STT", "Tên Đơn Hàng", "Hạn Sử Dụng (Ngày)", "Màu"};
-    Object[][] data = {
-            {"1", "Đơn 1", "2.0", "Đỏ"},
-            {"2", "Đơn 2", "4.0", "Vàng"},
-            {"3", "Đơn 3", "4.0", "Xanh"}
-    };
-    JTable table = new JTable(data, columnNames);
+    updateTableData();
     styleTable(table);
     JScrollPane scrollPane = new JScrollPane(table);
     panel.add(scrollPane, BorderLayout.CENTER);
@@ -145,7 +153,7 @@ public class CaiDonPanel extends JPanel {
     Panel1.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     JLabel Label1 = new JLabel("Tên Đơn Hàng");
-    JTextField DHField = new JTextField("ĐƠN 1");
+     DHField = new JTextField("");
     DHField.setFont(new Font("Arial", Font.BOLD, 14));
     Label1.setAlignmentX(Component.LEFT_ALIGNMENT);
     DHField.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -161,7 +169,7 @@ public class CaiDonPanel extends JPanel {
     Panel2.setPreferredSize(new Dimension(200, 0));  // Chiều rộng 200px, chiều cao tự động
 
     JLabel Label2 = new JLabel("Hạn Sử Dụng (Ngày)");
-    JTextField HSDField = new JTextField("4.0");
+     HSDField = new JTextField("");
     HSDField.setFont(new Font("Arial", Font.BOLD, 14));
 
     Label2.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -179,7 +187,7 @@ public class CaiDonPanel extends JPanel {
 
     JLabel Label3 = new JLabel("Màu");
     Label3.setFont(new Font("Arial", Font.BOLD, 14));
-    JComboBox<String> ThukhoComboBox = new JComboBox<>(new String[]{"Xanh", "Đỏ","Vàng"});
+     ThukhoComboBox = new JComboBox<>(new String[]{"Xanh", "Đỏ","Vàng"});
     ThukhoComboBox.setPreferredSize(new Dimension(200, 2));  // Chiều rộng 200px, chiều cao tự động
 
     Label3.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -202,27 +210,37 @@ public class CaiDonPanel extends JPanel {
     btnThem.setBackground(new Color(152, 201, 226,255)); // Màu xanh lá
     btnThem.setOpaque(true);  // Đảm bảo màu nền được hiển thị
     btnThem.setBorderPainted(false);  // Bỏ viền của nút
+    btnThem.addActionListener(ac);
 
     JButton btnSua = new JButton("Sửa");
     btnSua.setBackground(new Color(152, 201, 226,255)); // Màu xanh dương
     btnSua.setOpaque(true);
     btnSua.setBorderPainted(false);
+    btnSua.addActionListener(ac);
 
     JButton btnXoa = new JButton("Xóa");
     btnXoa.setBackground(new Color(152, 201, 226,255)); // Màu đỏ
     btnXoa.setOpaque(true);
     btnXoa.setBorderPainted(false);
+    btnXoa.addActionListener(ac);
 
     JButton btnXoaTatCa = new JButton("Xóa Tất Cả");
     btnXoaTatCa.setBackground(new Color(152, 201, 226,255)); // Màu cam
     btnXoaTatCa.setOpaque(true);
     btnXoaTatCa.setBorderPainted(false);
+    btnXoaTatCa.addActionListener(ac);
 
+    JButton btnReset = new JButton("Làm Mới");
+    btnReset.setBackground(new Color(152, 201, 226,255)); // Màu cam
+    btnReset.setOpaque(true);
+    btnReset.setBorderPainted(false);
+    btnReset.addActionListener(ac);
     // Thêm các nút vào panel
     buttonPanel.add(btnThem);
     buttonPanel.add(btnSua);
     buttonPanel.add(btnXoa);
     buttonPanel.add(btnXoaTatCa);
+    buttonPanel.add(btnReset);
 
     bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -556,6 +574,68 @@ public class CaiDonPanel extends JPanel {
   }
 
 
+  public void updateTableData() {
+    DaoProduct daoProduct = new DaoProduct(); // Tạo đối tượng DAO
+    List<Product> products = daoProduct.selectAll(); // Lấy danh sách sản phẩm từ DB
+
+    // Chuyển đổi danh sách thành mảng hai chiều
+    Object[][] data = new Object[products.size()][4];
+    // Lưu lại giá trị ban đầu để so sánh
+    Object[][] originalData = new Object[products.size()][4];
+    for (int i = 0; i < products.size(); i++) {
+      Product product = products.get(i);
+      data[i][0] = i + 1; // STT (không cho phép sửa)
+      data[i][1] = product.getProductName(); // Tên đơn hàng
+      data[i][2] = product.getHSD(); // Hạn sử dụng
+      data[i][3] = product.getColor(); // Màu (không cho phép sửa)
+
+      // Lưu lại giá trị ban đầu
+      originalData[i][0] = data[i][0];
+      originalData[i][1] = data[i][1];
+      originalData[i][2] = data[i][2];
+      originalData[i][3] = data[i][3];
+    }
+
+    // Cập nhật model cho JTable
+    tableModel = new DefaultTableModel(data, new Object[]{"STT", "Tên Đơn Hàng", "Hạn Sử Dụng", "Màu"}) {
+      // Ghi đè phương thức isCellEditable để không cho phép chỉnh sửa cột 0 và cột 3
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return column != 0 && column != 3; // Chỉ cho phép chỉnh sửa cột khác cột 0 và cột 3
+      }
+    };
+    table.setModel(tableModel);
+    styleTable(table);
+
+    // Đăng ký TableModelListener để nhận sự kiện thay đổi dữ liệu
+    tableModel.addTableModelListener(new TableModelListener() {
+
+      @Override
+      public void tableChanged(TableModelEvent e) {
+        if (e.getType() == TableModelEvent.UPDATE) {
+          int row = e.getFirstRow();
+          int column = e.getColumn();
+
+          // Chỉ xử lý sự kiện khi sửa cột 1 (Tên Đơn Hàng) và cột 2 (Hạn Sử Dụng)
+          if (column == 1 || column == 2) {
+            String updatedValue = tableModel.getValueAt(row, column).toString();
+            String originalValue = originalData[row][column].toString();
+
+            // Kiểm tra xem giá trị nhập vào có khác với giá trị ban đầu không
+            if (!updatedValue.equals(originalValue)) {
+              System.out.println("Dữ liệu đã thay đổi tại dòng " + row + ", cột " + column + ": " + updatedValue);
+
+
+            }
+          }
+        }
+      }
+    });
+  }
+
+
+
+
 
   // Phương thức tùy chỉnh bảng JTable
   private void styleTable(JTable table) {
@@ -635,5 +715,21 @@ public class CaiDonPanel extends JPanel {
     table.getColumnModel().getColumn(0).setCellRenderer(leftRenderer);  // Cột STT
     table.getColumnModel().getColumn(1).setCellRenderer(leftRenderer);  // Cột Tên Đơn Hàng
   }
+
+
+  //Getter va Setter
+  public JTextField getDHField() {
+    return DHField;
+  }
+
+  public JTextField getHSDField() {
+    return HSDField;
+  }
+
+  public JComboBox<String> getThukhoComboBox() {
+    return ThukhoComboBox;
+  }
+
+
 
 }

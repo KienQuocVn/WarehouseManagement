@@ -1,13 +1,13 @@
 package model;
+
 import jakarta.persistence.*;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Data
@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "Lots")
 public class Lot {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer lotID;
@@ -41,6 +42,17 @@ public class Lot {
 
     @Column(name = "WeightDeviation", columnDefinition = "DECIMAL(10, 2)", nullable = false)
     private BigDecimal weightDeviation; // Khối lượng bì
+
+    // Các mối quan hệ với bảng Shifts, ProductionGroups, WarehouseStaff
+    @ManyToOne
+    @JoinColumn(name = "ShiftID", nullable = false)
+    private Shift shift; // Tham chiếu đến bảng Shifts
+
+    @ManyToOne
+    @JoinColumn(name = "GroupID", nullable = false)
+    private ProductionGroup productionGroup; // Tham chiếu đến bảng ProductionGroups
+
+    @ManyToOne
+    @JoinColumn(name = "WarehouseStaff", nullable = false)
+    private WarehouseStaff warehouseStaff; // Tham chiếu đến bảng WarehouseStaff
 }
-
-
