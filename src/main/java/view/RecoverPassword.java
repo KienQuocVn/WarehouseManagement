@@ -249,11 +249,6 @@ public class RecoverPassword extends JDialog {
     }
   }
 
-  public static void main(String [] args ) {
-    RecoverPassword dialog = new RecoverPassword(new javax.swing.JFrame(), true);
-    dialog.setVisible(true);
-  }
-
   static boolean isValid(String email) {
     String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
     return email.matches(regex);
