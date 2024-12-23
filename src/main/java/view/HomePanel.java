@@ -144,7 +144,7 @@ public class HomePanel extends JPanel {
     JComboBox<String> printerBox = new JComboBox<>(new String[]{"Foxit PhantomPDF Printer"});
     JButton printButton = new JButton();
     // Tải icon từ file và thay đổi kích thước
-    ImageIcon originalIcon = new javax.swing.ImageIcon(getClass().getResource("/img/printer.png"));
+    ImageIcon originalIcon = new javax.swing.ImageIcon(getClass().getResource("/img/printer2.png"));
     Image iconImage = originalIcon.getImage(); // Lấy hình ảnh từ ImageIcon
 
 // Thay đổi kích thước của icon (ví dụ: 20x20 pixels)
