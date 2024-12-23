@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "Pallets")
 public class Pallet {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID palletID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer palletID;
 
     @ManyToOne
     @JoinColumn(name = "LotID", nullable = false)

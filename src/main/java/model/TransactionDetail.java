@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "TransactionDetails")
 public class TransactionDetail {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID detailID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer detailID;
 
     @ManyToOne
     @JoinColumn(name = "TransactionID", nullable = false)

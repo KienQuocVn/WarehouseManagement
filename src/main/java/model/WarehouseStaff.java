@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "WarehouseStaff")
 public class WarehouseStaff {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID staffId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer staffId;
 
     @Column(name = "StaffName", columnDefinition = "VARCHAR(255)")
     private String staffName;
