@@ -1,10 +1,12 @@
 package model;
+
 import jakarta.persistence.*;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.UUID;
 
 @Entity
 @Data
@@ -13,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "Shifts")
 public class Shift {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID shiftId;
@@ -20,5 +23,3 @@ public class Shift {
     @Column(name = "ShiftName", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String shiftName;
 }
-
-

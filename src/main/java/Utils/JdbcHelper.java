@@ -4,6 +4,8 @@
  */
 package Utils;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,10 +14,13 @@ import java.sql.SQLException;
 
 public class JdbcHelper {
 
+	private static  Dotenv dotenv = Dotenv.configure().load();
+
+
 	private static String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-	private static String dburl = "${DB_URL}";
-	private static String username = "${DB_USERNAME}";
-	private static String password = "${DB_PASSWORD}";
+	private static String dburl = dotenv.get("DB_URL");
+	private static String username =dotenv.get("DB_USERNAME");
+	private static String password = dotenv.get("DB_PASSWORD");
 
 	static {
 		try {
