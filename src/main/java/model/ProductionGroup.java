@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 public class ProductionGroup {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID groupID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer groupID;
 
     @Column(name = "GroupName", columnDefinition = "VARCHAR(255)", nullable = false)
     private String groupName; // Tên nhóm sản xuất

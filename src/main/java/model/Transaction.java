@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "Transactions")
 public class Transaction {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID transactionID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer transactionID;
 
     @Column(name = "TransactionType", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String transactionType; // Loại giao dịch ("Xuất" hoặc "Nhập")

@@ -17,8 +17,8 @@ import java.util.UUID;
 public class Shift {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID shiftId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer shiftId;
 
     @Column(name = "ShiftName", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String shiftName;
