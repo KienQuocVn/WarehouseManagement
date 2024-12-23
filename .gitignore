@@ -4,7 +4,6 @@ target/
 !**/src/test/**/target/
 .env
 .env.backup
-
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
