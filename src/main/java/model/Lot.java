@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "Lots")
 public class Lot {
+    //test
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID lotID;
