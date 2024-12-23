@@ -17,6 +17,17 @@ public class MainFrame extends JFrame {
     initDashboard();
     initContentPanel();
     setVisible(true);
+    ImageIcon logo = new ImageIcon(ClassLoader.getSystemResource("img/logo.png"));
+
+// Tăng kích thước của logo, ví dụ thay đổi kích thước thành 32x32
+    Image img = logo.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+
+// Gán lại hình ảnh đã thay đổi kích thước
+    logo = new ImageIcon(img);
+
+// Cài đặt icon cho cửa sổ
+    setIconImage(logo.getImage());
+
   }
 
   private void initDashboard() {
@@ -66,14 +77,22 @@ public class MainFrame extends JFrame {
     JButton btnConnect = new JButton("Chưa kết nối");
     btnConnect.setBackground(Color.RED);
     btnConnect.setFont(new Font("Arial", Font.BOLD, 15));
-    btnConnect.setBounds(1230, 10, 110, 30);
+    btnConnect.setBounds(1240, 10, 110, 30);
     btnConnect.setForeground(Color.BLACK);
     btnConnect.setBorder(BorderFactory.createLineBorder(Color.RED));
     btnConnect.setFocusPainted(false);
 
-    JButton btnSetting = createButton("Cài đặt");
-    btnSetting.setBounds(1350, 10, 90, 30);
-    btnSetting.addActionListener(e -> System.exit(0));
+    JButton btnSetting = new JButton(resizeIcon("/img/setting1.png", 25, 25));
+    btnSetting.setFont(new Font("Arial", Font.BOLD, 15));
+    btnSetting.setBackground(new Color(70, 130, 180));
+    btnSetting.setForeground(Color.BLACK);
+    btnSetting.setBorder(BorderFactory.createLineBorder(new Color(70, 130, 180)));
+    btnSetting.setFocusPainted(false);
+    btnSetting.setBounds(1360, 10, 90, 30);
+    btnSetting.addActionListener(e -> {
+      new SerialPortConfigFrame();
+    });
+
 
     dashboardPanel.add(btnHome);
     dashboardPanel.add(btnOrder);
@@ -95,7 +114,11 @@ public class MainFrame extends JFrame {
     button.setFocusPainted(false);
     return button;
   }
-
+  private ImageIcon resizeIcon(String imagePath, int width, int height) {
+    ImageIcon originalIcon = new ImageIcon(getClass().getResource(imagePath));
+    Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+    return new ImageIcon(scaledImage);
+  }
 
   private void initContentPanel() {
     cardLayout = new CardLayout();
