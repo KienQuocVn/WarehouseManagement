@@ -467,42 +467,78 @@ public class CaiDonPanel extends JPanel {
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.insets = new Insets(10, 20, 10, 10); // Điều chỉnh khoảng cách chiều ngang (left và right)
+    gbc.anchor = GridBagConstraints.NORTHWEST; // Căn lên trên cùng bên trái
+    gbc.weightx = 1.0; // Chiếm toàn bộ chiều rộng cột
 
     // Thêm các thành phần vào form
     gbc.gridx = 0;
     gbc.gridy = 0;
-    panel.add(new JLabel("THƯ MỤC LƯU:"), gbc);
+    gbc.weightx = 0.1;
+    JLabel thuMucLabel = new JLabel("THƯ MỤC LƯU:");
+    thuMucLabel.setFont(new Font("Arial", Font.BOLD, 15));
+    panel.add(thuMucLabel, gbc);
 
     gbc.gridx = 1;
-    gbc.weightx = 1.0; // Cho phép JTextField chiếm toàn bộ chiều rộng
+    gbc.weightx = 0.9;
     JTextField thuMucField = new JTextField("D:\\Export", 10);
+    thuMucField.setFont(new Font("Arial", Font.PLAIN, 17));
     panel.add(thuMucField, gbc);
 
+    // Thêm các thành phần vào form
+
+// Cấu hình JLabel và JTextField cho "TÊN FILE"
     gbc.gridx = 0;
     gbc.gridy = 1;
-    panel.add(new JLabel("TÊN FILE:"), gbc);
+    gbc.weightx = 0.1;
+    JLabel tenFileLabel = new JLabel("TÊN FILE:");
+    tenFileLabel.setFont(new Font("Arial", Font.BOLD, 15)); // Thay đổi cỡ chữ của JLabel
+    panel.add(tenFileLabel, gbc);
 
     gbc.gridx = 1;
+    gbc.weightx = 0.9;
     JTextField tenFileField = new JTextField("Export.xlsx", 10);
+    tenFileField.setFont(new Font("Arial", Font.PLAIN, 17)); // Thay đổi cỡ chữ của JTextField
     panel.add(tenFileField, gbc);
 
+// Cấu hình JLabel và JTextField cho "NGƯỠNG CẢN"
     gbc.gridx = 0;
     gbc.gridy = 2;
-    panel.add(new JLabel("NGƯỠNG CẢN:"), gbc);
+    gbc.weightx = 0.1;
+    JLabel nguongCanLabel = new JLabel("NGƯỠNG CẢN:");
+    nguongCanLabel.setFont(new Font("Arial", Font.BOLD, 15)); // Thay đổi cỡ chữ của JLabel
+    panel.add(nguongCanLabel, gbc);
 
     gbc.gridx = 1;
+    gbc.weightx = 0.9;
     JTextField nguongCanField = new JTextField("10.00", 10);
+    nguongCanField.setFont(new Font("Arial", Font.PLAIN, 17)); // Thay đổi cỡ chữ của JTextField
     panel.add(nguongCanField, gbc);
 
+// Cấu hình JLabel và JComboBox cho "MÁY IN"
     gbc.gridx = 0;
     gbc.gridy = 3;
-    panel.add(new JLabel("MÁY IN:"), gbc);
+    gbc.weightx = 0.1;
+    JLabel mayInLabel = new JLabel("MÁY IN:");
+    mayInLabel.setFont(new Font("Arial", Font.BOLD, 15)); // Thay đổi cỡ chữ của JLabel
+    panel.add(mayInLabel, gbc);
 
     gbc.gridx = 1;
+    gbc.weightx = 0.9;
     JComboBox<String> mayInComboBox = new JComboBox<>(new String[] {
-            "Foxit PhantomPDF Printer", "Microsoft Print to PDF", "Canon LBP6030"
+        "Foxit PhantomPDF Printer", "Microsoft Print to PDF", "Canon LBP6030"
     });
+
+    mayInComboBox.setFont(new Font("Arial", Font.PLAIN, 17)); // Cỡ chữ 17, kiểu chữ bình thường
+
     panel.add(mayInComboBox, gbc);
+
+
+    // Spacer để đẩy toàn bộ các thành phần lên trên
+    gbc.gridx = 0;
+    gbc.gridy = 4; // Dòng cuối cùng
+    gbc.weighty = 1.0; // Chiếm không gian dọc còn lại
+    gbc.gridwidth = 2; // Kéo dài qua 2 cột
+    panel.add(Box.createVerticalGlue(), gbc);
 
     // Tạo panel trên form và thêm label
     JPanel headerPanel = new JPanel(new BorderLayout());
@@ -535,6 +571,7 @@ public class CaiDonPanel extends JPanel {
 
     return containerPanel;
   }
+
 
 
   private JPanel createSoftwarePanel2() {

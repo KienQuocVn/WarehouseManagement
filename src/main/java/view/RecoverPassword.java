@@ -15,8 +15,7 @@ public class RecoverPassword extends JDialog {
     super(parent, modal);
     initComponents();
     setLocationRelativeTo(null);
-    ImageIcon logo = new ImageIcon(ClassLoader.getSystemResource("img/logo.png"));
-    setIconImage(logo.getImage());
+
   }
 
 

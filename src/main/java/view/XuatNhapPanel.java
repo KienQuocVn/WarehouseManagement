@@ -37,7 +37,7 @@ public class XuatNhapPanel extends JPanel {
 
 // Tạo JPanel để chứa JLabel và JButton
     JPanel labelPanelLeft = new JPanel(new BorderLayout()); // Dùng BorderLayout để căn đối xứng
-
+    labelPanelLeft.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 // Tạo JLabel "Mã Hàng"
     JLabel label = new JLabel("Mã Hàng:");
     label.setFont(new Font("Arial", Font.BOLD, 15)); // Cài đặt font cho JLabel
@@ -51,32 +51,72 @@ public class XuatNhapPanel extends JPanel {
 // Thêm labelPanel vào topPanel
     topPanelLeft.add(labelPanelLeft, BorderLayout.NORTH);
 
-    String[] columnNames = {"Mã Hàng", "Số Lô", "Xuất"};
-    Object[][] data = {
-        {"MH01", "L01", true},
-        {"MH02", "L02", false},
-        {"MH03", "L03", true}
+
+
+
+    // Dữ liệu cho bảng 1
+    String[] columnNames1 = {"Mã Hàng"};
+    Object[][] data1 = {
+        {"MH01"},
+        {"MH02"},
+        {"MH03"}
     };
 
-// Tạo DefaultTableModel với dữ liệu mới
-    DefaultTableModel tableModel = new DefaultTableModel(data, columnNames) {
+// Tạo DefaultTableModel cho bảng 1
+    DefaultTableModel tableModel1 = new DefaultTableModel(data1, columnNames1);
+
+// Tạo bảng 1
+    JTable table1 = new JTable(tableModel1);
+    table1.getTableHeader().setBackground(new Color(255, 153, 51));
+    JScrollPane tableScrollPane1 = new JScrollPane(table1);
+    tableScrollPane1.setBorder(BorderFactory.createCompoundBorder(
+        BorderFactory.createEmptyBorder(0, 5, 0, 0), // Khoảng cách cho các cạnh
+        BorderFactory.createMatteBorder(0, 0, 0, 10, Color.GRAY) // Border cho phía phải
+    ));  // Thêm dấu chấm phẩy ở đây
+
+
+    tableScrollPane1.setPreferredSize(new Dimension(300, 200)); // Kích thước của bảng 1
+
+// Dữ liệu cho bảng 2
+    String[] columnNames2 = {"Số Lô", "Xuất"};
+    Object[][] data2 = {
+        {"L01", true},
+        {"L02", false},
+        {"L03", true}
+    };
+
+// Tạo DefaultTableModel cho bảng 2
+    DefaultTableModel tableModel2 = new DefaultTableModel(data2, columnNames2) {
       @Override
       public Class<?> getColumnClass(int columnIndex) {
-        if (columnIndex == 2) {
-          return Boolean.class;
+        if (columnIndex == 1) {
+          return Boolean.class; // Cột "Xuất" có kiểu Boolean
         }
         return super.getColumnClass(columnIndex);
       }
     };
 
-    JTable table = new JTable(tableModel);
-    table.getColumnModel().getColumn(2).setCellEditor(new DefaultCellEditor(new JCheckBox()));
+// Tạo bảng 2
+    JTable table2 = new JTable(tableModel2);
+    table2.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(new JCheckBox())); // Sửa chỉ số cột
+    table2.getTableHeader().setBackground(new Color(255, 153, 51));
 
-    table.getTableHeader().setBackground(new Color(255, 153, 51)); // Màu nền tiêu đề
+// Tạo JScrollPane cho bảng 2
+    JScrollPane tableScrollPane2 = new JScrollPane(table2);
+    tableScrollPane2.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 5));
+    tableScrollPane2.setPreferredSize(new Dimension(300, 200)); // Kích thước của bảng 2
 
-    JScrollPane tableScrollPane = new JScrollPane(table);
-    tableScrollPane.setPreferredSize(new Dimension(550, 200));
-    topPanelLeft.add(tableScrollPane, BorderLayout.CENTER);
+// Tạo JPanel để chứa hai bảng
+    JPanel tablePanel = new JPanel(new BorderLayout());
+
+// Thêm cả hai bảng vào tablePanel
+    tablePanel.add(tableScrollPane1, BorderLayout.WEST); // Thêm bảng 1 vào vị trí WEST
+    tablePanel.add(tableScrollPane2, BorderLayout.EAST); // Thêm bảng 2 vào vị trí EAST
+
+// Thêm tablePanel vào topPanelLeft
+    topPanelLeft.add(tablePanel, BorderLayout.CENTER);
+    //======================================================================================
+
 
     JPanel bottomPanelLeft = new JPanel(new BorderLayout());
     JPanel labelPanelBottomLeft = new JPanel(new BorderLayout());
@@ -131,7 +171,8 @@ public class XuatNhapPanel extends JPanel {
 
 // Thêm các thành phần lọc vào bottomPanel
     JButton btnFilter = new JButton(resizeIcon("/img/search.png", 15, 15));
-    btnFilter.setPreferredSize(new Dimension(75, 25));
+    btnFilter.setBackground(new Color(70, 130, 180));
+    btnFilter.setPreferredSize(new Dimension(95, 25));
     filterPanel.add(btnFilter);
 
 // Thêm filterPanel vào labelPanelBottom ở vị trí CENTER
