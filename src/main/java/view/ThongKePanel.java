@@ -1,14 +1,35 @@
 package view;
 
 import com.toedter.calendar.JDateChooser;
+import dao.DaoLot;
+import dao.DaoProduct;
+import dao.DaoProductionGroup;
+import dao.DaoShift;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.swing.table.DefaultTableCellRenderer;
+import model.Lot;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Date;
 import javax.swing.table.DefaultTableModel;
+import model.Product;
+import model.ProductionGroup;
+import model.Shift;
 
 public class ThongKePanel extends JPanel {
+  private JTable table;
+  private DefaultTableModel tableModel;
+  private DaoLot daoLot; // Kết nối đến DAO
+  private DaoShift daoShift;
+  private DaoProductionGroup daoProductionGroup;
+  private DaoProduct daoProduct;
 
   public ThongKePanel() {
+    daoLot = new DaoLot();
+    daoProductionGroup = new DaoProductionGroup();
+    daoShift = new DaoShift();
+    daoProduct = new DaoProduct();
     setLayout(new BorderLayout());
 
     // Header panel
@@ -22,11 +43,20 @@ public class ThongKePanel extends JPanel {
     // Panel chứa bộ lọc
     JPanel filterPanel = new JPanel(new GridLayout(1, 11, 2, 2));
 
-    // Tạo ô cột với JLabel và thành phần nhập liệu
-    filterPanel.add(createColumn("Tổ Sản Xuất:", new JComboBox<>(new String[]{"Tất cả", "Tổ 1", "Tổ 2"})));
-    filterPanel.add(createColumn("Ca Sản Xuất:", new JComboBox<>(new String[]{"Tất cả", "Ca 1", "Ca 2"})));
+    // Tạo ComboBox cho Tổ Sản Xuất
+    JComboBox<String> productionGroupComboBox = new JComboBox<>();
+    loadProductionGroupsToComboBox(productionGroupComboBox);
+    filterPanel.add(createColumn("Tổ Sản Xuất:", productionGroupComboBox));
+
+    JComboBox<String> ShiftComboBox = new JComboBox<>();
+    loadShiftsToComboBox(ShiftComboBox);
+    filterPanel.add(createColumn("Ca Sản Xuất:", ShiftComboBox));
+
     filterPanel.add(createColumn("Xuất/Nhập:", new JComboBox<>(new String[]{"Xuất", "Nhập"})));
-    filterPanel.add(createColumn("Mã Hàng:", new JComboBox<>(new String[]{"Tất cả", "MH01", "MH02"})));
+
+    JComboBox<String> productNameComboBox = new JComboBox<>();
+    loadProductNameToComboBox(productNameComboBox);
+    filterPanel.add(createColumn("Mã Hàng:", productNameComboBox));
 
     // Sử dụng JDateChooser cho Từ Ngày và Đến Ngày
     JDateChooser fromDateChooser = new JDateChooser();
@@ -42,7 +72,7 @@ public class ThongKePanel extends JPanel {
 
     filterPanel.add(createColumnBlue("Xóa Chọn:", new JButton(resizeIcon("/img/reset.png", 25, 25))));
     filterPanel.add(createColumnBlue("Tìm Kiếm:", new JButton(resizeIcon("/img/search.png", 25, 25))));
-    filterPanel.add(createColumn("Loại Report:", new JComboBox<>(new String[]{"Loại 1", "Loại 2"})));
+    filterPanel.add(createColumn("Loại Report:", new JComboBox<>(new String[]{"Kê Nhập", "Thống Kê"})));
     filterPanel.add(createColumnBlue("Xem Trước:", new JButton(resizeIcon("/img/printer.png", 25, 25))));
     filterPanel.add(createColumnBlue("Excel:",new JButton(resizeIcon("/img/document.png", 25, 25))));
 
@@ -54,22 +84,23 @@ public class ThongKePanel extends JPanel {
 
     // Table
     String[] columnNames = {"Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Thời Gian SX", "KL Cân", "KL Bì", "KL Hàng", "Thủ Kho", "HSD", "Số Pallet", "Xuất/Nhập"};
-    Object[][] data = {
-        {"6", "Đơn 2", "0408N", "Tổ 1", "Ca 1", "12:00", "12.0", "0.0", "12.0", "HỦY", "26/05/2024", "4.0", "HỦY"},
-        {"6", "Đơn 2", "0408N", "Tổ 1", "Ca 1", "12:00", "12.0", "0.0", "12.0", "HỦY", "26/05/2024", "4.0", "HỦY"}
-    };
-
-    DefaultTableModel tableModel = new DefaultTableModel(data, columnNames);
-    JTable table = new JTable(tableModel);
+    tableModel = new DefaultTableModel(columnNames, 0);
+    table = new JTable(tableModel);
     JScrollPane scrollPane = new JScrollPane(table);
 
-    // Customizing table
+// Thiết lập căn giữa
+    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+    centerRenderer.setHorizontalAlignment(SwingConstants.CENTER); // Căn giữa
+    for (int i = 0; i < table.getColumnCount(); i++) {
+      table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+    }
+
     table.setRowHeight(25);
     table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 15));
     table.getTableHeader().setBackground(Color.LIGHT_GRAY);
     table.setFont(new Font("Arial", Font.PLAIN, 12));
-
     add(scrollPane, BorderLayout.CENTER);
+
 
 
     // Footer Panel
@@ -140,6 +171,7 @@ public class ThongKePanel extends JPanel {
     footerPanel.add(summaryPanel, BorderLayout.CENTER);
 
     add(footerPanel, BorderLayout.SOUTH);
+    loadDataToTable();  // Đảm bảo gọi phương thức load dữ liệu vào bảng khi panel được tạo
 
   }
   private JPanel createColumn(String labelText, JComponent inputComponent) {
@@ -224,6 +256,70 @@ public class ThongKePanel extends JPanel {
     ImageIcon originalIcon = new ImageIcon(getClass().getResource(imagePath));
     Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
     return new ImageIcon(scaledImage);
+  }
+
+  // Method to load data into the table
+  private void loadDataToTable() {
+    tableModel.setRowCount(0); // Xóa dữ liệu hiện tại trong bảng
+    List<Lot> lots = daoLot.selectAll(); // Lấy dữ liệu từ cơ sở dữ liệu
+
+    for (Lot lot : lots) {
+      // Lấy danh sách PalletID và chuyển thành chuỗi
+      String palletIDs = lot.getPallets().stream()
+          .map(pallet -> String.valueOf(pallet.getPalletID()))
+          .collect(Collectors.joining(", "));
+      Object[] row = {
+          lot.getLotID(),                              // "LotID"
+          lot.getProduct().getProductName(),            // "ProductID"
+          lot.getLotIDU(),                            // "LotIDU"
+          lot.getProductionGroup().getGroupName(),      // "GroupID"
+          lot.getShift().getShiftName(),                // "ShiftID"
+          lot.getProductionTime(),                    // "ProductionTime"
+          lot.getWarehouseWeight(),                   // "WarehouseWeight"
+          lot.getWeightDeviation(),                   // "WeightDeviation"
+          lot.getWeight(),                            // "Weight"
+          lot.getWarehouseStaff().getStaffName(),
+          lot.getExpirationDays(),                     // "ExpirationDays"
+          palletIDs
+      };
+      tableModel.addRow(row); // Thêm hàng vào bảng
+    }
+  }
+
+  // Phương thức tải dữ liệu vào JComboBox ProductionGroup
+  private void loadProductionGroupsToComboBox(JComboBox<String> comboBox) {
+    comboBox.removeAllItems(); // Xóa các mục cũ (nếu có)
+    comboBox.addItem("Tất cả"); // Thêm tùy chọn mặc định
+
+    // Lấy danh sách nhóm sản xuất từ database
+    List<ProductionGroup> groups = daoProductionGroup.selectAll();
+    for (ProductionGroup group : groups) {
+      comboBox.addItem(group.getGroupName());
+    }
+  }
+
+  // Phương thức tải dữ liệu vào JComboBox Shifts
+  private void loadShiftsToComboBox(JComboBox<String> comboBox) {
+    comboBox.removeAllItems(); // Xóa các mục cũ (nếu có)
+    comboBox.addItem("Tất cả"); // Thêm tùy chọn mặc định
+
+    // Lấy danh sách nhóm sản xuất từ database
+    List<Shift> shifts = daoShift.selectAll();
+    for (Shift shift : shifts) {
+      comboBox.addItem(shift.getShiftName());
+    }
+  }
+
+  // Phương thức tải dữ liệu vào JComboBox ProductName
+  private void loadProductNameToComboBox(JComboBox<String> comboBox) {
+    comboBox.removeAllItems(); // Xóa các mục cũ (nếu có)
+    comboBox.addItem("Tất cả"); // Thêm tùy chọn mặc định
+
+    // Lấy danh sách nhóm sản xuất từ database
+    List<Product> products = daoProduct.selectAll();
+    for (Product product : products) {
+      comboBox.addItem(product.getProductName());
+    }
   }
 
 }
