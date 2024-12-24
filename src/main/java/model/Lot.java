@@ -1,6 +1,8 @@
 package model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -53,6 +55,9 @@ public class Lot {
     private ProductionGroup productionGroup; // Tham chiếu đến bảng ProductionGroups
 
     @ManyToOne
-    @JoinColumn(name = "WarehouseStaff", nullable = false)
+    @JoinColumn(name = "WarehouseStaffID", nullable = false)
     private WarehouseStaff warehouseStaff; // Tham chiếu đến bảng WarehouseStaff
+
+    @OneToMany(mappedBy = "lot", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Pallet> pallets = new ArrayList<>();
 }

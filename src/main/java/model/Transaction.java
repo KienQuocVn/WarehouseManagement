@@ -22,7 +22,7 @@ public class Transaction {
     @Column(name = "TransactionType", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String transactionType; // Loại giao dịch ("Xuất" hoặc "Nhập")
 
-    @Column(name = "Date", columnDefinition = "TIMESTAMP", nullable = false)
+    @Column(name = "Date", columnDefinition = "DATE", nullable = false)
     private LocalDateTime date; // Ngày giao dịch
 
     @Column(name = "Customer", columnDefinition = "NVARCHAR(255)")
