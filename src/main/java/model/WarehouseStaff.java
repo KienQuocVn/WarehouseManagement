@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
+//thu kho
 @Entity
 @Data
 @NoArgsConstructor
@@ -17,7 +19,7 @@ public class WarehouseStaff {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer staffId;
 
-    @Column(name = "StaffName", columnDefinition = "VARCHAR(255)")
+    @Column(name = "StaffName", columnDefinition = "NVARCHAR(255)")
     private String staffName;
 }
 

@@ -2,8 +2,18 @@ package view;
 
 import Utils.RoundedBorder;
 import controller.CaiDonController;
+import controller.ProductionGroupController;
+import controller.ShiftController;
+import controller.WarehouseStaffController;
 import dao.DaoProduct;
+import dao.DaoProductionGroup;
+import dao.DaoShift;
+import dao.DaoWarehouseStaff;
 import model.Product;
+import Utils.DialogHelper;
+import model.ProductionGroup;
+import model.Shift;
+import model.WarehouseStaff;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -12,13 +22,15 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 public class CaiDonPanel extends JPanel {
   private CardLayout cardLayout;
   private JPanel mainPanel;
-  private DaoProduct daoProduct;
+  public Product productSendController;
+  public Shift ShiftSendController;
+  public ProductionGroup ProductionGroupSendController;
+  public WarehouseStaff WarehouseStaffSendController;
 
   public CaiDonPanel() {
     setLayout(new BorderLayout());
@@ -130,19 +142,24 @@ public class CaiDonPanel extends JPanel {
 
   // MA HANG
   // bien public
-  JTable table;
+  JTable tableMaHang;
   JTextField DHField;
   JTextField HSDField;
   JComboBox<String> ThukhoComboBox;
   private DefaultTableModel tableModel;
+  JButton btnThemMaHang;
+  JButton btnSuaMaHang;
+  JButton btnXoaMaHang;
+  JButton btnXoaTatCaMaHang;
+  JButton btnResetMaHang;
   private JPanel createMaHangPanel() {
     JPanel panel = new JPanel(new BorderLayout());
     ActionListener ac = new CaiDonController(this);
-    table = new JTable(); // Khởi tạo JTable tại đây
+    tableMaHang = new JTable(); // Khởi tạo JTable tại đây
     // Bảng dữ liệu
     updateTableData();
-    styleTable(table);
-    JScrollPane scrollPane = new JScrollPane(table);
+    styleTable(tableMaHang);
+    JScrollPane scrollPane = new JScrollPane(tableMaHang);
     panel.add(scrollPane, BorderLayout.CENTER);
 
     JPanel PanelD = new JPanel(new GridLayout(1, 3, 6, 0));
@@ -206,42 +223,43 @@ public class CaiDonPanel extends JPanel {
     // Các nút chức năng
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)); // Đặt FlowLayout.LEFT để căn chỉnh nút sang trái
 // Tạo các nút và thêm màu nền
-    JButton btnThem = new JButton("Thêm");
-    btnThem.setBackground(new Color(152, 201, 226,255)); // Màu xanh lá
-    btnThem.setOpaque(true);  // Đảm bảo màu nền được hiển thị
-    btnThem.setBorderPainted(false);  // Bỏ viền của nút
-    btnThem.addActionListener(ac);
+     btnThemMaHang = new JButton("Thêm");
+    btnThemMaHang.setBackground(new Color(152, 201, 226,255)); // Màu xanh lá
+    btnThemMaHang.setOpaque(true);  // Đảm bảo màu nền được hiển thị
+    btnThemMaHang.setBorderPainted(false);  // Bỏ viền của nút
+    btnThemMaHang.addActionListener(ac);
 
-    JButton btnSua = new JButton("Sửa");
-    btnSua.setBackground(new Color(152, 201, 226,255)); // Màu xanh dương
-    btnSua.setOpaque(true);
-    btnSua.setBorderPainted(false);
-    btnSua.addActionListener(ac);
+     btnSuaMaHang = new JButton("Sửa");
+    btnSuaMaHang.setBackground(new Color(152, 201, 226,255)); // Màu xanh dương
+    btnSuaMaHang.setOpaque(true);
+    btnSuaMaHang.setBorderPainted(false);
+    btnSuaMaHang.addActionListener(ac);
 
-    JButton btnXoa = new JButton("Xóa");
-    btnXoa.setBackground(new Color(152, 201, 226,255)); // Màu đỏ
-    btnXoa.setOpaque(true);
-    btnXoa.setBorderPainted(false);
-    btnXoa.addActionListener(ac);
+     btnXoaMaHang = new JButton("Xóa");
+    btnXoaMaHang.setBackground(new Color(152, 201, 226,255)); // Màu đỏ
+    btnXoaMaHang.setOpaque(true);
+    btnXoaMaHang.setBorderPainted(false);
+    btnXoaMaHang.addActionListener(ac);
 
-    JButton btnXoaTatCa = new JButton("Xóa Tất Cả");
-    btnXoaTatCa.setBackground(new Color(152, 201, 226,255)); // Màu cam
-    btnXoaTatCa.setOpaque(true);
-    btnXoaTatCa.setBorderPainted(false);
-    btnXoaTatCa.addActionListener(ac);
+     btnXoaTatCaMaHang = new JButton("Xóa Tất Cả");
+    btnXoaTatCaMaHang.setBackground(new Color(152, 201, 226,255)); // Màu cam
+    btnXoaTatCaMaHang.setOpaque(true);
+    btnXoaTatCaMaHang.setBorderPainted(false);
+    btnXoaTatCaMaHang.addActionListener(ac);
 
-    JButton btnReset = new JButton("Làm Mới");
-    btnReset.setBackground(new Color(152, 201, 226,255)); // Màu cam
-    btnReset.setOpaque(true);
-    btnReset.setBorderPainted(false);
-    btnReset.addActionListener(ac);
+     btnResetMaHang = new JButton("Làm Mới");
+    btnResetMaHang.setBackground(new Color(152, 201, 226,255)); // Màu cam
+    btnResetMaHang.setOpaque(true);
+    btnResetMaHang.setBorderPainted(false);
+    btnResetMaHang.addActionListener(ac);
     // Thêm các nút vào panel
-    buttonPanel.add(btnThem);
-    buttonPanel.add(btnSua);
-    buttonPanel.add(btnXoa);
-    buttonPanel.add(btnXoaTatCa);
-    buttonPanel.add(btnReset);
-
+    buttonPanel.add(btnThemMaHang);
+    buttonPanel.add(btnSuaMaHang);
+    buttonPanel.add(btnXoaMaHang);
+    buttonPanel.add(btnXoaTatCaMaHang);
+    buttonPanel.add(btnResetMaHang);
+    btnSuaMaHang.setEnabled(false);
+    btnXoaMaHang.setEnabled(false);
     bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
     panel.add(bottomPanel, BorderLayout.SOUTH);  // Thêm bottomPanel vào panel chính
@@ -251,20 +269,22 @@ public class CaiDonPanel extends JPanel {
 
 
 
-
+  JTable tableShift;
+  private DefaultTableModel tableModelShift;
+  JTextField CSXShiftField;
+  JButton btnThemShift;
+  JButton btnSuaShift;
+  JButton btnXoaShift;
+  JButton btnXoaTatCaShift;
+  JButton btnResetShift;
   private JPanel createCaSanXuatPanel() {
     JPanel panel = new JPanel(new BorderLayout());
+    ActionListener Sc = new ShiftController(this);
 
-    // Bảng dữ liệu
-    String[] columnNames = {"STT", "Ca Sản Xuất"};
-    Object[][] data = {
-            {"1", "Ca 1"},
-            {"2", "Ca 2"},
-            {"3", "Ca 3"}
-    };
-    JTable table = new JTable(data, columnNames);
-    styleTable2(table);
-    JScrollPane scrollPane = new JScrollPane(table);
+     tableShift = new JTable();
+    updateTableDataShift();
+    styleTable2(tableShift);
+    JScrollPane scrollPane = new JScrollPane(tableShift);
     panel.add(scrollPane, BorderLayout.CENTER);
 
     JPanel PanelD = new JPanel(new GridLayout(1, 1, 6, 0));
@@ -275,12 +295,12 @@ public class CaiDonPanel extends JPanel {
     Panel1.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     JLabel Label1 = new JLabel("Ca Sản Xuất");
-    JTextField DHField = new JTextField("Ca 4");
-    DHField.setFont(new Font("Arial", Font.BOLD, 14));
+    CSXShiftField = new JTextField();
+    CSXShiftField.setFont(new Font("Arial", Font.BOLD, 14));
     Label1.setAlignmentX(Component.LEFT_ALIGNMENT);
-    DHField.setAlignmentX(Component.LEFT_ALIGNMENT);
+    CSXShiftField.setAlignmentX(Component.LEFT_ALIGNMENT);
     Panel1.add(Label1);
-    Panel1.add(DHField);
+    Panel1.add(CSXShiftField);
 
     PanelD.add(Panel1);
 
@@ -292,31 +312,44 @@ public class CaiDonPanel extends JPanel {
     // Các nút chức năng
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)); // Đặt FlowLayout.LEFT để căn chỉnh nút sang trái
 // Tạo các nút và thêm màu nền
-    JButton btnThem = new JButton("Thêm");
-    btnThem.setBackground(new Color(152, 201, 226,255)); // Màu xanh lá
-    btnThem.setOpaque(true);  // Đảm bảo màu nền được hiển thị
-    btnThem.setBorderPainted(false);  // Bỏ viền của nút
+     btnThemShift = new JButton("Thêm");
+    btnThemShift.setBackground(new Color(152, 201, 226,255)); // Màu xanh lá
+    btnThemShift.setOpaque(true);  // Đảm bảo màu nền được hiển thị
+    btnThemShift.setBorderPainted(false);  // Bỏ viền của nút
+    btnThemShift.addActionListener(Sc);
 
-    JButton btnSua = new JButton("Sửa");
-    btnSua.setBackground(new Color(152, 201, 226,255)); // Màu xanh dương
-    btnSua.setOpaque(true);
-    btnSua.setBorderPainted(false);
+    btnSuaShift = new JButton("Sửa");
+    btnSuaShift.setBackground(new Color(152, 201, 226,255)); // Màu xanh dương
+    btnSuaShift.setOpaque(true);
+    btnSuaShift.setBorderPainted(false);
+    btnSuaShift.addActionListener(Sc);
 
-    JButton btnXoa = new JButton("Xóa");
-    btnXoa.setBackground(new Color(152, 201, 226,255)); // Màu đỏ
-    btnXoa.setOpaque(true);
-    btnXoa.setBorderPainted(false);
+     btnXoaShift = new JButton("Xóa");
+    btnXoaShift.setBackground(new Color(152, 201, 226,255)); // Màu đỏ
+    btnXoaShift.setOpaque(true);
+    btnXoaShift.setBorderPainted(false);
+    btnXoaShift.addActionListener(Sc);
 
-    JButton btnXoaTatCa = new JButton("Xóa Tất Cả");
-    btnXoaTatCa.setBackground(new Color(152, 201, 226,255)); // Màu cam
-    btnXoaTatCa.setOpaque(true);
-    btnXoaTatCa.setBorderPainted(false);
+     btnXoaTatCaShift = new JButton("Xóa Tất Cả");
+    btnXoaTatCaShift.setBackground(new Color(152, 201, 226,255)); // Màu cam
+    btnXoaTatCaShift.setOpaque(true);
+    btnXoaTatCaShift.setBorderPainted(false);
+    btnXoaTatCaShift.addActionListener(Sc);
+
+    btnResetShift = new JButton("Làm Mới");
+    btnResetShift.setBackground(new Color(152, 201, 226,255)); // Màu cam
+    btnResetShift.setOpaque(true);
+    btnResetShift.setBorderPainted(false);
+    btnResetShift.addActionListener(Sc);
 
     // Thêm các nút vào panel
-    buttonPanel.add(btnThem);
-    buttonPanel.add(btnSua);
-    buttonPanel.add(btnXoa);
-    buttonPanel.add(btnXoaTatCa);
+    buttonPanel.add(btnThemShift);
+    buttonPanel.add(btnSuaShift);
+    buttonPanel.add(btnXoaShift);
+    buttonPanel.add(btnXoaTatCaShift);
+    buttonPanel.add(btnResetShift);
+    btnSuaShift.setEnabled(false);
+    btnXoaShift.setEnabled(false);
 
     bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -325,19 +358,22 @@ public class CaiDonPanel extends JPanel {
     return panel;
   }
 
+  JTable tableProductionGroup;
+  private DefaultTableModel tableModelProductionGroup;
+  JTextField TSXField;
+  JButton btnThemProductionGroup;
+  JButton btnSuaProductionGroup;
+  JButton btnXoaProductionGroup;
+  JButton btnXoaTatCaProductionGroup;
+  JButton btnResetProductionGroup;
   private JPanel createToSanXuatPanel() {
     JPanel panel = new JPanel(new BorderLayout());
+    ActionListener PGc = new ProductionGroupController(this);
 
-    // Bảng dữ liệu
-    String[] columnNames = {"STT", "Tổ Sản Xuất"};
-    Object[][] data = {
-            {"1", "Tổ 1"},
-            {"2", "Tổ 2"},
-            {"3", "Tổ 3"}
-    };
-    JTable table = new JTable(data, columnNames);
-    styleTable2(table);
-    JScrollPane scrollPane = new JScrollPane(table);
+    tableProductionGroup  = new JTable();
+    updateTableDataProductionGroup();
+    styleTable2(tableProductionGroup);
+    JScrollPane scrollPane = new JScrollPane(tableProductionGroup);
     panel.add(scrollPane, BorderLayout.CENTER);
 
     JPanel PanelD = new JPanel(new GridLayout(1, 1, 6, 0));
@@ -348,12 +384,12 @@ public class CaiDonPanel extends JPanel {
     Panel1.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     JLabel Label1 = new JLabel("Tổ Sản Xuất");
-    JTextField DHField = new JTextField("Tổ 4");
-    DHField.setFont(new Font("Arial", Font.BOLD, 14));
+    TSXField = new JTextField("");
+    TSXField.setFont(new Font("Arial", Font.BOLD, 14));
     Label1.setAlignmentX(Component.LEFT_ALIGNMENT);
-    DHField.setAlignmentX(Component.LEFT_ALIGNMENT);
+    TSXField.setAlignmentX(Component.LEFT_ALIGNMENT);
     Panel1.add(Label1);
-    Panel1.add(DHField);
+    Panel1.add(TSXField);
 
     PanelD.add(Panel1);
 
@@ -365,31 +401,44 @@ public class CaiDonPanel extends JPanel {
     // Các nút chức năng
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)); // Đặt FlowLayout.LEFT để căn chỉnh nút sang trái
 // Tạo các nút và thêm màu nền
-    JButton btnThem = new JButton("Thêm");
-    btnThem.setBackground(new Color(152, 201, 226,255)); // Màu xanh lá
-    btnThem.setOpaque(true);  // Đảm bảo màu nền được hiển thị
-    btnThem.setBorderPainted(false);  // Bỏ viền của nút
+    btnThemProductionGroup = new JButton("Thêm");
+    btnThemProductionGroup.setBackground(new Color(152, 201, 226,255)); // Màu xanh lá
+    btnThemProductionGroup.setOpaque(true);  // Đảm bảo màu nền được hiển thị
+    btnThemProductionGroup.setBorderPainted(false);  // Bỏ viền của nút
+    btnThemProductionGroup.addActionListener(PGc);
 
-    JButton btnSua = new JButton("Sửa");
-    btnSua.setBackground(new Color(152, 201, 226,255)); // Màu xanh dương
-    btnSua.setOpaque(true);
-    btnSua.setBorderPainted(false);
+    btnSuaProductionGroup = new JButton("Sửa");
+    btnSuaProductionGroup.setBackground(new Color(152, 201, 226,255)); // Màu xanh dương
+    btnSuaProductionGroup.setOpaque(true);
+    btnSuaProductionGroup.setBorderPainted(false);
+    btnSuaProductionGroup.addActionListener(PGc);
 
-    JButton btnXoa = new JButton("Xóa");
-    btnXoa.setBackground(new Color(152, 201, 226,255)); // Màu đỏ
-    btnXoa.setOpaque(true);
-    btnXoa.setBorderPainted(false);
+    btnXoaProductionGroup = new JButton("Xóa");
+    btnXoaProductionGroup.setBackground(new Color(152, 201, 226,255)); // Màu đỏ
+    btnXoaProductionGroup.setOpaque(true);
+    btnXoaProductionGroup.setBorderPainted(false);
+    btnXoaProductionGroup.addActionListener(PGc);
 
-    JButton btnXoaTatCa = new JButton("Xóa Tất Cả");
-    btnXoaTatCa.setBackground(new Color(152, 201, 226,255)); // Màu cam
-    btnXoaTatCa.setOpaque(true);
-    btnXoaTatCa.setBorderPainted(false);
+    btnXoaTatCaProductionGroup = new JButton("Xóa Tất Cả");
+    btnXoaTatCaProductionGroup.setBackground(new Color(152, 201, 226,255)); // Màu cam
+    btnXoaTatCaProductionGroup.setOpaque(true);
+    btnXoaTatCaProductionGroup.setBorderPainted(false);
+    btnXoaTatCaProductionGroup.addActionListener(PGc);
+
+    btnResetProductionGroup = new JButton("Làm Mới");
+    btnResetProductionGroup.setBackground(new Color(152, 201, 226,255)); // Màu cam
+    btnResetProductionGroup.setOpaque(true);
+    btnResetProductionGroup.setBorderPainted(false);
+    btnResetProductionGroup.addActionListener(PGc);
 
     // Thêm các nút vào panel
-    buttonPanel.add(btnThem);
-    buttonPanel.add(btnSua);
-    buttonPanel.add(btnXoa);
-    buttonPanel.add(btnXoaTatCa);
+    buttonPanel.add(btnThemProductionGroup);
+    buttonPanel.add(btnSuaProductionGroup);
+    buttonPanel.add(btnXoaProductionGroup);
+    buttonPanel.add(btnXoaTatCaProductionGroup);
+    buttonPanel.add(btnResetProductionGroup);
+    btnSuaProductionGroup.setEnabled(false);
+    btnXoaProductionGroup.setEnabled(false);
 
     bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -398,19 +447,24 @@ public class CaiDonPanel extends JPanel {
     return panel;
   }
 
+
+  JTable tableWarehouseStaff;
+  private DefaultTableModel tableModelWarehouseStaff;
+  JTextField TKField;
+  JButton btnThemWarehouseStaff;
+  JButton btnSuaWarehouseStaff;
+  JButton btnXoaWarehouseStaff;
+  JButton btnXoaTatCaWarehouseStaff;
+  JButton btnResetWarehouseStaff;
   private JPanel createThuKhoPanel() {
     JPanel panel = new JPanel(new BorderLayout());
 
-    // Bảng dữ liệu
-    String[] columnNames = {"STT", "Thủ Kho"};
-    Object[][] data = {
-            {"1", "Thủ Kho 1"},
-            {"2", "Thủ Kho 2 "},
-            {"3", "Thủ Kho 3"}
-    };
-    JTable table = new JTable(data, columnNames);
-    styleTable2(table);
-    JScrollPane scrollPane = new JScrollPane(table);
+    ActionListener WSc = new WarehouseStaffController(this);
+
+    tableWarehouseStaff = new JTable();
+    updateTableDataWarehouseStaff();
+    styleTable2(tableWarehouseStaff);
+    JScrollPane scrollPane = new JScrollPane(tableWarehouseStaff);
     panel.add(scrollPane, BorderLayout.CENTER);
 
     JPanel PanelD = new JPanel(new GridLayout(1, 1, 6, 0));
@@ -421,12 +475,12 @@ public class CaiDonPanel extends JPanel {
     Panel1.setAlignmentX(Component.LEFT_ALIGNMENT);
 
     JLabel Label1 = new JLabel("Thủ Kho");
-    JTextField DHField = new JTextField("Thủ Kho 4");
-    DHField.setFont(new Font("Arial", Font.BOLD, 14));
+    TKField = new JTextField();
+    TKField.setFont(new Font("Arial", Font.BOLD, 14));
     Label1.setAlignmentX(Component.LEFT_ALIGNMENT);
-    DHField.setAlignmentX(Component.LEFT_ALIGNMENT);
+    TKField.setAlignmentX(Component.LEFT_ALIGNMENT);
     Panel1.add(Label1);
-    Panel1.add(DHField);
+    Panel1.add(TKField);
 
     PanelD.add(Panel1);
 
@@ -438,31 +492,44 @@ public class CaiDonPanel extends JPanel {
     // Các nút chức năng
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)); // Đặt FlowLayout.LEFT để căn chỉnh nút sang trái
 // Tạo các nút và thêm màu nền
-    JButton btnThem = new JButton("Thêm");
-    btnThem.setBackground(new Color(152, 201, 226,255)); // Màu xanh lá
-    btnThem.setOpaque(true);  // Đảm bảo màu nền được hiển thị
-    btnThem.setBorderPainted(false);  // Bỏ viền của nút
+    btnThemWarehouseStaff = new JButton("Thêm");
+    btnThemWarehouseStaff.setBackground(new Color(152, 201, 226,255)); // Màu xanh lá
+    btnThemWarehouseStaff.setOpaque(true);  // Đảm bảo màu nền được hiển thị
+    btnThemWarehouseStaff.setBorderPainted(false);  // Bỏ viền của nút
+    btnThemWarehouseStaff.addActionListener(WSc);
 
-    JButton btnSua = new JButton("Sửa");
-    btnSua.setBackground(new Color(152, 201, 226,255)); // Màu xanh dương
-    btnSua.setOpaque(true);
-    btnSua.setBorderPainted(false);
+    btnSuaWarehouseStaff = new JButton("Sửa");
+    btnSuaWarehouseStaff.setBackground(new Color(152, 201, 226,255)); // Màu xanh dương
+    btnSuaWarehouseStaff.setOpaque(true);
+    btnSuaWarehouseStaff.setBorderPainted(false);
+    btnSuaWarehouseStaff.addActionListener(WSc);
 
-    JButton btnXoa = new JButton("Xóa");
-    btnXoa.setBackground(new Color(152, 201, 226,255)); // Màu đỏ
-    btnXoa.setOpaque(true);
-    btnXoa.setBorderPainted(false);
+    btnXoaWarehouseStaff = new JButton("Xóa");
+    btnXoaWarehouseStaff.setBackground(new Color(152, 201, 226,255)); // Màu đỏ
+    btnXoaWarehouseStaff.setOpaque(true);
+    btnXoaWarehouseStaff.setBorderPainted(false);
+    btnXoaWarehouseStaff.addActionListener(WSc);
 
-    JButton btnXoaTatCa = new JButton("Xóa Tất Cả");
-    btnXoaTatCa.setBackground(new Color(152, 201, 226,255)); // Màu cam
-    btnXoaTatCa.setOpaque(true);
-    btnXoaTatCa.setBorderPainted(false);
+    btnXoaTatCaWarehouseStaff = new JButton("Xóa Tất Cả");
+    btnXoaTatCaWarehouseStaff.setBackground(new Color(152, 201, 226,255)); // Màu cam
+    btnXoaTatCaWarehouseStaff.setOpaque(true);
+    btnXoaTatCaWarehouseStaff.setBorderPainted(false);
+    btnXoaTatCaWarehouseStaff.addActionListener(WSc);
+
+    btnResetWarehouseStaff = new JButton("Làm Mới");
+    btnResetWarehouseStaff.setBackground(new Color(152, 201, 226,255)); // Màu cam
+    btnResetWarehouseStaff.setOpaque(true);
+    btnResetWarehouseStaff.setBorderPainted(false);
+    btnResetWarehouseStaff.addActionListener(WSc);
 
     // Thêm các nút vào panel
-    buttonPanel.add(btnThem);
-    buttonPanel.add(btnSua);
-    buttonPanel.add(btnXoa);
-    buttonPanel.add(btnXoaTatCa);
+    buttonPanel.add(btnThemWarehouseStaff);
+    buttonPanel.add(btnSuaWarehouseStaff);
+    buttonPanel.add(btnXoaWarehouseStaff);
+    buttonPanel.add(btnXoaTatCaWarehouseStaff);
+    buttonPanel.add(btnResetWarehouseStaff);
+    btnSuaWarehouseStaff.setEnabled(false);
+    btnXoaWarehouseStaff.setEnabled(false);
 
     bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
 
@@ -592,83 +659,427 @@ public class CaiDonPanel extends JPanel {
 
 
 
-  private JPanel createSoftwarePanel2() {
-    JPanel softwarePanel = new JPanel();
-    softwarePanel.setBackground(Color.WHITE);
-    softwarePanel.setBorder(new RoundedBorder(0));
-
-    JLabel softwareLabel = new JLabel("CÀI ĐẶT ĐƠN HÀNG");
-    softwareLabel.setVerticalAlignment(SwingConstants.TOP);
-    softwareLabel.setFont(new Font("Arial", Font.BOLD, 16));
-    softwarePanel.add(softwareLabel);
-
-    JPanel containerPanel = new JPanel(new BorderLayout());
-    containerPanel.setBackground(Color.WHITE);
-    containerPanel.setPreferredSize(new Dimension(0, 40));
-    containerPanel.add(softwarePanel, BorderLayout.CENTER);
-
-    return containerPanel;
-  }
 
 
   public void updateTableData() {
-    DaoProduct daoProduct = new DaoProduct(); // Tạo đối tượng DAO
-    List<Product> products = daoProduct.selectAll(); // Lấy danh sách sản phẩm từ DB
+    DaoProduct daoProduct = new DaoProduct();
+    List<Product> products = daoProduct.selectAll(); // Lấy danh sách sản phẩm từ cơ sở dữ liệu
 
     // Chuyển đổi danh sách thành mảng hai chiều
-    Object[][] data = new Object[products.size()][4];
-    // Lưu lại giá trị ban đầu để so sánh
-    Object[][] originalData = new Object[products.size()][4];
+    Object[][] data = new Object[products.size()][5]; // Thêm cột ẩn ProductID
+    Object[][] originalData = new Object[products.size()][5]; // Lưu dữ liệu ban đầu
+
     for (int i = 0; i < products.size(); i++) {
       Product product = products.get(i);
-      data[i][0] = i + 1; // STT (không cho phép sửa)
-      data[i][1] = product.getProductName(); // Tên đơn hàng
-      data[i][2] = product.getHSD(); // Hạn sử dụng
-      data[i][3] = product.getColor(); // Màu (không cho phép sửa)
+      data[i][0] = i + 1; // STT
+      data[i][1] = product.getProductName(); // Tên Đơn Hàng
+      data[i][2] = product.getHSD(); // Hạn Sử Dụng
+      data[i][3] = product.getColor(); // Màu
+      data[i][4] = product.getProductID(); // ProductID (ẩn)
 
-      // Lưu lại giá trị ban đầu
       originalData[i][0] = data[i][0];
       originalData[i][1] = data[i][1];
       originalData[i][2] = data[i][2];
       originalData[i][3] = data[i][3];
+      originalData[i][4] = data[i][4];
     }
 
     // Cập nhật model cho JTable
-    tableModel = new DefaultTableModel(data, new Object[]{"STT", "Tên Đơn Hàng", "Hạn Sử Dụng", "Màu"}) {
-      // Ghi đè phương thức isCellEditable để không cho phép chỉnh sửa cột 0 và cột 3
+    tableModel = new DefaultTableModel(data, new Object[]{"STT", "Tên Đơn Hàng", "Hạn Sử Dụng", "Màu", "ProductID"}) {
       @Override
       public boolean isCellEditable(int row, int column) {
-        return column != 0 && column != 3; // Chỉ cho phép chỉnh sửa cột khác cột 0 và cột 3
+        return column != 0 && column != 3 && column != 4; // Không cho phép chỉnh sửa cột STT, Màu và ProductID
       }
     };
-    table.setModel(tableModel);
-    styleTable(table);
+    tableMaHang.setModel(tableModel);
+
+    // Ẩn cột ProductID
+    tableMaHang.getColumnModel().getColumn(4).setMinWidth(0);
+    tableMaHang.getColumnModel().getColumn(4).setMaxWidth(0);
+    tableMaHang.getColumnModel().getColumn(4).setWidth(0);
+
+    styleTable(tableMaHang);
 
     // Đăng ký TableModelListener để nhận sự kiện thay đổi dữ liệu
     tableModel.addTableModelListener(new TableModelListener() {
-
       @Override
       public void tableChanged(TableModelEvent e) {
         if (e.getType() == TableModelEvent.UPDATE) {
           int row = e.getFirstRow();
           int column = e.getColumn();
 
-          // Chỉ xử lý sự kiện khi sửa cột 1 (Tên Đơn Hàng) và cột 2 (Hạn Sử Dụng)
+          // Chỉ xử lý khi sửa cột "Tên Đơn Hàng" hoặc "Hạn Sử Dụng"
           if (column == 1 || column == 2) {
             String updatedValue = tableModel.getValueAt(row, column).toString();
             String originalValue = originalData[row][column].toString();
 
-            // Kiểm tra xem giá trị nhập vào có khác với giá trị ban đầu không
+            // Kiểm tra xem giá trị mới có khác giá trị cũ không
             if (!updatedValue.equals(originalValue)) {
-              System.out.println("Dữ liệu đã thay đổi tại dòng " + row + ", cột " + column + ": " + updatedValue);
+              Integer productID = (Integer) tableModel.getValueAt(row, 4);
 
+              // Kiểm tra các trường nhập liệu
+              if (column == 1 && updatedValue.isEmpty()) {
+                DialogHelper.alert(null, "Vui lòng nhập Tên Đơn Hàng trong Bảng!");
+                return;
+              }
 
+              if (column == 2) {
+                try {
+                  Double.parseDouble(updatedValue); // Kiểm tra giá trị HSD là số
+                } catch (NumberFormatException ex) {
+                  DialogHelper.alert(null, "Hạn Sử Dụng phải là một số hợp lệ!");
+                  return;
+                }
+              }
+
+              // Cập nhật dữ liệu
+              Product updatedProduct = new Product(
+                      productID,
+                      tableModel.getValueAt(row, 1).toString(),
+                      Double.parseDouble(tableModel.getValueAt(row, 2).toString()),
+                      tableModel.getValueAt(row, 3).toString()
+              );
+
+              daoProduct.update(updatedProduct); // Gọi phương thức update từ DAO
+
+              // Cập nhật giá trị ban đầu
+              originalData[row][column] = updatedValue;
+              DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
+              updateTableData(); // Cập nhật lại bảng
+              ResetFormMaHang();
             }
           }
         }
       }
     });
+
+    // Thêm sự kiện lắng nghe khi người dùng chọn dòng
+    tableMaHang.getSelectionModel().addListSelectionListener(e -> {
+      if (!e.getValueIsAdjusting() && tableMaHang.getSelectedRow() != -1) {
+        btnThemMaHang.setEnabled(false);
+        btnXoaMaHang.setEnabled(true);
+        btnSuaMaHang.setEnabled(true);
+        btnXoaTatCaMaHang.setEnabled(false);
+        btnResetMaHang.setEnabled(true);
+
+        int selectedRow = tableMaHang.getSelectedRow();
+        Integer productID = (Integer) tableModel.getValueAt(selectedRow, 4);
+
+        // Lấy sản phẩm từ cơ sở dữ liệu
+        Product selectedProduct = daoProduct.selectbyID(productID);
+
+        if (selectedProduct != null) {
+          productSendController = selectedProduct;
+          DHField.setText(selectedProduct.getProductName());
+          HSDField.setText(selectedProduct.getHSD().toString());
+          ThukhoComboBox.setSelectedItem(selectedProduct.getColor());
+        }
+      }
+    });
   }
+
+
+
+  public void updateTableDataShift() {
+    DaoShift daoShift = new DaoShift();
+    List<Shift> shifts = daoShift.selectAll(); // Lấy danh sách shifts từ cơ sở dữ liệu
+
+    // Chuyển đổi danh sách thành mảng hai chiều
+    Object[][] data = new Object[shifts.size()][3]; // Thêm cột ẩn ShiftID
+    Object[][] originalData = new Object[shifts.size()][3]; // Lưu dữ liệu ban đầu
+
+    for (int i = 0; i < shifts.size(); i++) {
+      Shift shift = shifts.get(i);
+      data[i][0] = i + 1; // STT
+      data[i][1] = shift.getShiftName(); // Tên Ca Sản Xuất
+      data[i][2] = shift.getShiftId(); // ShiftID (ẩn)
+
+      originalData[i][0] = data[i][0];
+      originalData[i][1] = data[i][1];
+      originalData[i][2] = data[i][2];
+    }
+
+    // Cập nhật model cho JTable
+    tableModelShift = new DefaultTableModel(data, new Object[]{"STT", "Ca Sản Xuất", "ShiftID"}) {
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return column != 0; // Không cho phép chỉnh sửa cột STT
+      }
+    };
+    tableShift.setModel(tableModelShift);
+
+    // Ẩn cột ShiftID
+    tableShift.getColumnModel().getColumn(2).setMinWidth(0);
+    tableShift.getColumnModel().getColumn(2).setMaxWidth(0);
+    tableShift.getColumnModel().getColumn(2).setWidth(0);
+
+    styleTable2(tableShift);
+
+    // Đăng ký TableModelListener để nhận sự kiện thay đổi dữ liệu
+    tableModelShift.addTableModelListener(new TableModelListener() {
+      @Override
+      public void tableChanged(TableModelEvent e) {
+        if (e.getType() == TableModelEvent.UPDATE) {
+          int row = e.getFirstRow();
+          int column = e.getColumn();
+
+          // Chỉ xử lý khi sửa cột "Ca Sản Xuất"
+          if (column == 1) {
+            String updatedValue = tableModelShift.getValueAt(row, column).toString();
+            String originalValue = originalData[row][column].toString();
+
+            // Kiểm tra xem giá trị mới có khác giá trị cũ không
+            if (!updatedValue.equals(originalValue)) {
+              Integer shiftId = (Integer) tableModelShift.getValueAt(row, 2);
+
+              // Kiểm tra các trường nhập liệu
+              if (updatedValue.isEmpty()) {
+                DialogHelper.alert(null, "Vui lòng nhập Ca Sản Xuất trong Bảng!");
+                return; // Dừng hàm nếu thông tin chưa đầy đủ
+              }
+
+              // Cập nhật dữ liệu
+              Shift updatedShift = new Shift(shiftId, updatedValue);
+              daoShift.update(updatedShift); // Gọi phương thức update từ DAO
+
+              // Cập nhật giá trị ban đầu
+              originalData[row][column] = updatedValue;
+              DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
+              updateTableDataShift(); // Tải lại bảng sau khi cập nhật
+              ResetFormShift(); // Reset form nếu cần
+            }
+          }
+        }
+      }
+    });
+
+    // Thêm sự kiện lắng nghe khi người dùng chọn dòng
+    tableShift.getSelectionModel().addListSelectionListener(e -> {
+      if (!e.getValueIsAdjusting() && tableShift.getSelectedRow() != -1) {
+        btnThemShift.setEnabled(false);
+        btnXoaShift.setEnabled(true);
+        btnSuaShift.setEnabled(true);
+        btnXoaTatCaShift.setEnabled(false);
+        btnResetShift.setEnabled(true);
+
+        // Lấy chỉ số dòng được chọn
+        int selectedRow = tableShift.getSelectedRow();
+
+        // Lấy ShiftID từ cột ẩn
+        Integer shiftId = (Integer) tableModelShift.getValueAt(selectedRow, 2);
+
+        // Lấy Shift từ cơ sở dữ liệu
+        Shift shift = daoShift.selectbyID(shiftId);
+
+        if (shift != null) {
+          ShiftSendController = shift;
+          CSXShiftField.setText(shift.getShiftName());
+        }
+      }
+    });
+  }
+
+
+
+  public void updateTableDataProductionGroup() {
+    DaoProductionGroup daoproductionGroup = new DaoProductionGroup();
+    List<ProductionGroup> productionGroups = daoproductionGroup.selectAll(); // Lấy danh sách shifts từ cơ sở dữ liệu
+
+    // Chuyển đổi danh sách thành mảng hai chiều
+    Object[][] data = new Object[productionGroups.size()][3]; // Thêm cột ẩn ShiftID
+    Object[][] originalData = new Object[productionGroups.size()][3]; // Lưu dữ liệu ban đầu
+
+    for (int i = 0; i < productionGroups.size(); i++) {
+      ProductionGroup productionGroup = productionGroups.get(i);
+      data[i][0] = i + 1; // STT
+      data[i][1] = productionGroup.getGroupName(); // Tên Ca Sản Xuất
+      data[i][2] = productionGroup.getGroupID(); // GroupID (ẩn)
+
+      originalData[i][0] = data[i][0];
+      originalData[i][1] = data[i][1];
+      originalData[i][2] = data[i][2];
+    }
+
+    // Cập nhật model cho JTable
+    tableModelProductionGroup = new DefaultTableModel(data, new Object[]{"STT", "Tổ Sản Xuất", "grID"}) {
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return column != 0; // Không cho phép chỉnh sửa cột STT
+      }
+    };
+    tableProductionGroup.setModel(tableModelProductionGroup);
+
+    // Ẩn cột ShiftID
+    tableProductionGroup.getColumnModel().getColumn(2).setMinWidth(0);
+    tableProductionGroup.getColumnModel().getColumn(2).setMaxWidth(0);
+    tableProductionGroup.getColumnModel().getColumn(2).setWidth(0);
+
+    styleTable2(tableProductionGroup);
+
+    // Đăng ký TableModelListener để nhận sự kiện thay đổi dữ liệu
+    tableModelProductionGroup.addTableModelListener(new TableModelListener() {
+      @Override
+      public void tableChanged(TableModelEvent e) {
+        if (e.getType() == TableModelEvent.UPDATE) {
+          int row = e.getFirstRow();
+          int column = e.getColumn();
+
+          // Chỉ xử lý khi sửa cột "Ca Sản Xuất"
+          if (column == 1) {
+            String updatedValue = tableModelProductionGroup.getValueAt(row, column).toString();
+            String originalValue = originalData[row][column].toString();
+
+            // Kiểm tra xem giá trị mới có khác giá trị cũ không
+            if (!updatedValue.equals(originalValue)) {
+              Integer ProductionGrId = (Integer) tableModelProductionGroup.getValueAt(row, 2);
+
+              // Kiểm tra các trường nhập liệu
+              if (updatedValue.isEmpty()) {
+                DialogHelper.alert(null, "Vui lòng nhập Tổ Sản Xuất trong Bảng!");
+                return; // Dừng hàm nếu thông tin chưa đầy đủ
+              }
+
+              // Cập nhật dữ liệu
+              ProductionGroup updatedProductionGroup= new ProductionGroup(ProductionGrId, updatedValue);
+              daoproductionGroup.update(updatedProductionGroup); // Gọi phương thức update từ DAO
+
+              // Cập nhật giá trị ban đầu
+              originalData[row][column] = updatedValue;
+              DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
+              updateTableDataProductionGroup(); // Tải lại bảng sau khi cập nhật
+              ResetFormProductionGroup(); // Reset form nếu cần
+            }
+          }
+        }
+      }
+    });
+
+    // Thêm sự kiện lắng nghe khi người dùng chọn dòng
+    tableProductionGroup.getSelectionModel().addListSelectionListener(e -> {
+      if (!e.getValueIsAdjusting() && tableProductionGroup.getSelectedRow() != -1) {
+        btnThemProductionGroup.setEnabled(false);
+        btnXoaProductionGroup.setEnabled(true);
+        btnSuaProductionGroup.setEnabled(true);
+        btnXoaTatCaProductionGroup.setEnabled(false);
+        btnResetProductionGroup.setEnabled(true);
+
+        // Lấy chỉ số dòng được chọn
+        int selectedRow = tableProductionGroup.getSelectedRow();
+
+        // Lấy ShiftID từ cột ẩn
+        Integer shiftId = (Integer) tableModelProductionGroup.getValueAt(selectedRow, 2);
+
+        // Lấy Shift từ cơ sở dữ liệu
+        ProductionGroup productionGroup = daoproductionGroup.selectbyID(shiftId);
+
+        if (productionGroup != null) {
+          ProductionGroupSendController = productionGroup;
+          TSXField.setText(productionGroup.getGroupName());
+        }
+      }
+    });
+  }
+
+
+  public void updateTableDataWarehouseStaff() {
+    DaoWarehouseStaff daoWarehouseStaff = new DaoWarehouseStaff();
+    List<WarehouseStaff> warehouseStaffs = daoWarehouseStaff.selectAll(); // Lấy danh sách shifts từ cơ sở dữ liệu
+
+    // Chuyển đổi danh sách thành mảng hai chiều
+    Object[][] data = new Object[warehouseStaffs.size()][3]; // Thêm cột ẩn ShiftID
+    Object[][] originalData = new Object[warehouseStaffs.size()][3]; // Lưu dữ liệu ban đầu
+
+    for (int i = 0; i < warehouseStaffs.size(); i++) {
+      WarehouseStaff productionGroup = warehouseStaffs.get(i);
+      data[i][0] = i + 1; // STT
+      data[i][1] = productionGroup.getStaffName(); // Tên Ca Sản Xuất
+      data[i][2] = productionGroup.getStaffId(); // GroupID (ẩn)
+
+      originalData[i][0] = data[i][0];
+      originalData[i][1] = data[i][1];
+      originalData[i][2] = data[i][2];
+    }
+
+    // Cập nhật model cho JTable
+    tableModelWarehouseStaff = new DefaultTableModel(data, new Object[]{"STT", "Tổ Sản Xuất", "grID"}) {
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return column != 0; // Không cho phép chỉnh sửa cột STT
+      }
+    };
+    tableWarehouseStaff.setModel(tableModelWarehouseStaff);
+
+    // Ẩn cột ShiftID
+    tableWarehouseStaff.getColumnModel().getColumn(2).setMinWidth(0);
+    tableWarehouseStaff.getColumnModel().getColumn(2).setMaxWidth(0);
+    tableWarehouseStaff.getColumnModel().getColumn(2).setWidth(0);
+
+    styleTable2(tableWarehouseStaff);
+
+    // Đăng ký TableModelListener để nhận sự kiện thay đổi dữ liệu
+    tableModelWarehouseStaff.addTableModelListener(new TableModelListener() {
+      @Override
+      public void tableChanged(TableModelEvent e) {
+        if (e.getType() == TableModelEvent.UPDATE) {
+          int row = e.getFirstRow();
+          int column = e.getColumn();
+
+          // Chỉ xử lý khi sửa cột "Ca Sản Xuất"
+          if (column == 1) {
+            String updatedValue = tableModelWarehouseStaff.getValueAt(row, column).toString();
+            String originalValue = originalData[row][column].toString();
+
+            // Kiểm tra xem giá trị mới có khác giá trị cũ không
+            if (!updatedValue.equals(originalValue)) {
+              Integer WarehouseStaffId = (Integer) tableModelWarehouseStaff.getValueAt(row, 2);
+
+              // Kiểm tra các trường nhập liệu
+              if (updatedValue.isEmpty()) {
+                DialogHelper.alert(null, "Vui lòng nhập Thủ Kho trong Bảng!");
+                return; // Dừng hàm nếu thông tin chưa đầy đủ
+              }
+
+              // Cập nhật dữ liệu
+              WarehouseStaff updatedWarehouseStaff = new WarehouseStaff(WarehouseStaffId, updatedValue);
+              daoWarehouseStaff.update(updatedWarehouseStaff); // Gọi phương thức update từ DAO
+
+              // Cập nhật giá trị ban đầu
+              originalData[row][column] = updatedValue;
+              DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
+              updateTableDataWarehouseStaff(); // Tải lại bảng sau khi cập nhật
+              ResetFormWarehouseStaff(); // Reset form nếu cần
+            }
+          }
+        }
+      }
+    });
+
+    // Thêm sự kiện lắng nghe khi người dùng chọn dòng
+    tableWarehouseStaff.getSelectionModel().addListSelectionListener(e -> {
+      if (!e.getValueIsAdjusting() && tableWarehouseStaff.getSelectedRow() != -1) {
+        btnThemWarehouseStaff.setEnabled(false);
+        btnXoaWarehouseStaff.setEnabled(true);
+        btnSuaWarehouseStaff.setEnabled(true);
+        btnXoaTatCaWarehouseStaff.setEnabled(false);
+        btnResetWarehouseStaff.setEnabled(true);
+
+        // Lấy chỉ số dòng được chọn
+        int selectedRow = tableWarehouseStaff.getSelectedRow();
+
+        // Lấy ShiftID từ cột ẩn
+        Integer shiftId = (Integer) tableModelWarehouseStaff.getValueAt(selectedRow, 2);
+
+        // Lấy Shift từ cơ sở dữ liệu
+        WarehouseStaff warehouseStaff = daoWarehouseStaff.selectbyID(shiftId);
+
+        if (warehouseStaff != null) {
+          WarehouseStaffSendController = warehouseStaff;
+          TKField.setText(warehouseStaff.getStaffName());
+        }
+      }
+    });
+  }
+
 
 
 
@@ -755,6 +1166,8 @@ public class CaiDonPanel extends JPanel {
 
 
   //Getter va Setter
+
+  //Product
   public JTextField getDHField() {
     return DHField;
   }
@@ -767,6 +1180,161 @@ public class CaiDonPanel extends JPanel {
     return ThukhoComboBox;
   }
 
+  public JButton getbtnThemMaHang() {
+    return btnThemMaHang;
+  }
+
+  public JButton getbtnSuaMaHang() {
+    return btnSuaMaHang;
+  }
+
+  public JButton getbtnXoaMaHang() {
+    return btnXoaMaHang;
+  }
+
+  public JButton getbtnXoaTatCaMaHang() {
+    return btnXoaTatCaMaHang;
+  }
+
+  public JButton getbtnResetMaHang() {
+    return btnResetMaHang;
+  }
+
+  public Product getProductSendControllerg() {
+    return productSendController;
+  }
+
+  public void ResetFormMaHang () {
+    getDHField().setText("");
+    getHSDField().setText("");
+    getThukhoComboBox().setSelectedIndex(0);
+    getbtnThemMaHang().setEnabled(true);
+    getbtnSuaMaHang().setEnabled(false);
+    getbtnXoaMaHang().setEnabled(false);
+    getbtnXoaTatCaMaHang().setEnabled(true);
+    productSendController = null;
+  }
+
+
+  //Shift
+
+  public JTextField getCSXShiftField() {
+    return CSXShiftField;
+  }
+
+  public JButton getbtnThemShift() {
+    return btnThemShift;
+  }
+
+  public JButton getbtnSuaShift() {
+    return btnSuaShift;
+  }
+
+  public JButton getbtnXoaShift() {
+    return btnXoaShift;
+  }
+
+  public JButton getbtnXoaTatCaShift() {
+    return btnXoaTatCaShift;
+  }
+
+  public JButton getbtnResetShift() {
+    return btnResetShift;
+  }
+
+  public Shift getShiftSendControllerg() {
+    return ShiftSendController;
+  }
+
+
+  public void ResetFormShift () {
+   getCSXShiftField().setText("");
+    getbtnThemShift().setEnabled(true);
+   getbtnSuaShift().setEnabled(false);
+   getbtnXoaShift().setEnabled(false);
+   getbtnXoaTatCaShift().setEnabled(true);
+  }
+
+
+  //ProducGroup
+  public JTextField getTSXField() {
+    return TSXField;
+  }
+
+  public JButton getbtnThemProductionGroup() {
+    return btnThemProductionGroup;
+  }
+
+  public JButton getbtnSuaProductionGroup() {
+    return btnSuaProductionGroup;
+  }
+
+  public JButton getbtnXoaProductionGroup() {
+    return btnXoaProductionGroup;
+  }
+
+  public JButton getbtnXoaTatCaProductionGroup() {
+    return btnXoaTatCaProductionGroup;
+  }
+
+  public JButton getbtnResetProductionGroup() {
+    return btnResetProductionGroup;
+  }
+
+  public ProductionGroup getProductionGroupSendController() {
+    return ProductionGroupSendController;
+  }
+
+
+  public void ResetFormProductionGroup () {
+    getTSXField().setText("");
+    getbtnThemProductionGroup().setEnabled(true);
+    getbtnSuaProductionGroup().setEnabled(false);
+    getbtnXoaProductionGroup().setEnabled(false);
+    getbtnXoaTatCaProductionGroup().setEnabled(true);
+  }
+
+  //WareHouseStaff
+  public JTextField getTKField() {
+    return TKField;
+  }
+
+  public JButton getbtnThemWarehouseStaff() {
+    return btnThemWarehouseStaff;
+  }
+
+  public JButton getbtnSuaWarehouseStaff() {
+    return btnSuaWarehouseStaff;
+  }
+
+  public JButton getbtnXoaWarehouseStaff() {
+    return btnXoaWarehouseStaff;
+  }
+
+  public JButton getbtnXoaTatCaWarehouseStaff() {
+    return btnXoaTatCaWarehouseStaff;
+  }
+
+  public JButton getbtnResetWarehouseStaff() {
+    return btnResetWarehouseStaff;
+  }
+
+  public WarehouseStaff getWarehouseStaffSendController() {
+    return WarehouseStaffSendController;
+  }
+
+
+  public void ResetFormWarehouseStaff() {
+    getTKField().setText("");
+    getbtnThemWarehouseStaff().setEnabled(true);
+    getbtnSuaWarehouseStaff().setEnabled(false);
+    getbtnXoaWarehouseStaff().setEnabled(false);
+    getbtnXoaTatCaWarehouseStaff().setEnabled(true);
+  }
+
+
+
 
 
 }
+

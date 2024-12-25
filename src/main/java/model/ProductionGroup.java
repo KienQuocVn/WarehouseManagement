@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+//to san xuat
 @Entity
 @Data
 @NoArgsConstructor
@@ -18,7 +19,7 @@ public class ProductionGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer groupID;
 
-    @Column(name = "GroupName", columnDefinition = "VARCHAR(255)", nullable = false)
+    @Column(name = "GroupName", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String groupName; // Tên nhóm sản xuất
 }
 

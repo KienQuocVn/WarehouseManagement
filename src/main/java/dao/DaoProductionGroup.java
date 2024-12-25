@@ -23,6 +23,11 @@ public class DaoProductionGroup extends WHMA<ProductionGroup, Integer> {
     JdbcHelper.executeUpdate(sql, entity.getGroupName(), entity.getGroupID());
   }
 
+  public void deleteAll() {
+    String sql = "DELETE FROM ProductionGroups ";
+    JdbcHelper.executeUpdate(sql);
+  }
+
   @Override
   public void delete(Integer id) {
     String sql = "DELETE FROM ProductionGroups WHERE GroupID = ?";

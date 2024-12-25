@@ -23,6 +23,11 @@ public class DaoWarehouseStaff extends WHMA<WarehouseStaff, Integer> {
     JdbcHelper.executeUpdate(sql, entity.getStaffName(), entity.getStaffId());
   }
 
+  public void deleteAll() {
+    String sql = "DELETE FROM WarehouseStaff ";
+    JdbcHelper.executeUpdate(sql);
+  }
+
   @Override
   public void delete(Integer id) {
     String sql = "DELETE FROM WarehouseStaff WHERE StaffId = ?";
