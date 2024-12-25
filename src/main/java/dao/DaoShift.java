@@ -29,6 +29,11 @@ public class DaoShift extends WHMA<Shift, Integer> {
     JdbcHelper.executeUpdate(sql, id);
   }
 
+  public void deleteAll() {
+    String sql = "DELETE FROM Shifts ";
+    JdbcHelper.executeUpdate(sql);
+  }
+
   @Override
   public List<Shift> selectAll() {
     String sql = "SELECT * FROM Shifts";

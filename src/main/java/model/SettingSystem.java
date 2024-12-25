@@ -1,2 +1,4 @@
-package model;public class SettingSystem {
+package model;
+
+public class SettingSystem {
 }

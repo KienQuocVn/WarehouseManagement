@@ -30,6 +30,12 @@ public class DaoProduct extends WHMA<Product, Integer> {
         JdbcHelper.executeUpdate(sql, id.toString());
     }
 
+
+    public void deleteAll() {
+        String sql = "DELETE FROM Products ";
+        JdbcHelper.executeUpdate(sql);
+    }
+
     @Override
     public List<Product> selectAll() {
         String sql = "SELECT * FROM Products";

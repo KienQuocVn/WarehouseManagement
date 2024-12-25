@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
-
+//ca san xuat
 @Entity
 @Data
 @NoArgsConstructor
