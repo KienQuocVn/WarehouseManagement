@@ -189,3 +189,36 @@ JOIN
     WarehouseStaff ws ON l.WarehouseStaffID = ws.StaffID
 JOIN Pallets pal ON l.LotID = pal.LotID	;
 
+
+
+SELECT 
+    l.LotID,
+    l.LotIDU,
+    p.ProductID,
+    p.ProductName,
+    pg.GroupID,
+    pg.GroupName,
+    s.ShiftID,
+    s.ShiftName,
+    l.ProductionTime,
+    l.ExpirationDays,
+    l.Weight,
+    l.WarehouseWeight,
+    l.WeightDeviation,
+    ws.StaffID,
+    ws.StaffName,
+    pal.PalletID
+FROM Lots l
+JOIN Products p ON l.ProductID = p.ProductID
+JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
+JOIN Shifts s ON l.ShiftID = s.ShiftID
+JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.StaffID
+LEFT JOIN Pallets pal ON pal.LotID = l.LotID
+WHERE (pg.GroupName = 'Nhóm A')
+  AND (s.ShiftName = 'Ca sáng')
+  AND (p.ProductName = 'Sản phẩm A')
+  AND (l.ProductionTime >= '2024-01-01' OR '2024-01-01' IS NULL)
+  AND (l.ProductionTime <= '2024-12-31' OR '2024-12-31' IS NULL)
+ORDER BY l.ProductionTime DESC;
+
+

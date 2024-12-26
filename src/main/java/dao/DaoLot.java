@@ -1,6 +1,8 @@
 package dao;
 
 import AbtractClass.WHMA;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import model.Lot;
 import Utils.JdbcHelper;
 
@@ -16,6 +18,11 @@ import model.Shift;
 import model.WarehouseStaff;
 
 public class DaoLot extends WHMA<Lot, Integer> {
+  private DaoLot daoLot;
+  private DaoShift daoShift;
+  private DaoProductionGroup daoProductionGroup;
+  private DaoProduct daoProduct;
+  private DaoWarehouseStaff daoWarehouseStaff;
 
   @Override
   public void insert(Lot entity) {
@@ -164,4 +171,66 @@ public class DaoLot extends WHMA<Lot, Integer> {
     }
     return list;
   }
+
+  public List<Lot> searchLots(String productionGroup, String shift, String productName, java.sql.Date fromDate, java.sql.Date toDate) {
+    StringBuilder sql = new StringBuilder("""
+        SELECT 
+            l.LotID,
+            l.LotIDU,
+            p.ProductID,
+            p.ProductName,
+            pg.GroupID,
+            pg.GroupName,
+            s.ShiftID,
+            s.ShiftName,
+            l.ProductionTime,
+            l.ExpirationDays,
+            l.Weight,
+            l.WarehouseWeight,
+            l.WeightDeviation,
+            ws.StaffID,
+            ws.StaffName,
+            pal.PalletID
+        FROM Lots l
+        JOIN Products p ON l.ProductID = p.ProductID
+        JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
+        JOIN Shifts s ON l.ShiftID = s.ShiftID
+        JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.StaffID
+        LEFT JOIN Pallets pal ON pal.LotID = l.LotID
+        WHERE 1=1
+    """);
+
+    List<Object> params = new ArrayList<>();
+
+    // Điều kiện lọc
+    if (productionGroup != null) {
+      sql.append(" AND pg.GroupName = ?");
+      params.add(productionGroup);
+    }
+    if (shift != null) {
+      sql.append(" AND s.ShiftName = ?");
+      params.add(shift);
+    }
+    if (productName != null) {
+      sql.append(" AND p.ProductName = ?");
+      params.add(productName);
+    }
+    if (fromDate != null) {
+      sql.append(" AND l.ProductionTime >= ?");
+      params.add(fromDate);
+    }
+    if (toDate != null) {
+      sql.append(" AND l.ProductionTime <= ?");
+      params.add(toDate);
+    }
+
+    // Sắp xếp kết quả
+    sql.append(" ORDER BY l.ProductionTime DESC");
+
+    // Trả về kết quả
+    return selectBySql(sql.toString(), params.toArray());
+  }
+
+
+
 }
