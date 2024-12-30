@@ -16,6 +16,9 @@ public class Pallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer palletID;
 
+    @Column(name = "palletIDU", columnDefinition = "NVARCHAR(255)", length = 20, nullable = false)
+    private String palletIDU;
+
     @ManyToOne
     @JoinColumn(name = "LotID", nullable = false)
     private Lot lot; // Khóa ngoại tham chiếu đến bảng Lots

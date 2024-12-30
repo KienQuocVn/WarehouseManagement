@@ -94,7 +94,12 @@ public class ShiftController implements ActionListener {
             caiDonPanel.updateTableDataShift();
             ResetFormShift();
         } catch (Exception ex) {
-            DialogHelper.alert(caiDonPanel, "Lỗi khi thêm Ca Sản Xuất: " + ex.getMessage());
+            if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                DialogHelper.alert(caiDonPanel, "Tên Ca Sản Xuất đã tồn tại! Vui lòng nhập tên khác.");
+            } else {
+                DialogHelper.alert(caiDonPanel, "Lỗi khi thêm Ca Sản Xuất: " + ex.getMessage());
+            }
+
         }
     }
 
@@ -121,7 +126,11 @@ public class ShiftController implements ActionListener {
             caiDonPanel.updateTableDataShift();
             ResetFormShift();
         } catch (Exception ex) {
-            DialogHelper.alert(caiDonPanel, "Lỗi khi Xóa Ca Sản Xuất: " + ex.getMessage());
+            if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                DialogHelper.alert(caiDonPanel, "Tên Ca Sản Xuất đã tồn tại! Vui lòng nhập tên khác.");
+            } else {
+                DialogHelper.alert(caiDonPanel, "Lỗi khi cập nhật Ca Sản Xuất: " + ex.getMessage());
+            }
         }
     }
 
@@ -186,6 +195,7 @@ public class ShiftController implements ActionListener {
         caiDonPanel.getbtnSuaShift().setEnabled(false);
         caiDonPanel.getbtnXoaShift().setEnabled(false);
         caiDonPanel.getbtnXoaTatCaShift().setEnabled(true);
+        caiDonPanel.updateTableDataShift();
     }
 
 

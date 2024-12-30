@@ -20,6 +20,6 @@ public class Shift {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer shiftId;
 
-    @Column(name = "ShiftName", columnDefinition = "NVARCHAR(255)", nullable = false)
+    @Column(name = "ShiftName", columnDefinition = "NVARCHAR(255)", nullable = false, unique = true)
     private String shiftName;
 }

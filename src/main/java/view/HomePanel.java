@@ -1,6 +1,10 @@
 package view;
 
 import Utils.RoundedBorder;
+import com.toedter.calendar.JDateChooser;
+import controller.HomeController;
+import dao.*;
+import model.SettingSystem;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -8,8 +12,18 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
+import java.util.Date;
+import java.util.List;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class HomePanel extends JPanel {
+  public DaoProduct daoProduct;
+  public DaoProductionGroup DaoProductionGroup;
+  public DaoShift daoShift;
+  public DaoWarehouseStaff daoWarehouseStaff;
+  public DaoSettingSystem daoSettingSystem;
+  private JPopupMenu popupMenu;
 
   public HomePanel() {
     setLayout(new BorderLayout());
@@ -22,7 +36,53 @@ public class HomePanel extends JPanel {
 
     // Thêm bảng JTable
     add(createTablePanel(), BorderLayout.SOUTH);
+
+
+    // Tạo và gắn menu chuột phải
+    createContextMenu();
+    addMouseListener(new MouseAdapter() {
+      @Override
+      public void mousePressed(MouseEvent e) {
+        showPopupMenu(e);
+      }
+
+      @Override
+      public void mouseReleased(MouseEvent e) {
+        showPopupMenu(e);
+      }
+    });
+
+
   }
+
+  private void createContextMenu() {
+    popupMenu = new JPopupMenu();
+
+    JMenuItem menuItem1 = new JMenuItem("Refresh");
+    menuItem1.addActionListener(e -> {
+      refreshComboBoxData();
+      refreshprinter();
+      refreshToSXComboBoxData();
+      refreshcaSanxuatComboBoxData();
+      refreshThukhoComboBoxData();
+      JOptionPane.showMessageDialog(this, "Trang Chủ Đã Làm Mới!");
+    });
+
+    JMenuItem menuItem2 = new JMenuItem("Thoát");
+    menuItem2.addActionListener(e -> System.exit(0));
+
+
+    popupMenu.add(menuItem1);
+    popupMenu.addSeparator(); // Dòng ngăn cách
+    popupMenu.add(menuItem2);
+  }
+
+  private void showPopupMenu(MouseEvent e) {
+    if (e.isPopupTrigger()) { // Kiểm tra nếu là chuột phải
+      popupMenu.show(this, e.getX(), e.getY());
+    }
+  }
+
 
   // Phương thức tạo panel tiêu đề phần mềm
   private JPanel createSoftwarePanel() {
@@ -56,11 +116,19 @@ public class HomePanel extends JPanel {
   }
 
   // Panel bên trái
+  private JComboBox<String> maHangComboBox;
+  JTextField mauField;
+  JTextField hanSDField;
+  JTextField soLoField;
+  JTextField klBiField;
+  JComboBox<String> printerBox;
   private JPanel createLeftPanel() {
     JPanel leftPanel = new JPanel();
     leftPanel.setLayout(new GridBagLayout());
     leftPanel.setBorder(new RoundedBorder(20));
     leftPanel.setBackground(Color.WHITE);
+
+    HomeController homeController = new HomeController(this);
 
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(5, 5, 5, 5); // Khoảng cách giữa các thành phần
@@ -83,11 +151,13 @@ public class HomePanel extends JPanel {
     JLabel maHangLabel = new JLabel("Mã Hàng:");
     leftPanel.add(maHangLabel, gbc);
 
-    gbc.gridx = 1;
-    JComboBox<String> maHangComboBox = new JComboBox<>(new String[]{"Đơn 1", "Đơn 2", "Đơn 3"});
-    maHangComboBox.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
-    leftPanel.add(maHangComboBox, gbc);
 
+    gbc.gridx = 1;
+    maHangComboBox = new JComboBox<>(); // Khởi tạo JComboBox
+    maHangComboBox.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
+    refreshComboBoxData(); // Gọi phương thức làm mới dữ liệu khi khởi tạo
+    leftPanel.add(maHangComboBox, gbc);
+    maHangComboBox.addActionListener(homeController);
     // Màu
     gbc.gridx = 0;
     gbc.gridy = 2;
@@ -95,9 +165,10 @@ public class HomePanel extends JPanel {
     leftPanel.add(mauLabel, gbc);
 
     gbc.gridx = 1;
-    JTextField mauField = new JTextField();
+    mauField = new JTextField();
     mauField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
     mauField.setBackground(new Color(255, 255, 204)); // Màu vàng nhạt
+    mauField.setEditable(false);
     leftPanel.add(mauField, gbc);
 
     // Hạn SD
@@ -107,8 +178,10 @@ public class HomePanel extends JPanel {
     leftPanel.add(hanSDLabel, gbc);
 
     gbc.gridx = 1;
-    JTextField hanSDField = new JTextField("0");
+     hanSDField = new JTextField("0");
     hanSDField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
+    hanSDField.setBackground(new Color(255, 255, 204)); // Màu vàng nhạt
+    hanSDField.setEditable(false);
     leftPanel.add(hanSDField, gbc);
 
     // Số Lô
@@ -118,7 +191,7 @@ public class HomePanel extends JPanel {
     leftPanel.add(soLoLabel, gbc);
 
     gbc.gridx = 1;
-    JTextField soLoField = new JTextField();
+     soLoField = new JTextField();
     soLoField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
     leftPanel.add(soLoField, gbc);
 
@@ -129,7 +202,7 @@ public class HomePanel extends JPanel {
     leftPanel.add(klBiLabel, gbc);
 
     gbc.gridx = 1;
-    JTextField klBiField = new JTextField("0");
+     klBiField = new JTextField("0");
     klBiField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
     leftPanel.add(klBiField, gbc);
 
@@ -141,7 +214,8 @@ public class HomePanel extends JPanel {
 
     gbc.gridx = 1;
     JPanel printerPanel = new JPanel(new BorderLayout());
-    JComboBox<String> printerBox = new JComboBox<>(new String[]{"Foxit PhantomPDF Printer"});
+    printerBox = new JComboBox<>();
+    refreshprinter();
     JButton printButton = new JButton();
     // Tải icon từ file và thay đổi kích thước
     ImageIcon originalIcon = new javax.swing.ImageIcon(getClass().getResource("/img/printer2.png"));
@@ -159,10 +233,41 @@ public class HomePanel extends JPanel {
     return leftPanel;
   }
 
+  // Hàm làm mới dữ liệu cho JComboBox
+  private void refreshComboBoxData() {
+    daoProduct = new DaoProduct();
+    List<String> productNames = daoProduct.getAllProductNames(); // Lấy danh sách mới từ DAO
 
+    if(productNames.size() > 0) {
+      // Xóa tất cả các mục cũ
+      maHangComboBox.removeAllItems();
+      maHangComboBox.addItem("Mã Hàng");
+      // Thêm các mục mới
+      for (String name : productNames) {
+        maHangComboBox.addItem(name);
+      }
+    }
+    else {
+      maHangComboBox.addItem("Chưa Có Mã Hàng Nào");
+    }
+
+  }
+
+  // Hàm Cập nhật printer
+  private void refreshprinter() {
+    daoSettingSystem = new DaoSettingSystem();
+    SettingSystem settingSystem = daoSettingSystem.selectLatest();
+    if(settingSystem != null) {
+      printerBox.removeAllItems();
+      printerBox.addItem(settingSystem.getPrinter());
+    }
+  }
 
 
   // Panel trung tâm
+  JComboBox<String> ToSXComboBox;
+  JComboBox<String> caSanxuatComboBox;
+  JComboBox<String> ThukhoComboBox;
   private JPanel createCenterPanel() {
     JPanel CentePanel = new JPanel();
     CentePanel.setLayout(new GridBagLayout());
@@ -191,9 +296,10 @@ public class HomePanel extends JPanel {
     CentePanel.add(maHangLabel, gbc);
 
     gbc.gridx = 1;
-    JComboBox<String> maHangComboBox = new JComboBox<>(new String[]{"Tổ 1", "Tổ 2", "Tổ 3"});
-    maHangComboBox.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
-    CentePanel.add(maHangComboBox, gbc);
+    ToSXComboBox = new JComboBox<>();
+    ToSXComboBox.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
+    refreshToSXComboBoxData();
+    CentePanel.add(ToSXComboBox, gbc);
 
     // Màu
     gbc.gridx = 0;
@@ -202,8 +308,9 @@ public class HomePanel extends JPanel {
     CentePanel.add(mauLabel, gbc);
 
     gbc.gridx = 1;
-    JComboBox<String> caSanxuatComboBox = new JComboBox<>(new String[]{"Ca 1", "CA 2", "CA 3"});
+    caSanxuatComboBox =  new JComboBox<>();
     caSanxuatComboBox.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
+    refreshcaSanxuatComboBoxData();
     CentePanel.add(caSanxuatComboBox, gbc);
 
 
@@ -214,24 +321,38 @@ public class HomePanel extends JPanel {
     CentePanel.add(soLoLabel, gbc);
 
     gbc.gridx = 1;
-    JComboBox<String> ThukhoComboBox = new JComboBox<>(new String[]{"Trung", "Quoc"});
+    ThukhoComboBox = new JComboBox<>();
     ThukhoComboBox.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
+    refreshThukhoComboBoxData();
     CentePanel.add(ThukhoComboBox, gbc);
 
     // KL Bi
     gbc.gridx = 0;
     gbc.gridy = 4;
-    JLabel klBiLabel = new JLabel("Số Pallet:");
-    CentePanel.add(klBiLabel, gbc);
+    JLabel NSXLabel = new JLabel("Ngày Sản Xuất:");
+    CentePanel.add(NSXLabel, gbc);
 
     gbc.gridx = 1;
-    JTextField klBiField = new JTextField("0");
-    klBiField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
-    CentePanel.add(klBiField, gbc);
+    JDateChooser NSXDate = new JDateChooser();
+    NSXDate.setDate(new Date());
+    NSXDate.setDateFormatString("dd/MM/yyyy");
+    CentePanel.add(NSXDate, gbc);
+
+    // KL Bi
+    gbc.gridx = 0;
+    gbc.gridy = 5;
+    JLabel SoPalletLabel = new JLabel("Số Pallet:");
+    CentePanel.add(SoPalletLabel, gbc);
+
+    gbc.gridx = 1;
+    JTextField SoPalletTe= new JTextField("0");
+    SoPalletTe.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
+    CentePanel.add(SoPalletTe, gbc);
+
 
     // Printer
     gbc.gridx = 0;
-    gbc.gridy = 5;
+    gbc.gridy = 6;
     JLabel printerLabel = new JLabel("Tìm mã hàng và số lô:");
     CentePanel.add(printerLabel, gbc);
 
@@ -245,7 +366,7 @@ public class HomePanel extends JPanel {
     Image iconImage = originalIcon.getImage(); // Lấy hình ảnh từ ImageIcon
 
 // Thay đổi kích thước của icon (ví dụ: 20x20 pixels)
-    Image scaledImage = iconImage.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+    Image scaledImage = iconImage.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
     timButton.setIcon(new ImageIcon(scaledImage));
     timButton.setBackground(new Color(71,138,173,255));
 
@@ -255,7 +376,7 @@ public class HomePanel extends JPanel {
     Image iconImage2 = originalIcon2.getImage(); // Lấy hình ảnh từ ImageIcon
 
 // Thay đổi kích thước của icon (ví dụ: 20x20 pixels)
-    Image scaledImage2 = iconImage2.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+    Image scaledImage2 = iconImage2.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
     lamMoiButton.setIcon(new ImageIcon(scaledImage2));
     lamMoiButton.setBackground(new Color(71,138,173,255));
 
@@ -269,6 +390,68 @@ public class HomePanel extends JPanel {
 
     return CentePanel;
   }
+
+  // Hàm làm mới dữ liệu cho JComboBox
+  private void refreshToSXComboBoxData() {
+    DaoProductionGroup = new DaoProductionGroup();
+    List<String> productNames = DaoProductionGroup.getAllProductionGroupNames(); // Lấy danh sách mới từ DAO
+    if(productNames.size() > 0) {
+      // Xóa tất cả các mục cũ
+      ToSXComboBox.removeAllItems();
+      ToSXComboBox.addItem("Tổ");
+      // Thêm các mục mới
+      for (String name : productNames) {
+        ToSXComboBox.addItem(name);
+      }
+    }
+    else {
+      ToSXComboBox.addItem("Chưa Có Tổ Nào");
+    }
+
+  }
+
+  // Hàm làm mới dữ liệu cho JComboBox
+  private void refreshcaSanxuatComboBoxData() {
+    daoShift = new DaoShift();
+    List<String> productNames = daoShift.getAllShiftNames(); // Lấy danh sách mới từ DAO
+
+   if(productNames.size() > 0) {
+     // Xóa tất cả các mục cũ
+     caSanxuatComboBox.removeAllItems();
+     caSanxuatComboBox.addItem("Ca");
+     // Thêm các mục mới
+     for (String name : productNames) {
+       caSanxuatComboBox.addItem(name);
+     }
+   }
+   else {
+     caSanxuatComboBox.addItem("Chưa Có Ca Nào");
+   }
+  }
+
+  // Hàm làm mới dữ liệu cho JComboBox
+  private void refreshThukhoComboBoxData() {
+    daoWarehouseStaff = new DaoWarehouseStaff();
+    List<String> productNames = daoWarehouseStaff.getAllWarehouseStaffNames(); // Lấy danh sách mới từ DAO
+
+    if(productNames.size() > 0) {
+
+      // Xóa tất cả các mục cũ
+      ThukhoComboBox.removeAllItems();
+      ThukhoComboBox.addItem("Thủ Kho");
+      // Thêm các mục mới
+      for (String name : productNames) {
+        ThukhoComboBox.addItem(name);
+      }
+    }
+    else {
+      ThukhoComboBox.addItem("Chưa Có Thủ Kho Nào");
+    }
+  }
+
+
+
+
 
 
   private JPanel createRightPanel() {
@@ -496,5 +679,38 @@ public class HomePanel extends JPanel {
       table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
     }
   }
+
+  //getter
+
+  // Getter cho maHangComboBox
+  public JComboBox<String> getMaHangComboBox() {
+    return maHangComboBox;
+  }
+
+  // Getter cho mauField
+  public JTextField getMauField() {
+    return mauField;
+  }
+
+  // Getter cho hanSDField
+  public JTextField getHanSDField() {
+    return hanSDField;
+  }
+
+  // Getter cho soLoField
+  public JTextField getSoLoField() {
+    return soLoField;
+  }
+
+  // Getter cho klBiField
+  public JTextField getKlBiField() {
+    return klBiField;
+  }
+
+  // Getter cho printerBox
+  public JComboBox<String> getPrinterBox() {
+    return printerBox;
+  }
+
 
 }
