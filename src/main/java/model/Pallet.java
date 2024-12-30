@@ -12,10 +12,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @Table(name = "Pallets")
 public class Pallet {
-
     @Id
-    @Column(name = "palletID", columnDefinition = "NVARCHAR(255)", length = 20)
-    private String palletID;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer palletID;
+
+    @Column(name = "palletIDU", columnDefinition = "NVARCHAR(255)", unique = true, length = 20, nullable = false)
+    private String palletIDU;
 
     @ManyToOne
     @JoinColumn(name = "LotID", nullable = false)

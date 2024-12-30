@@ -3,19 +3,18 @@ package dao;
 import AbtractClass.WHMA;
 import Utils.JdbcHelper;
 import model.Pallet;
-import model.Lot;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DaoPallet extends WHMA<Pallet, String> {
+public class DaoPallet extends WHMA<Pallet, Integer> {
 
   @Override
   public void insert(Pallet entity) {
-    String sql = "INSERT INTO Pallets (PalletID, LotID) VALUES (?, ?)";
-    JdbcHelper.executeUpdate(sql, entity.getPalletID(), entity.getLot().getLotID());
+    String sql = "INSERT INTO Pallets (LotID) VALUES (?)";
+    JdbcHelper.executeUpdate(sql, entity.getLot().getLotID());
   }
 
   @Override
@@ -25,7 +24,7 @@ public class DaoPallet extends WHMA<Pallet, String> {
   }
 
   @Override
-  public void delete(String id) {
+  public void delete(Integer id) {
     String sql = "DELETE FROM Pallets WHERE PalletID = ?";
     JdbcHelper.executeUpdate(sql, id);
   }
@@ -37,7 +36,7 @@ public class DaoPallet extends WHMA<Pallet, String> {
   }
 
   @Override
-  public Pallet selectbyID(String id) {
+  public Pallet selectbyID(Integer id) {
     String sql = "SELECT * FROM Pallets WHERE PalletID = ?";
     List<Pallet> pallets = selectBySql(sql, id);
     return pallets.isEmpty() ? null : pallets.get(0);
@@ -53,12 +52,10 @@ public class DaoPallet extends WHMA<Pallet, String> {
     try (ResultSet rs = JdbcHelper.executeQuery(sql, args)) {
       while (rs.next()) {
         Pallet pallet = new Pallet();
-        pallet.setPalletID(rs.getString("PalletID"));
-
-        // Lấy thông tin Lot từ DaoLot
+        pallet.setPalletID(rs.getInt("PalletID"));
+        pallet.setPalletIDU(rs.getString("palletIDU"));
         DaoLot daoLot = new DaoLot();
-        Lot lot = daoLot.selectbyID(rs.getInt("LotID"));
-        pallet.setLot(lot);
+        pallet.setLot(daoLot.selectbyID(rs.getInt("LotID")));
 
         list.add(pallet);
       }
