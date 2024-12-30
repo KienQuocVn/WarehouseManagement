@@ -19,7 +19,7 @@ public class ProductionGroup {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer groupID;
 
-    @Column(name = "GroupName", columnDefinition = "NVARCHAR(255)", nullable = false)
+    @Column(name = "GroupName", columnDefinition = "NVARCHAR(255)", nullable = false, unique = true)
     private String groupName; // Tên nhóm sản xuất
 }
 

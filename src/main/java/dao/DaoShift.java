@@ -47,6 +47,19 @@ public class DaoShift extends WHMA<Shift, Integer> {
     return shifts.isEmpty() ? null : shifts.get(0);
   }
 
+  public List<String> getAllShiftNames() {
+    List<String> productNames = new ArrayList<>();
+    String sql = "SELECT ShiftName FROM Shifts";
+    try (ResultSet rs = JdbcHelper.executeQuery(sql)) {
+      while (rs.next()) {
+        productNames.add(rs.getString("ShiftName"));
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Error while fetching Shifts names: " + e.getMessage());
+    }
+    return productNames;
+  }
+
   @Override
   public List<Shift> selectbyID(String sql, Object... args) {
     return selectBySql(sql, args);

@@ -42,6 +42,13 @@ public class DaoProduct extends WHMA<Product, Integer> {
         return selectBySql(sql);
     }
 
+
+    public Product selectbyName(String name) {
+        String sql = "SELECT * FROM Products WHERE ProductName = ?";
+        List<Product> products = selectBySql(sql, name);
+        return products.isEmpty() ? null : products.get(0);
+    }
+
     @Override
     public Product selectbyID(Integer id) {
         String sql = "SELECT * FROM Products WHERE ProductID = ?";
@@ -52,6 +59,19 @@ public class DaoProduct extends WHMA<Product, Integer> {
     @Override
     public List<Product> selectbyID(String sql, Object... args) {
         return selectBySql(sql, args);
+    }
+
+    public List<String> getAllProductNames() {
+        List<String> productNames = new ArrayList<>();
+        String sql = "SELECT ProductName FROM Products";
+        try (ResultSet rs = JdbcHelper.executeQuery(sql)) {
+            while (rs.next()) {
+                productNames.add(rs.getString("ProductName"));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error while fetching product names: " + e.getMessage());
+        }
+        return productNames;
     }
 
     private List<Product> selectBySql(String sql, Object... args) {

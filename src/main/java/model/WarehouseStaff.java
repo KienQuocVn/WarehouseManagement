@@ -19,7 +19,7 @@ public class WarehouseStaff {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer staffId;
 
-    @Column(name = "StaffName", columnDefinition = "NVARCHAR(255)")
+    @Column(name = "StaffName", columnDefinition = "NVARCHAR(255)", nullable = false, unique = true)
     private String staffName;
 }
 

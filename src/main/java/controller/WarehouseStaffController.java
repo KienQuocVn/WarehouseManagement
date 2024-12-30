@@ -93,7 +93,12 @@ public class WarehouseStaffController implements ActionListener {
             caiDonPanel.updateTableDataWarehouseStaff();
             ResetFormWarehouseStaff();
         } catch (Exception ex) {
-            DialogHelper.alert(caiDonPanel, "Lỗi khi thêm Thủ Kho: " + ex.getMessage());
+            if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                DialogHelper.alert(caiDonPanel, "Tên Thủ Kho đã tồn tại! Vui lòng nhập tên khác.");
+            } else {
+                DialogHelper.alert(caiDonPanel, "Lỗi khi thêm Thủ Kho: " + ex.getMessage());
+            }
+
         }
     }
 
@@ -120,7 +125,11 @@ public class WarehouseStaffController implements ActionListener {
             caiDonPanel.updateTableDataWarehouseStaff();
             ResetFormWarehouseStaff();
         } catch (Exception ex) {
-            DialogHelper.alert(caiDonPanel, "Lỗi khi Xóa Thủ Kho: " + ex.getMessage());
+            if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                DialogHelper.alert(caiDonPanel, "Tên Thủ Kho đã tồn tại! Vui lòng nhập tên khác.");
+            } else {
+                DialogHelper.alert(caiDonPanel, "Lỗi khi cập nhật Thủ Kho: " + ex.getMessage());
+            }
         }
     }
 
@@ -185,6 +194,7 @@ public class WarehouseStaffController implements ActionListener {
         caiDonPanel.getbtnSuaWarehouseStaff().setEnabled(false);
         caiDonPanel.getbtnXoaWarehouseStaff().setEnabled(false);
         caiDonPanel.getbtnXoaTatCaWarehouseStaff().setEnabled(true);
+        caiDonPanel.updateTableDataWarehouseStaff();
     }
 
 

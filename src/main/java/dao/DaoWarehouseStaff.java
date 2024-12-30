@@ -47,6 +47,19 @@ public class DaoWarehouseStaff extends WHMA<WarehouseStaff, Integer> {
     return staffList.isEmpty() ? null : staffList.get(0);
   }
 
+  public List<String> getAllWarehouseStaffNames() {
+    List<String> productNames = new ArrayList<>();
+    String sql = "SELECT StaffName FROM WarehouseStaff";
+    try (ResultSet rs = JdbcHelper.executeQuery(sql)) {
+      while (rs.next()) {
+        productNames.add(rs.getString("StaffName"));
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Error while fetching WarehouseStaff names: " + e.getMessage());
+    }
+    return productNames;
+  }
+
   @Override
   public List<WarehouseStaff> selectbyID(String sql, Object... args) {
     return selectBySql(sql, args);

@@ -79,50 +79,53 @@ public class CaiDonController implements ActionListener {
             // Kiểm tra các trường nhập liệu
             if (productName.isEmpty()) {
                 DialogHelper.alert(caiDonPanel, "Vui lòng nhập Tên Đơn Hàng!");
-                return; // Dừng hàm nếu thông tin chưa đầy đủ
+                return;
             }
 
             if (hsdText.isEmpty()) {
                 DialogHelper.alert(caiDonPanel, "Vui lòng nhập Hạn Sử Dụng!");
-                return; // Dừng hàm nếu thông tin chưa đầy đủ
+                return;
             }
 
             if (color == null || color.isEmpty()) {
                 DialogHelper.alert(caiDonPanel, "Vui lòng chọn Màu!");
-                return; // Dừng hàm nếu thông tin chưa đầy đủ
+                return;
             }
 
             // Chuyển đổi giá trị Hạn Sử Dụng sang kiểu double và kiểm tra tính hợp lệ
-            double hsd = 0;
+            double hsd;
             try {
-                hsd = Double.parseDouble(hsdText); // Chuyển đổi chuỗi thành double
+                hsd = Double.parseDouble(hsdText);
             } catch (NumberFormatException ex) {
                 DialogHelper.alert(caiDonPanel, "Hạn Sử Dụng phải là một số hợp lệ!");
-                return; // Dừng hàm nếu giá trị HSD không hợp lệ
+                return;
             }
 
-            // In ra thông tin để kiểm tra
-
-
-
-            // Tạo đối tượng sản phẩm và thêm vào DB
+            // Tạo đối tượng sản phẩm
             Product product = Product.builder()
                     .productName(productName)
-                    .HSD(hsd) // Sử dụng giá trị double
+                    .HSD(hsd)
                     .color(color)
                     .build();
 
-
+            // Thêm vào cơ sở dữ liệu
             daoProduct.insert(product);
 
             DialogHelper.alert(caiDonPanel, "Thêm Hàng thành công!");
-            // Cập nhật bảng dữ liệu trong `CaiDonPanel`
+            // Cập nhật bảng dữ liệu
             caiDonPanel.updateTableData();
             ResetFormMaHang();
+
         } catch (Exception ex) {
-            DialogHelper.alert(caiDonPanel, "Lỗi khi thêm Hàng: " + ex.getMessage());
+            // Kiểm tra nếu lỗi do vi phạm ràng buộc UNIQUE
+            if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                DialogHelper.alert(caiDonPanel, "Tên Đơn Hàng đã tồn tại! Vui lòng nhập tên khác.");
+            } else {
+                DialogHelper.alert(caiDonPanel, "Lỗi khi thêm Hàng: " + ex.getMessage());
+            }
         }
     }
+
 
     private void handleUpdateProduct() {
         try {
@@ -165,7 +168,12 @@ public class CaiDonController implements ActionListener {
             caiDonPanel.updateTableData();
             ResetFormMaHang();
         } catch (Exception ex) {
-            DialogHelper.alert(caiDonPanel, "Lỗi khi Xóa Hàng: " + ex.getMessage());
+            // Kiểm tra nếu lỗi do vi phạm ràng buộc UNIQUE
+            if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                DialogHelper.alert(caiDonPanel, "Tên Đơn Hàng đã tồn tại! Vui lòng nhập tên khác.");
+            } else {
+                DialogHelper.alert(caiDonPanel, "Lỗi khi cập nhật Hàng: " + ex.getMessage());
+            }
         }
     }
 
@@ -233,6 +241,7 @@ public class CaiDonController implements ActionListener {
         caiDonPanel.getbtnSuaMaHang().setEnabled(false);
         caiDonPanel.getbtnXoaMaHang().setEnabled(false);
         caiDonPanel.getbtnXoaTatCaMaHang().setEnabled(true);
+        caiDonPanel.updateTableData();
     }
 
 
