@@ -1,5 +1,13 @@
 package view;
 
+import com.itextpdf.text.Element;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import com.toedter.calendar.JDateChooser;
 import dao.DaoLot;
 import dao.DaoProduct;
@@ -8,17 +16,20 @@ import dao.DaoShift;
 import dao.DaoWarehouseStaff;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
+import com.itextpdf.text.Document;
 import model.Lot;
 import javax.swing.*;
 import java.awt.*;
@@ -28,6 +39,13 @@ import model.Product;
 import model.ProductionGroup;
 import model.Shift;
 import model.WarehouseStaff;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ThongKePanel extends JPanel {
   private JTable table;
@@ -127,7 +145,7 @@ public class ThongKePanel extends JPanel {
 
 
     calendar.setTime(currentDate);
-    calendar.add(Calendar.MONTH, -4); // Lùi lại 2 tháng
+    calendar.add(Calendar.MONTH, -12); // Lùi lại 2 tháng
     Date twoMonthsAgo = calendar.getTime();
     // Thiết lập ngày cho fromDateChooser và toDateChooser
     fromDateChooser.setDate(twoMonthsAgo); // Ngày lùi 2 tháng
@@ -188,6 +206,9 @@ public class ThongKePanel extends JPanel {
       tableModel.setRowCount(0); // Xóa dữ liệu cũ
       if (searchResults != null && !searchResults.isEmpty()) {
         for (Lot lot : searchResults) {
+          String palletIDs = lot.getPallets().stream()
+              .map(pallet -> String.valueOf(pallet.getPalletID()))
+              .collect(Collectors.joining(", "));
           tableModel.addRow(new Object[]{
               lot.getLotID(),
               lot.getProduct().getProductName(),
@@ -200,6 +221,7 @@ public class ThongKePanel extends JPanel {
               lot.getWeight(),
               lot.getWarehouseStaff().getStaffName(),
               lot.getExpirationDate(),
+              palletIDs
           });
         }
       } else {
@@ -209,9 +231,30 @@ public class ThongKePanel extends JPanel {
 
     filterPanel.add(createColumn("Loại Report:", new JComboBox<>(new String[]{"Kê Nhập", "Thống Kê"})));
 
-    filterPanel.add(createColumnBlue("Xem Trước:", new JButton(resizeIcon("/img/printer.png", 25, 25))));
+    JButton previewButton = new JButton(resizeIcon("/img/printer.png", 25, 25));
+    filterPanel.add(createColumnBlue("Xem Trước:", previewButton));
+    previewButton.addActionListener(e -> {
+      // Lấy dữ liệu hiển thị trên bảng
+      List<Lot> tableData = getTableData();
+      if (tableData != null && !tableData.isEmpty()) {
+        showPreview();
+      } else {
+        JOptionPane.showMessageDialog(this, "Không có dữ liệu để hiển thị!");
+      }
+    });
 
-    filterPanel.add(createColumnBlue("Excel:",new JButton(resizeIcon("/img/document.png", 25, 25))));
+    JButton excelButton = new JButton(resizeIcon("/img/document.png", 25, 25));
+    filterPanel.add(createColumnBlue("Excel:", excelButton));
+    excelButton.addActionListener(e -> {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setDialogTitle("Chọn nơi lưu file Excel");
+      int userSelection = fileChooser.showSaveDialog(this);
+
+      if (userSelection == JFileChooser.APPROVE_OPTION) {
+        String filePath = fileChooser.getSelectedFile().getAbsolutePath() + ".xlsx";
+        exportToExcel(filePath);
+      }
+    });
 
 
     headerPanel.add(titleLabel, BorderLayout.NORTH);
@@ -425,7 +468,24 @@ public class ThongKePanel extends JPanel {
     summaryPanel.add(createColumn("Ca Sản Xuất:",shiftComboBox1), gbc);
 
     gbc.gridx = 6;
-    summaryPanel.add(createColumnBlue("In Phiếu:",  new JButton(resizeIcon("/img/printer.png", 25, 25))),gbc);
+    JButton printButton = new JButton(resizeIcon("/img/printer.png", 25, 25));
+    printButton.addActionListener(e -> {
+      List<Lot> tableData = getTableData();
+      if (tableData != null && !tableData.isEmpty()) {
+        // Chọn đường dẫn lưu file PDF
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn nơi lưu file PDF");
+        int userSelection = fileChooser.showSaveDialog(this);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+          String filePath = fileChooser.getSelectedFile().getAbsolutePath() + ".pdf";
+          exportToPDF(filePath);
+        }
+      } else {
+        JOptionPane.showMessageDialog(this, "Không có dữ liệu để in!");
+      }
+    });
+    summaryPanel.add(createColumnBlue("In Phiếu:", printButton),gbc);
+
 
     gbc.gridx = 7;
     JButton deleteAllButton = new JButton(resizeIcon("/img/trash-bin.png", 25, 25));
@@ -451,30 +511,35 @@ public class ThongKePanel extends JPanel {
     tableModel.setRowCount(0);
     List<Lot> lots = daoLot.selectAll();
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy"); // Define the date format
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy"); // Định dạng ngày
 
     for (Lot lot : lots) {
       String productionTimeFormatted = lot.getProductionTime() != null ? lot.getProductionTime().format(formatter) : "";
       String expirationDaysFormatted = lot.getExpirationDate() != null ? lot.getExpirationDate().format(formatter) : "";
+
       String shiftName = "N/A";
       if (lot.getShift() != null && lot.getShift().getShiftName() != null) {
         shiftName = lot.getShift().getShiftName();
       }
+
       String productName = "N/A";
       if (lot.getProduct() != null && lot.getProduct().getProductName() != null) {
         productName = lot.getProduct().getProductName();
       }
+
       String productGroupName = "N/A";
       if (lot.getProductionGroup() != null && lot.getProductionGroup().getGroupName() != null) {
         productGroupName = lot.getProductionGroup().getGroupName();
       }
+
       String staffName = "N/A";
       if (lot.getWarehouseStaff() != null && lot.getWarehouseStaff().getStaffName() != null) {
         staffName = lot.getWarehouseStaff().getStaffName();
       }
+
       String palletIDs = lot.getPallets().stream()
           .map(pallet -> String.valueOf(pallet.getPalletID()))
-          .collect(Collectors.joining(", ")); // Nối các PalletID bằng dấu phẩy
+          .collect(Collectors.joining(", "));
 
       Object[] row = {
           lot.getLotID(),
@@ -494,6 +559,7 @@ public class ThongKePanel extends JPanel {
       tableModel.addRow(row);
     }
   }
+
 
   private void loadDataToFields(int selectedRow) {
     String soPhieu = tableModel.getValueAt(selectedRow, 0) != null
@@ -803,4 +869,325 @@ public class ThongKePanel extends JPanel {
     Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
     return new ImageIcon(scaledImage);
   }
+
+
+//===================================================Show Preview PDF
+  private void showPreview() {
+    List<Lot> lots = daoLot.selectAll();
+
+    // Tạo JFrame hiển thị nội dung xem trước
+    JFrame previewFrame = new JFrame("Xem Trước In PDF");
+    previewFrame.setSize(1200, 700);
+    previewFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+    previewFrame.setLocationRelativeTo(null);
+
+    // Title and logo panel
+    JPanel titlePanel = new JPanel();
+    titlePanel.setLayout(new BorderLayout());
+
+    // Logo (replace with your logo image path)
+    JLabel logoLabel = new JLabel(new ImageIcon("img/logo.png"));
+    titlePanel.add(logoLabel, BorderLayout.WEST);
+
+    // Title and date
+    JLabel titleLabel = new JLabel("KẾT QUẢ CẦN BÁN THÀNH PHẨM", JLabel.CENTER);
+    titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+    titleLabel.setBorder(new EmptyBorder(20, 0, 0, 0)); // Top, Left, Bottom, Right
+
+    // Current date
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    String currentDate = LocalDate.now().format(dateFormatter);
+    JLabel dateLabel = new JLabel("Ngày In: " + currentDate, JLabel.CENTER);
+    dateLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+
+    titlePanel.add(titleLabel, BorderLayout.CENTER);
+    titlePanel.add(dateLabel, BorderLayout.SOUTH);
+
+    previewFrame.add(titlePanel, BorderLayout.NORTH);
+
+    // Tạo DefaultTableModel để lưu dữ liệu
+    String[] columnNames = {"Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Ngày Sản Xuất", "KL Cân", "KL Bì", "KL Hàng", "Thủ Kho", "HSD", "Số Pallet", "Xuất/Nhập"};
+    tableModel = new DefaultTableModel(columnNames, 0);
+
+    // Thêm dữ liệu vào DefaultTableModel
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    for (Lot lot : lots) {
+      String productionTime = lot.getProductionTime() != null ? lot.getProductionTime().format(formatter) : "";
+      String expirationDate = lot.getExpirationDate() != null ? lot.getExpirationDate().format(formatter) : "";
+      String palletIDs = lot.getPallets().stream()
+          .map(pallet -> String.valueOf(pallet.getPalletID()))
+          .collect(Collectors.joining(", "));
+      Object[] rowData = {
+          lot.getLotID(),
+          lot.getProduct() != null ? lot.getProduct().getProductName() : "N/A",
+          lot.getLotIDU(),
+          lot.getProductionGroup() != null ? lot.getProductionGroup().getGroupName() : "N/A",
+          lot.getShift() != null ? lot.getShift().getShiftName() : "N/A",
+          productionTime,
+          lot.getWarehouseWeight(),
+          lot.getWeightDeviation(),
+          lot.getWeight(),
+          lot.getWarehouseStaff() != null ? lot.getWarehouseStaff().getStaffName() : "N/A",
+          expirationDate,
+          palletIDs
+      };
+      tableModel.addRow(rowData);
+    }
+
+    // Tạo JTable để hiển thị dữ liệu
+    JTable previewTable = new JTable(tableModel);
+    previewTable.setRowHeight(25);
+    previewTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
+    previewTable.setFont(new Font("Arial", Font.PLAIN, 12));
+    previewTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+
+    // Căn giữa dữ liệu trong các cột
+    DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+    centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+    for (int i = 0; i < previewTable.getColumnCount(); i++) {
+      previewTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+    }
+
+    // Thêm JTable vào JScrollPane để hỗ trợ cuộn
+    JScrollPane scrollPane = new JScrollPane(previewTable);
+    previewFrame.add(scrollPane, BorderLayout.CENTER);
+
+    // Tạo JPanel cho nút In PDF
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+
+    JButton printButton = new JButton("In PDF");
+    buttonPanel.add(printButton);
+
+    // Thêm sự kiện cho nút In PDF
+    printButton.addActionListener(e -> {
+      List<Lot> tableData = getTableData();
+      if (tableData != null && !tableData.isEmpty()) {
+        // Chọn đường dẫn lưu file PDF
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn nơi lưu file PDF");
+        int userSelection = fileChooser.showSaveDialog(previewFrame);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+          String filePath = fileChooser.getSelectedFile().getAbsolutePath() + ".pdf";
+          exportToPDF(filePath);
+        }
+      } else {
+        JOptionPane.showMessageDialog(previewFrame, "Không có dữ liệu để in!");
+      }
+    });
+
+    // Thêm buttonPanel vào JFrame
+    previewFrame.add(buttonPanel, BorderLayout.SOUTH);
+
+    // Hiển thị JFrame
+    previewFrame.setVisible(true);
+  }
+
+
+//===================================================In PDF
+  private void exportToPDF( String filePath) {
+    List<Lot> data = daoLot.selectAll();
+    Document document = new Document();
+    try {
+      PdfWriter.getInstance(document, new FileOutputStream(filePath));
+      document.open();
+
+      // Đường dẫn tới file font (cần đảm bảo file tồn tại)
+      String fontPath = getClass().getClassLoader().getResource("fonts/Arial.ttf").getPath();
+      // Tạo font hỗ trợ Unicode
+      BaseFont baseFont = BaseFont.createFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+      com.itextpdf.text.Font titleFont = new com.itextpdf.text.Font(baseFont, 18, com.itextpdf.text.Font.BOLD);
+      com.itextpdf.text.Font regularFont = new com.itextpdf.text.Font(baseFont, 12);
+
+      // Title and date
+      Paragraph title = new Paragraph("DANH SÁCH DỮ LIỆU IN", titleFont);
+      title.setAlignment(Element.ALIGN_CENTER);
+      document.add(title);
+
+      DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+      String currentDate = LocalDate.now().format(dateFormatter);
+      Paragraph dateParagraph = new Paragraph("Ngày In: " + currentDate, regularFont);
+      dateParagraph.setAlignment(Element.ALIGN_CENTER);
+      document.add(dateParagraph);
+
+      // Thêm khoảng cách
+      document.add(new Paragraph(" "));
+
+
+      // Table setup
+      PdfPTable table = new PdfPTable(13);
+      table.setWidthPercentage(100);
+      float[] columnWidths = { 3, 3, 3, 3, 3, 6, 3, 3, 3, 3, 6, 3, 4 };
+      table.setWidths(columnWidths);
+
+      // Add headers to table
+      String[] headers = {"Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Ngày Sản Xuất", "KL Cân", "KL Bì", "KL Hàng", "Thủ Kho", "HSD", "Số Pallet", "Xuất/Nhập"};
+      for (String header : headers) {
+        PdfPCell headerCell = new PdfPCell(new Phrase(header, new com.itextpdf.text.Font(baseFont, 10, com.itextpdf.text.Font.BOLD)));
+        table.addCell(headerCell);
+      }
+
+      // Add rows to table
+      for (Lot lot : data) {
+        table.addCell(new PdfPCell(new Phrase(String.valueOf(lot.getLotID()), regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getProduct() != null ? lot.getProduct().getProductName() : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getLotIDU() != null ? lot.getLotIDU() : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getProductionGroup() != null ? lot.getProductionGroup().getGroupName() : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getShift() != null ? lot.getShift().getShiftName() : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getProductionTime() != null ? lot.getProductionTime().format(dateFormatter) : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getWarehouseWeight() != null ? String.valueOf(lot.getWarehouseWeight()) : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getWeightDeviation() != null ? String.valueOf(lot.getWeightDeviation()) : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getWeight() != null ? String.valueOf(lot.getWeight()) : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getWarehouseStaff() != null ? lot.getWarehouseStaff().getStaffName() : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getExpirationDate() != null ? lot.getExpirationDate().format(dateFormatter) : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase(lot.getPallets() != null ? lot.getPallets().stream().map(pallet -> String.valueOf(pallet.getPalletID())).collect(Collectors.joining(", ")) : "", regularFont)));
+        table.addCell(new PdfPCell(new Phrase("", regularFont))); // Cột "Xuất/Nhập"
+      }
+
+
+      document.add(table);
+
+      JOptionPane.showMessageDialog(null, "In PDF thành công!");
+    } catch (Exception e) {
+      e.printStackTrace();
+      JOptionPane.showMessageDialog(null, "Lỗi khi tạo PDF!");
+    } finally {
+      document.close();
+    }
+  }
+
+
+  private List<Lot> getTableData() {
+    List<Lot> data = new ArrayList<>();
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy"); // Định dạng ngày
+
+    for (int i = 0; i < tableModel.getRowCount(); i++) {
+      Lot lot = new Lot();
+
+      // Lấy dữ liệu từ bảng và gán vào đối tượng Lot
+      Object lotIDValue = tableModel.getValueAt(i, 0);
+      if (lotIDValue instanceof Integer) {
+        lot.setLotID((Integer) lotIDValue);
+      } else if (lotIDValue instanceof String) {
+        lot.setLotID(Integer.valueOf((String) lotIDValue));
+      }
+
+      Product product = new Product();
+      product.setProductName((String) tableModel.getValueAt(i, 1));
+      lot.setProduct(product);
+
+      lot.setLotIDU((String) tableModel.getValueAt(i, 2));
+
+      ProductionGroup productionGroup = new ProductionGroup();
+      productionGroup.setGroupName((String) tableModel.getValueAt(i, 3));
+      lot.setProductionGroup(productionGroup);
+
+      Shift shift = new Shift();
+      shift.setShiftName((String) tableModel.getValueAt(i, 4));
+      lot.setShift(shift);
+
+      Object productionTimeValue = tableModel.getValueAt(i, 5);
+      if (productionTimeValue instanceof String) {
+        lot.setProductionTime(LocalDate.parse((String) productionTimeValue, formatter)); // Sử dụng formatter
+      }
+
+      Object warehouseWeightValue = tableModel.getValueAt(i, 6);
+      if (warehouseWeightValue instanceof Double) {
+        lot.setWarehouseWeight(BigDecimal.valueOf((Double) warehouseWeightValue));
+      }
+
+      Object weightDeviationValue = tableModel.getValueAt(i, 7);
+      if (weightDeviationValue instanceof Double) {
+        lot.setWeightDeviation(BigDecimal.valueOf((Double) weightDeviationValue));
+      }
+
+      Object weightValue = tableModel.getValueAt(i, 8);
+      if (weightValue instanceof Double) {
+        lot.setWeight(BigDecimal.valueOf((Double) weightValue));
+      }
+
+      WarehouseStaff warehouseStaff = new WarehouseStaff();
+      warehouseStaff.setStaffName((String) tableModel.getValueAt(i, 9));
+      lot.setWarehouseStaff(warehouseStaff);
+
+      Object expirationDateValue = tableModel.getValueAt(i, 10);
+      if (expirationDateValue instanceof String) {
+        lot.setExpirationDate(LocalDate.parse((String) expirationDateValue, formatter)); // Sử dụng formatter
+      }
+
+      data.add(lot);
+    }
+    return data;
+  }
+
+  private void exportToExcel(String filePath) {
+    try (Workbook workbook = new XSSFWorkbook()) {
+      Sheet sheet = workbook.createSheet("Danh Sách Dữ Liệu");
+
+      // Tạo font và style cho tiêu đề
+      CellStyle headerStyle = workbook.createCellStyle();
+
+      org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont();
+      headerFont.setBold(true); // Make the font bold
+      headerFont.setFontHeightInPoints((short) 12); // Set font size
+      headerFont.setFontName("Arial"); // Set font name
+
+// Apply the font to the cell style
+      headerStyle.setFont(headerFont);
+      headerStyle.setAlignment(HorizontalAlignment.CENTER);
+
+      // Tạo hàng tiêu đề
+      Row headerRow = sheet.createRow(0);
+      String[] columnNames = {"Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Ngày Sản Xuất", "KL Cân", "KL Bì", "KL Hàng", "Thủ Kho", "HSD", "Số Pallet", "Xuất/Nhập"};
+      for (int i = 0; i < columnNames.length; i++) {
+        Cell cell = headerRow.createCell(i);
+        cell.setCellValue(columnNames[i]);
+        cell.setCellStyle(headerStyle);
+      }
+
+      // Lấy dữ liệu từ bảng
+      List<Lot> lots = daoLot.selectAll();
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+      int rowIndex = 1; // Bắt đầu từ hàng thứ 2
+      for (Lot lot : lots) {
+        Row row = sheet.createRow(rowIndex++);
+
+        row.createCell(0).setCellValue(lot.getLotID());
+        row.createCell(1).setCellValue(lot.getProduct() != null ? lot.getProduct().getProductName() : "N/A");
+        row.createCell(2).setCellValue(lot.getLotIDU());
+        row.createCell(3).setCellValue(lot.getProductionGroup() != null ? lot.getProductionGroup().getGroupName() : "N/A");
+        row.createCell(4).setCellValue(lot.getShift() != null ? lot.getShift().getShiftName() : "N/A");
+        row.createCell(5).setCellValue(lot.getProductionTime() != null ? lot.getProductionTime().format(formatter) : "");
+        row.createCell(6).setCellValue(lot.getWarehouseWeight() != null ? lot.getWarehouseWeight().toString() : "");
+        row.createCell(7).setCellValue(lot.getWeightDeviation() != null ? lot.getWeightDeviation().toString() : "");
+        row.createCell(8).setCellValue(lot.getWeight() != null ? lot.getWeight().toString() : "");
+        row.createCell(9).setCellValue(lot.getWarehouseStaff() != null ? lot.getWarehouseStaff().getStaffName() : "N/A");
+        row.createCell(10).setCellValue(lot.getExpirationDate() != null ? lot.getExpirationDate().format(formatter) : "");
+        row.createCell(11).setCellValue(
+            lot.getPallets().stream()
+                .map(pallet -> String.valueOf(pallet.getPalletID()))
+                .collect(Collectors.joining(", "))
+        );
+        row.createCell(12).setCellValue(""); // Cột "Xuất/Nhập"
+      }
+
+      // Tự động điều chỉnh kích thước cột
+      for (int i = 0; i < columnNames.length; i++) {
+        sheet.autoSizeColumn(i);
+      }
+
+      // Ghi file ra đĩa
+      try (FileOutputStream fileOut = new FileOutputStream(filePath)) {
+        workbook.write(fileOut);
+      }
+
+      JOptionPane.showMessageDialog(null, "Xuất file Excel thành công!");
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      JOptionPane.showMessageDialog(null, "Lỗi khi xuất file Excel!");
+    }
+  }
+
+
 }
