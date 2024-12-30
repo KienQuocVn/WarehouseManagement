@@ -91,9 +91,5 @@ public class DaoProduct extends WHMA<Product, Integer> {
         return list;
     }
 
-    public Product selectbyName(String name) {
-        String sql = "SELECT * FROM Products WHERE ProductName = ?";
-        List<Product> products = selectBySql(sql, name);
-        return products.isEmpty() ? null : products.get(0);
-    }
+
 }

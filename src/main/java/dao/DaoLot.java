@@ -157,7 +157,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
         lot.setWarehouseStaff(warehouseStaff);
 
         // Mapping Pallets
-        Integer palletID = rs.getObject("PalletID", Integer.class);
+        String palletID = rs.getString("PalletID");
         if (palletID != null) {
           Pallet pallet = new Pallet();
           pallet.setPalletID(palletID);

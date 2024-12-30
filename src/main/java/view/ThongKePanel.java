@@ -189,7 +189,7 @@ public class ThongKePanel extends JPanel {
               lot.getWeightDeviation(),
               lot.getWeight(),
               lot.getWarehouseStaff().getStaffName(),
-              lot.getExpirationDays(),
+              lot.getExpirationDate(),
               String.join(", ", lot.getPallets().stream()
                   .map(pallet -> pallet.getPalletID().toString())
                   .collect(Collectors.toList()))
@@ -327,7 +327,7 @@ public class ThongKePanel extends JPanel {
 
     for (Lot lot : lots) {
       String productionTimeFormatted = lot.getProductionTime() != null ? lot.getProductionTime().format(formatter) : "";
-      String expirationDaysFormatted = lot.getExpirationDays() != null ? lot.getExpirationDays().format(formatter) : "";
+      String expirationDaysFormatted = lot.getExpirationDate() != null ? lot.getExpirationDate().format(formatter) : "";
 
       // Lấy danh sách PalletID và chuyển thành chuỗi
       String palletIDs = lot.getPallets().stream()
@@ -381,7 +381,7 @@ public class ThongKePanel extends JPanel {
             lot.getWeightDeviation(),                     // "WeightDeviation"
             lot.getWeight(),                              // "Weight"
             lot.getWarehouseStaff().getStaffName(),       // "StaffName"
-            lot.getExpirationDays(),                      // "ExpirationDays"
+            lot.getExpirationDate(),                      // "ExpirationDays"
             palletIDs
         });
       }
@@ -413,7 +413,7 @@ public class ThongKePanel extends JPanel {
             lot.getWeightDeviation(),                     // "WeightDeviation"
             lot.getWeight(),                              // "Weight"
             lot.getWarehouseStaff().getStaffName(),       // "StaffName"
-            lot.getExpirationDays(),                      // "ExpirationDays"
+            lot.getExpirationDate(),                      // "ExpirationDays"
             palletIDs
         });
       }
@@ -445,7 +445,7 @@ public class ThongKePanel extends JPanel {
             lot.getWeightDeviation(),                     // "WeightDeviation"
             lot.getWeight(),                              // "Weight"
             lot.getWarehouseStaff().getStaffName(),       // "StaffName"
-            lot.getExpirationDays(),                      // "ExpirationDays"
+            lot.getExpirationDate(),                      // "ExpirationDays"
             palletIDs
         });
       }

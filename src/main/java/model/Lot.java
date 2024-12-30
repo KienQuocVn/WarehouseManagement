@@ -25,7 +25,7 @@ public class Lot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer lotID;
 
-    @Column(name = "LotIDU", columnDefinition = "NVARCHAR(255)", length = 20, nullable = false)
+    @Column(name = "LotIDU", unique = true, columnDefinition = "NVARCHAR(255)", length = 20, nullable = false)
     private String lotIDU;
 
     @ManyToOne
