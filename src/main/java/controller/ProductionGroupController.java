@@ -93,7 +93,13 @@ public class ProductionGroupController implements ActionListener {
             caiDonPanel.updateTableDataProductionGroup();
             ResetFormProductionGroup();
         } catch (Exception ex) {
-            DialogHelper.alert(caiDonPanel, "Lỗi khi thêm Tổ Sản Xuất: " + ex.getMessage());
+            // Kiểm tra nếu lỗi do vi phạm ràng buộc UNIQUE
+            if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                DialogHelper.alert(caiDonPanel, "Tên Tổ Sản Xuất đã tồn tại! Vui lòng nhập tên khác.");
+            } else {
+                DialogHelper.alert(caiDonPanel, "Lỗi khi thêm Tổ Sản Xuất: " + ex.getMessage());
+            }
+
         }
     }
 
@@ -120,7 +126,11 @@ public class ProductionGroupController implements ActionListener {
             caiDonPanel.updateTableDataProductionGroup();
             ResetFormProductionGroup();
         } catch (Exception ex) {
-            DialogHelper.alert(caiDonPanel, "Lỗi khi Xóa Tổ Sản Xuất: " + ex.getMessage());
+            if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                DialogHelper.alert(caiDonPanel, "Tên Tổ Sản Xuất đã tồn tại! Vui lòng nhập tên khác.");
+            } else {
+                DialogHelper.alert(caiDonPanel, "Lỗi khi cập nhật Tổ Sản Xuất: " + ex.getMessage());
+            }
         }
     }
 
@@ -185,6 +195,7 @@ public class ProductionGroupController implements ActionListener {
         caiDonPanel.getbtnSuaProductionGroup().setEnabled(false);
         caiDonPanel.getbtnXoaProductionGroup().setEnabled(false);
         caiDonPanel.getbtnXoaTatCaProductionGroup().setEnabled(true);
+        caiDonPanel.updateTableDataProductionGroup();
     }
 
 

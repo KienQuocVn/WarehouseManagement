@@ -50,6 +50,19 @@ public class DaoProductionGroup extends WHMA<ProductionGroup, Integer> {
     return groups.isEmpty() ? null : groups.get(0);
   }
 
+  public List<String> getAllProductionGroupNames() {
+    List<String> productNames = new ArrayList<>();
+    String sql = "SELECT GroupName FROM ProductionGroups";
+    try (ResultSet rs = JdbcHelper.executeQuery(sql)) {
+      while (rs.next()) {
+        productNames.add(rs.getString("GroupName"));
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Error while fetching GroupName names: " + e.getMessage());
+    }
+    return productNames;
+  }
+
   @Override
   public List<ProductionGroup> selectbyID(String sql, Object... args) {
     return selectBySql(sql, args);

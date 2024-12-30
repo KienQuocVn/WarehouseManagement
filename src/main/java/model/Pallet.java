@@ -18,5 +18,12 @@ public class Pallet {
 
     @Column(name = "PalletName", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String palletName;
+  
+    @Column(name = "palletIDU", columnDefinition = "NVARCHAR(255)", unique = true, length = 20, nullable = false)
+    private String palletIDU;
+
+    @ManyToOne
+    @JoinColumn(name = "LotID", nullable = false)
+    private Lot lot; // Khóa ngoại tham chiếu đến bảng Lots
 }
 

@@ -8,6 +8,7 @@ import Utils.JdbcHelper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
 
   @Override
   public void insert(Lot entity) {
-    String sql = "INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDays, Weight, WarehouseWeight, WeightDeviation, ShiftID, GroupID, WarehouseStaffID) " + // Sửa cột
+    String sql = "INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, GroupID, WarehouseStaffID) " + // Sửa cột
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     JdbcHelper.executeUpdate(
@@ -29,7 +30,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
         entity.getLotIDU(),
         entity.getProduct().getProductID(),
         entity.getProductionTime(),
-        entity.getExpirationDays(),
+        entity.getExpirationDate(),
         entity.getWeight(),
         entity.getWarehouseWeight(),
         entity.getWeightDeviation(),
@@ -163,8 +164,8 @@ public class DaoLot extends WHMA<Lot, Integer> {
         lot.setProduct(product);
 
         // Mapping các cột khác
-        lot.setProductionTime(rs.getObject("ProductionTime", LocalDateTime.class));
-        lot.setExpirationDays(rs.getObject("ExpirationDays", LocalDateTime.class));
+        lot.setProductionTime(rs.getObject("ProductionTime", LocalDate.class));
+        lot.setExpirationDate(rs.getObject("ExpirationDate",  LocalDate.class));
         lot.setWeight(rs.getBigDecimal("Weight"));
         lot.setWarehouseWeight(rs.getBigDecimal("WarehouseWeight"));
         lot.setWeightDeviation(rs.getBigDecimal("WeightDeviation"));

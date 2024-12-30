@@ -1,6 +1,8 @@
 package model;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -24,7 +26,7 @@ public class Lot {
     @Column(name = "LotID")
     private Integer lotID;
 
-    @Column(name = "LotIDU", columnDefinition = "NVARCHAR(255)", unique = true, length = 20, nullable = false)
+    @Column(name = "LotIDU", unique = true, columnDefinition = "NVARCHAR(255)", length = 20, nullable = false)
     private String lotIDU;
 
     @ManyToOne
@@ -32,10 +34,10 @@ public class Lot {
     private Product product; // Khóa ngoại đến bảng Products
 
     @Column(name = "ProductionTime", columnDefinition = "DATE", nullable = false)
-    private LocalDateTime productionTime; // Thời gian sản xuất
+    private LocalDate productionTime; // Thời gian sản xuất (dùng LocalDate)
 
-    @Column(name = "ExpirationDays", columnDefinition = "DATE", nullable = false)
-    private LocalDateTime expirationDays; // Hạn sử dụng
+    @Column(name = "ExpirationDate", columnDefinition = "DATE", nullable = false)
+    private LocalDate expirationDate; // Hạn sử dụng (đổi tên thành expirationDate)
 
     @Column(name = "Weight", columnDefinition = "DECIMAL(10, 2)", nullable = false)
     private BigDecimal weight; // Khối lượng tịnh
@@ -59,7 +61,6 @@ public class Lot {
     @JoinColumn(name = "WarehouseStaffID", nullable = false)
     private WarehouseStaff warehouseStaff; // Tham chiếu đến bảng WarehouseStaff
 
-    @ManyToOne
-    @JoinColumn(name = "PalletID", nullable = false)
-    private Pallet pallets;
+    @OneToMany(mappedBy = "lot", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Pallet> pallets = new ArrayList<>(); // Cascade ALL và orphanRemoval để xóa đúng dữ liệu liên quan
 }

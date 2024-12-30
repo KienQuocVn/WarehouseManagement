@@ -47,7 +47,7 @@ public class DaoPallet extends WHMA<Pallet, Integer> {
     return selectBySql(sql, args);
   }
 
-  private List<Pallet> selectBySql(String sql, Object... args) {
+   private List<Pallet> selectBySql(String sql, Object... args) {
     List<Pallet> list = new ArrayList<>();
     try (ResultSet rs = JdbcHelper.executeQuery(sql, args)) {
       while (rs.next()) {

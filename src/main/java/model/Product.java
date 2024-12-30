@@ -1,5 +1,8 @@
 package model;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,12 +20,15 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer productID;
 
-    @Column(name = "ProductName", columnDefinition = "NVARCHAR(255)", nullable = false)
-    private String productName; // Tên sản phẩm
+    @Column(name = "ProductName", columnDefinition = "NVARCHAR(255)", nullable = false, unique = true)
+    private String productName; // Tên sản phẩm (unique)
 
     @Column(name = "HSD", columnDefinition = "DECIMAL(10, 2)")
     private Double HSD; // Màu sắc sản phẩm
 
     @Column(name = "Color", columnDefinition = "NVARCHAR(255)")
     private String color; // Màu sắc sản phẩm
+
+
+
 }

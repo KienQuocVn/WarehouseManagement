@@ -1,19 +1,10 @@
 package view;
 
 import Utils.RoundedBorder;
-import controller.CaiDonController;
-import controller.ProductionGroupController;
-import controller.ShiftController;
-import controller.WarehouseStaffController;
-import dao.DaoProduct;
-import dao.DaoProductionGroup;
-import dao.DaoShift;
-import dao.DaoWarehouseStaff;
-import model.Product;
+import controller.*;
+import dao.*;
+import model.*;
 import Utils.DialogHelper;
-import model.ProductionGroup;
-import model.Shift;
-import model.WarehouseStaff;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -538,6 +529,10 @@ public class CaiDonPanel extends JPanel {
     return panel;
   }
 
+  JTextField thuMucField;
+  JTextField tenFileField;
+  JTextField nguongCanField;
+  JComboBox<String> mayInComboBox;
   private JPanel createCauHinhPanel() {
     // Panel chính
     JPanel containerPanel = new JPanel(new BorderLayout());
@@ -565,7 +560,7 @@ public class CaiDonPanel extends JPanel {
 
     gbc.gridx = 1;
     gbc.weightx = 0.9;
-    JTextField thuMucField = new JTextField("D:\\Export", 10);
+    thuMucField = new JTextField("", 10);
     thuMucField.setFont(new Font("Arial", Font.PLAIN, 17));
     panel.add(thuMucField, gbc);
 
@@ -581,7 +576,7 @@ public class CaiDonPanel extends JPanel {
 
     gbc.gridx = 1;
     gbc.weightx = 0.9;
-    JTextField tenFileField = new JTextField("Export.xlsx", 10);
+     tenFileField = new JTextField("", 10);
     tenFileField.setFont(new Font("Arial", Font.PLAIN, 17)); // Thay đổi cỡ chữ của JTextField
     panel.add(tenFileField, gbc);
 
@@ -595,7 +590,7 @@ public class CaiDonPanel extends JPanel {
 
     gbc.gridx = 1;
     gbc.weightx = 0.9;
-    JTextField nguongCanField = new JTextField("10.00", 10);
+    nguongCanField = new JTextField("", 10);
     nguongCanField.setFont(new Font("Arial", Font.PLAIN, 17)); // Thay đổi cỡ chữ của JTextField
     panel.add(nguongCanField, gbc);
 
@@ -609,7 +604,7 @@ public class CaiDonPanel extends JPanel {
 
     gbc.gridx = 1;
     gbc.weightx = 0.9;
-    JComboBox<String> mayInComboBox = new JComboBox<>(new String[] {
+    mayInComboBox = new JComboBox<>(new String[] {
         "Foxit PhantomPDF Printer", "Microsoft Print to PDF", "Canon LBP6030"
     });
 
@@ -643,7 +638,8 @@ public class CaiDonPanel extends JPanel {
     btnThem.setBackground(new Color(152, 201, 226, 255)); // Màu xanh lá
     btnThem.setOpaque(true);  // Đảm bảo màu nền được hiển thị
     btnThem.setBorderPainted(false);  // Bỏ viền của nút
-
+    btnThem.setActionCommand("Lưu");
+    btnThem.addActionListener(new SettingSystemController(this));
     // Thêm các nút vào panel
     buttonPanel.add(btnThem);
 
@@ -653,7 +649,7 @@ public class CaiDonPanel extends JPanel {
     containerPanel.add(headerPanel, BorderLayout.NORTH); // Đặt panel header lên trên
     containerPanel.add(panel, BorderLayout.CENTER); // Đặt panel form vào giữa
     containerPanel.add(bottomPanel, BorderLayout.SOUTH);  // Thêm bottomPanel vào panel chính
-
+    loadSettings();
     return containerPanel;
   }
 
@@ -693,6 +689,8 @@ public class CaiDonPanel extends JPanel {
     };
     tableMaHang.setModel(tableModel);
 
+
+
     // Ẩn cột ProductID
     tableMaHang.getColumnModel().getColumn(4).setMinWidth(0);
     tableMaHang.getColumnModel().getColumn(4).setMaxWidth(0);
@@ -715,38 +713,49 @@ public class CaiDonPanel extends JPanel {
 
             // Kiểm tra xem giá trị mới có khác giá trị cũ không
             if (!updatedValue.equals(originalValue)) {
-              Integer productID = (Integer) tableModel.getValueAt(row, 4);
+              try {
+                Integer productID = (Integer) tableModel.getValueAt(row, 4);
 
-              // Kiểm tra các trường nhập liệu
-              if (column == 1 && updatedValue.isEmpty()) {
-                DialogHelper.alert(null, "Vui lòng nhập Tên Đơn Hàng trong Bảng!");
-                return;
-              }
-
-              if (column == 2) {
-                try {
-                  Double.parseDouble(updatedValue); // Kiểm tra giá trị HSD là số
-                } catch (NumberFormatException ex) {
-                  DialogHelper.alert(null, "Hạn Sử Dụng phải là một số hợp lệ!");
+                // Kiểm tra các trường nhập liệu
+                if (column == 1 && updatedValue.isEmpty()) {
+                  DialogHelper.alert(null, "Vui lòng nhập Tên Đơn Hàng trong Bảng!");
                   return;
+                }
+
+                if (column == 2) {
+                  try {
+                    Double.parseDouble(updatedValue); // Kiểm tra giá trị HSD là số
+                  } catch (NumberFormatException ex) {
+                    DialogHelper.alert(null, "Hạn Sử Dụng phải là một số hợp lệ!");
+                    return;
+                  }
+                }
+
+                // Cập nhật dữ liệu
+                Product updatedProduct = new Product(
+                        productID,
+                        tableModel.getValueAt(row, 1).toString(),
+                        Double.parseDouble(tableModel.getValueAt(row, 2).toString()),
+                        tableModel.getValueAt(row, 3).toString()
+                );
+
+                daoProduct.update(updatedProduct); // Gọi phương thức update từ DAO
+
+                // Cập nhật giá trị ban đầu
+                originalData[row][column] = updatedValue;
+                DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
+                updateTableData(); // Cập nhật lại bảng
+                ResetFormMaHang();
+
+              }catch (Exception ex){
+                // Kiểm tra nếu lỗi do vi phạm ràng buộc UNIQUE
+                if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                  DialogHelper.alert(null, "Tên Đơn Hàng đã tồn tại! Vui lòng nhập tên khác.");
+                } else {
+                  DialogHelper.alert(null, "Lỗi khi cập nhật Hàng: " + ex.getMessage());
                 }
               }
 
-              // Cập nhật dữ liệu
-              Product updatedProduct = new Product(
-                      productID,
-                      tableModel.getValueAt(row, 1).toString(),
-                      Double.parseDouble(tableModel.getValueAt(row, 2).toString()),
-                      tableModel.getValueAt(row, 3).toString()
-              );
-
-              daoProduct.update(updatedProduct); // Gọi phương thức update từ DAO
-
-              // Cập nhật giá trị ban đầu
-              originalData[row][column] = updatedValue;
-              DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
-              updateTableData(); // Cập nhật lại bảng
-              ResetFormMaHang();
             }
           }
         }
@@ -773,9 +782,21 @@ public class CaiDonPanel extends JPanel {
           DHField.setText(selectedProduct.getProductName());
           HSDField.setText(selectedProduct.getHSD().toString());
           ThukhoComboBox.setSelectedItem(selectedProduct.getColor());
+          if(selectedProduct.getColor().equals("Đỏ")) {
+            tableMaHang.setSelectionBackground(new Color(255, 204, 204));
+          }
+          else if(selectedProduct.getColor().equals("Vàng")) {
+            tableMaHang.setSelectionBackground(new Color(255, 255, 204));
+          }
+          else {
+            tableMaHang.setSelectionBackground(new Color(204, 255, 204));
+          }
         }
       }
     });
+
+
+
   }
 
 
@@ -830,23 +851,31 @@ public class CaiDonPanel extends JPanel {
 
             // Kiểm tra xem giá trị mới có khác giá trị cũ không
             if (!updatedValue.equals(originalValue)) {
-              Integer shiftId = (Integer) tableModelShift.getValueAt(row, 2);
+              try {
+                Integer shiftId = (Integer) tableModelShift.getValueAt(row, 2);
 
-              // Kiểm tra các trường nhập liệu
-              if (updatedValue.isEmpty()) {
-                DialogHelper.alert(null, "Vui lòng nhập Ca Sản Xuất trong Bảng!");
-                return; // Dừng hàm nếu thông tin chưa đầy đủ
+                // Kiểm tra các trường nhập liệu
+                if (updatedValue.isEmpty()) {
+                  DialogHelper.alert(null, "Vui lòng nhập Ca Sản Xuất trong Bảng!");
+                  return; // Dừng hàm nếu thông tin chưa đầy đủ
+                }
+
+                // Cập nhật dữ liệu
+                Shift updatedShift = new Shift(shiftId, updatedValue);
+                daoShift.update(updatedShift); // Gọi phương thức update từ DAO
+
+                // Cập nhật giá trị ban đầu
+                originalData[row][column] = updatedValue;
+                DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
+                updateTableDataShift(); // Tải lại bảng sau khi cập nhật
+                ResetFormShift(); // Reset form nếu cần
+              }catch (Exception ex){
+                if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                  DialogHelper.alert(null, "Tên Ca Sản Xuất đã tồn tại! Vui lòng nhập tên khác.");
+                } else {
+                  DialogHelper.alert(null, "Lỗi khi cập nhật Ca Sản Xuất: " + ex.getMessage());
+                }
               }
-
-              // Cập nhật dữ liệu
-              Shift updatedShift = new Shift(shiftId, updatedValue);
-              daoShift.update(updatedShift); // Gọi phương thức update từ DAO
-
-              // Cập nhật giá trị ban đầu
-              originalData[row][column] = updatedValue;
-              DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
-              updateTableDataShift(); // Tải lại bảng sau khi cập nhật
-              ResetFormShift(); // Reset form nếu cần
             }
           }
         }
@@ -931,23 +960,31 @@ public class CaiDonPanel extends JPanel {
 
             // Kiểm tra xem giá trị mới có khác giá trị cũ không
             if (!updatedValue.equals(originalValue)) {
-              Integer ProductionGrId = (Integer) tableModelProductionGroup.getValueAt(row, 2);
+             try {
+               Integer ProductionGrId = (Integer) tableModelProductionGroup.getValueAt(row, 2);
 
-              // Kiểm tra các trường nhập liệu
-              if (updatedValue.isEmpty()) {
-                DialogHelper.alert(null, "Vui lòng nhập Tổ Sản Xuất trong Bảng!");
-                return; // Dừng hàm nếu thông tin chưa đầy đủ
-              }
+               // Kiểm tra các trường nhập liệu
+               if (updatedValue.isEmpty()) {
+                 DialogHelper.alert(null, "Vui lòng nhập Tổ Sản Xuất trong Bảng!");
+                 return; // Dừng hàm nếu thông tin chưa đầy đủ
+               }
 
-              // Cập nhật dữ liệu
-              ProductionGroup updatedProductionGroup= new ProductionGroup(ProductionGrId, updatedValue);
-              daoproductionGroup.update(updatedProductionGroup); // Gọi phương thức update từ DAO
+               // Cập nhật dữ liệu
+               ProductionGroup updatedProductionGroup= new ProductionGroup(ProductionGrId, updatedValue);
+               daoproductionGroup.update(updatedProductionGroup); // Gọi phương thức update từ DAO
 
-              // Cập nhật giá trị ban đầu
-              originalData[row][column] = updatedValue;
-              DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
-              updateTableDataProductionGroup(); // Tải lại bảng sau khi cập nhật
-              ResetFormProductionGroup(); // Reset form nếu cần
+               // Cập nhật giá trị ban đầu
+               originalData[row][column] = updatedValue;
+               DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
+               updateTableDataProductionGroup(); // Tải lại bảng sau khi cập nhật
+               ResetFormProductionGroup(); // Reset form nếu cần
+             }catch (Exception ex) {
+               if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                 DialogHelper.alert(null, "Tên Tổ Sản Xuất đã tồn tại! Vui lòng nhập tên khác.");
+               } else {
+                 DialogHelper.alert(null, "Lỗi khi cập nhật Tổ Sản Xuất: " + ex.getMessage());
+               }
+             }
             }
           }
         }
@@ -1031,6 +1068,7 @@ public class CaiDonPanel extends JPanel {
 
             // Kiểm tra xem giá trị mới có khác giá trị cũ không
             if (!updatedValue.equals(originalValue)) {
+            try {
               Integer WarehouseStaffId = (Integer) tableModelWarehouseStaff.getValueAt(row, 2);
 
               // Kiểm tra các trường nhập liệu
@@ -1048,6 +1086,15 @@ public class CaiDonPanel extends JPanel {
               DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
               updateTableDataWarehouseStaff(); // Tải lại bảng sau khi cập nhật
               ResetFormWarehouseStaff(); // Reset form nếu cần
+            }catch (Exception ex) {
+              if (ex.getMessage().contains("UNIQUE")) { // Tùy vào driver SQL, thông báo lỗi có thể khác
+                DialogHelper.alert(null, "Tên Thủ Kho đã tồn tại! Vui lòng nhập tên khác.");
+              } else {
+                DialogHelper.alert(null, "Lỗi khi cập nhật Thủ Kho: " + ex.getMessage());
+              }
+            }
+
+
             }
           }
         }
@@ -1332,7 +1379,44 @@ public class CaiDonPanel extends JPanel {
     getbtnXoaTatCaWarehouseStaff().setEnabled(true);
   }
 
+//setting
 
+  public JTextField getThuMucField() {
+    return thuMucField;
+  }
+
+  public JTextField getTenFileField() {
+    return tenFileField;
+  }
+
+  public JTextField getNguongCanField() {
+    return nguongCanField;
+  }
+
+  public JComboBox<String> getMayInComboBox() {
+    return mayInComboBox;
+  }
+
+  public void loadSettings() {
+    DaoSettingSystem dao = new DaoSettingSystem();
+    SettingSystem setting = dao.selectLatest(); // Lấy cài đặt mới nhất từ cơ sở dữ liệu
+
+    if (setting != null) {
+      // Gán giá trị vào JTextField
+      getThuMucField().setText(setting.getDirSave());
+     getTenFileField().setText(setting.getNameFile());
+     getNguongCanField().setText(setting.getWeightThreshold().toString());
+
+      // Gán giá trị vào JComboBox
+      getMayInComboBox().setSelectedItem(setting.getPrinter());
+    } else {
+      // Thiết lập giá trị mặc định nếu không có dữ liệu
+      getThuMucField().setText("");
+      getTenFileField().setText("");
+      getNguongCanField().setText("0.00");
+      getMayInComboBox().setSelectedIndex(0);
+    }
+  }
 
 
 
