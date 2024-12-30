@@ -14,13 +14,13 @@ public class DaoPallet extends WHMA<Pallet, Integer> {
   @Override
   public void insert(Pallet entity) {
     String sql = "INSERT INTO Pallets (LotID) VALUES (?)";
-    JdbcHelper.executeUpdate(sql, entity.getLot().getLotID());
+    JdbcHelper.executeUpdate(sql, entity.getPalletName());
   }
 
   @Override
   public void update(Pallet entity) {
     String sql = "UPDATE Pallets SET LotID = ? WHERE PalletID = ?";
-    JdbcHelper.executeUpdate(sql, entity.getLot().getLotID(), entity.getPalletID());
+    JdbcHelper.executeUpdate(sql, entity.getPalletName(), entity.getPalletID());
   }
 
   @Override
@@ -53,10 +53,7 @@ public class DaoPallet extends WHMA<Pallet, Integer> {
       while (rs.next()) {
         Pallet pallet = new Pallet();
         pallet.setPalletID(rs.getInt("PalletID"));
-
-        DaoLot daoLot = new DaoLot();
-        pallet.setLot(daoLot.selectbyID(rs.getInt("LotID")));
-
+        pallet.setPalletName(rs.getString("PalletName"));
         list.add(pallet);
       }
     } catch (SQLException e) {

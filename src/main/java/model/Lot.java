@@ -21,6 +21,7 @@ public class Lot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "LotID")
     private Integer lotID;
 
     @Column(name = "LotIDU", columnDefinition = "NVARCHAR(255)", unique = true, length = 20, nullable = false)
@@ -58,6 +59,7 @@ public class Lot {
     @JoinColumn(name = "WarehouseStaffID", nullable = false)
     private WarehouseStaff warehouseStaff; // Tham chiếu đến bảng WarehouseStaff
 
-    @OneToMany(mappedBy = "lot", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Pallet> pallets = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(name = "PalletID", nullable = false)
+    private Pallet pallets;
 }

@@ -2,6 +2,9 @@ package dao;
 
 import AbtractClass.WHMA;
 import Utils.JdbcHelper;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import model.ProductionGroup;
 import model.Shift;
 
 import java.sql.ResultSet;
@@ -73,5 +76,21 @@ public class DaoShift extends WHMA<Shift, Integer> {
     List<Shift> shifts = selectBySql(sql, name);
     return shifts.isEmpty() ? null : shifts.get(0);
   }
-
+  public Shift findByName(String shiftName) {
+    String sql = "SELECT * FROM Shifts WHERE ShiftName = ?";
+    try (Connection connection = JdbcHelper.getConnection(); // Obtain connection
+        PreparedStatement stmt = connection.prepareStatement(sql)) {
+      stmt.setString(1, shiftName);
+      ResultSet rs = stmt.executeQuery();
+      if (rs.next()) {
+        Shift shift = new Shift();
+        shift.setShiftId(rs.getInt("ShiftId"));
+        shift.setShiftName(rs.getString("ShiftName"));
+        return shift;
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Error while finding Shift by name: " + e.getMessage(), e);
+    }
+    return null;
+  }
 }

@@ -66,4 +66,8 @@ public class JdbcHelper {
 		}
 	}
 
+	public static Connection getConnection() throws SQLException {
+		return DriverManager.getConnection(dburl, username, password);
+	}
+
 }

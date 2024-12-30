@@ -2,6 +2,9 @@ package dao;
 
 import AbtractClass.WHMA;
 import Utils.JdbcHelper;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import model.Product;
 import model.ProductionGroup;
 
 import java.sql.ResultSet;
@@ -68,9 +71,21 @@ public class DaoProductionGroup extends WHMA<ProductionGroup, Integer> {
     return list;
   }
 
-  public ProductionGroup selectbyName(String name) {
+  public ProductionGroup findByName(String ProductionGroupName) {
     String sql = "SELECT * FROM ProductionGroups WHERE GroupName = ?";
-    List<ProductionGroup> groups = selectBySql(sql, name);
-    return groups.isEmpty() ? null : groups.get(0);
+    try (Connection connection = JdbcHelper.getConnection(); // Obtain connection
+        PreparedStatement stmt = connection.prepareStatement(sql)) {
+      stmt.setString(1, ProductionGroupName);
+      ResultSet rs = stmt.executeQuery();
+      if (rs.next()) {
+        ProductionGroup groups = new ProductionGroup();
+        groups.setGroupID(rs.getInt("GroupId"));
+        groups.setGroupName(rs.getString("GroupName"));
+        return groups;
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Error while finding ProductionGroup by name: " + e.getMessage(), e);
+    }
+    return null;
   }
 }

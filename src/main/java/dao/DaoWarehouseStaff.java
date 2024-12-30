@@ -2,6 +2,8 @@ package dao;
 
 import AbtractClass.WHMA;
 import Utils.JdbcHelper;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import model.WarehouseStaff;
 
 import java.sql.ResultSet;
@@ -68,9 +70,23 @@ public class DaoWarehouseStaff extends WHMA<WarehouseStaff, Integer> {
     return list;
   }
 
-  public WarehouseStaff selectbyName(String name) {
+  public WarehouseStaff findByName(String staffName) {
     String sql = "SELECT * FROM WarehouseStaff WHERE StaffName = ?";
-    List<WarehouseStaff> staffList = selectBySql(sql, name);
-    return staffList.isEmpty() ? null : staffList.get(0);
+    try (Connection connection = JdbcHelper.getConnection(); // Obtain connection
+        PreparedStatement stmt = connection.prepareStatement(sql)) {
+      stmt.setString(1, staffName);
+      ResultSet rs = stmt.executeQuery();
+      if (rs.next()) {
+        WarehouseStaff staff = new WarehouseStaff();
+        staff.setStaffId(rs.getInt("StaffId"));
+        staff.setStaffName(rs.getString("StaffName"));
+        return staff;
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Error while finding WarehouseStaff by name: " + e.getMessage(), e);
+    }
+    return null;
   }
+
+
 }

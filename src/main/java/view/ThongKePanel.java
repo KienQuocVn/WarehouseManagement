@@ -8,9 +8,14 @@ import dao.DaoShift;
 import dao.DaoWarehouseStaff;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.swing.table.DefaultTableCellRenderer;
 import model.Lot;
@@ -45,8 +50,11 @@ public class ThongKePanel extends JPanel {
   private JComboBox<String> warehouseStaffComboBox;
   private JComboBox<String> productionGroupComboBox1;
   private JComboBox<String> productNameComboBox;
+  private JComboBox<String> productNameComboBox1;
   JDateChooser fromDateChooser = new JDateChooser();
   JDateChooser toDateChooser = new JDateChooser();
+  JDateChooser productionDateChooser = new JDateChooser();
+  JDateChooser expirationDateChooser = new JDateChooser();
   // Lấy ngày hiện tại
   Date currentDate = new Date();
   Calendar calendar = Calendar.getInstance();
@@ -67,11 +75,12 @@ public class ThongKePanel extends JPanel {
     txtHanSuDung = new JTextField();
 
     productionGroupComboBox = new JComboBox<>();
+    productionGroupComboBox1 = new JComboBox<>();
     shiftComboBox1 = new JComboBox<>();
     shiftComboBox = new JComboBox<>();
     warehouseStaffComboBox = new JComboBox<>();
-    productionGroupComboBox1 = new JComboBox<>();
     productNameComboBox = new JComboBox<>();
+    productNameComboBox1 = new JComboBox<>();
 
     setLayout(new BorderLayout());
 
@@ -133,8 +142,6 @@ public class ThongKePanel extends JPanel {
 
     JButton resetButton = new JButton(resizeIcon("/img/reset.png", 25, 25));
     filterPanel.add(createColumnBlue("Xóa Chọn:", resetButton));
-
-// Xử lý sự kiện khi nhấn nút "Xóa chọn"
     resetButton.addActionListener(e -> {
       // Đặt lại giá trị mặc định cho các ComboBox
       productionGroupComboBox.setSelectedIndex(0); // Chọn mục đầu tiên (giả định là "Tất cả")
@@ -190,9 +197,7 @@ public class ThongKePanel extends JPanel {
               lot.getWeight(),
               lot.getWarehouseStaff().getStaffName(),
               lot.getExpirationDays(),
-              String.join(", ", lot.getPallets().stream()
-                  .map(pallet -> pallet.getPalletID().toString())
-                  .collect(Collectors.toList()))
+              lot.getPallets().getPalletID()
           });
         }
       } else {
@@ -210,6 +215,19 @@ public class ThongKePanel extends JPanel {
     add(headerPanel, BorderLayout.NORTH);
     add(headerPanel, BorderLayout.NORTH);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     // Table
     String[] columnNames = {"Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Ngày Sản Xuất", "KL Cân", "KL Bì", "KL Hàng", "Thủ Kho", "HSD", "Số Pallet", "Xuất/Nhập"};
     tableModel = new DefaultTableModel(columnNames, 0);
@@ -226,34 +244,30 @@ public class ThongKePanel extends JPanel {
     table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 15));
     table.getTableHeader().setBackground(Color.LIGHT_GRAY);
     table.setFont(new Font("Arial", Font.PLAIN, 12));
-    // Thêm sự kiện click chuột vào bảng
     table.addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
-        int selectedRow = table.getSelectedRow(); // Lấy chỉ số dòng được chọn
-        if (selectedRow != -1) { // Kiểm tra có dòng nào được chọn
-          loadDataToFields(selectedRow); // Gọi phương thức load data vào các textfield
+        int selectedRow = table.getSelectedRow();
+        if (selectedRow != -1) {
+          loadDataToFields(selectedRow);
         }
       }
     });
     add(scrollPane, BorderLayout.CENTER);
 
 
-    // Footer Panel
     JPanel footerPanel = new JPanel(new BorderLayout());
 
-    // Sử dụng GridBagLayout cho summaryPanel
     JPanel summaryPanel = new JPanel(new GridBagLayout());
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(2, 2, 2, 2);
-    gbc.fill = GridBagConstraints.HORIZONTAL; // Giãn ngang
-    gbc.weightx = 1.0; // Giãn toàn bộ chiều ngang
-    gbc.weighty = 0;   // Không cần giãn chiều dọc
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.weightx = 1.0;
+    gbc.weighty = 0;
 
-    // ====== HÀNG 1 ======
-    gbc.gridx = 0; // Cột đầu tiên
-    gbc.gridy = 0; // Hàng đầu tiên
-    gbc.gridwidth = 1; // Chiếm 1 cột
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 1;
     summaryPanel.add(createColumnYellow("Số Phiếu:",txtSoPhieu), gbc);
 
     gbc.gridx = 1;
@@ -268,7 +282,9 @@ public class ThongKePanel extends JPanel {
     summaryPanel.add(createColumn("Khối Lượng Tịnh:", txtKhoiLuongTinh), gbc);
 
     gbc.gridx = 4;
-    summaryPanel.add(createColumnYellow("Ngày Sản Xuất:", txtNgaySanXuat), gbc);
+    productionDateChooser.setDate(currentDate);
+    productionDateChooser.setDateFormatString("dd/MM/yyyy");
+    summaryPanel.add(createColumnYellow("Ngày Sản Xuất:", productionDateChooser), gbc);
 
     gbc.gridx = 5;
     warehouseStaffComboBox = new JComboBox<>();
@@ -276,38 +292,148 @@ public class ThongKePanel extends JPanel {
     summaryPanel.add(createColumn("Thủ Kho:", warehouseStaffComboBox), gbc);
 
     gbc.gridx = 6;
-    summaryPanel.add(createColumnBlue("Lưu Thay Đổi:",new JButton(resizeIcon("/img/diskette.png", 25, 25))),gbc);
+    JButton updateButton = new JButton(resizeIcon("/img/diskette.png", 25, 25));
+    updateButton.addActionListener(e -> {
+      int selectedRow = table.getSelectedRow();
+      if (selectedRow >= 0) {
+        try {
+          // Lấy giá trị từ TextField
+          String soPhieu = txtSoPhieu.getText().trim();
+          BigDecimal khoiLuongBi = new BigDecimal(txtKhoiLuongBi.getText().trim());
+          BigDecimal khoiLuongTong = new BigDecimal(txtKhoiLuongTong.getText().trim());
+          BigDecimal khoiLuongTinh = new BigDecimal(txtKhoiLuongTinh.getText().trim());
+
+          // Parse ngày tháng
+          DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+          LocalDate ngaySanXuat = LocalDate.parse(txtNgaySanXuat.getText().trim(), formatter);
+          LocalDate hanSuDung = LocalDate.parse(txtHanSuDung.getText().trim(), formatter);
+
+          // Lấy ID từ ComboBox thông qua Map
+          Integer selectedProductID = productMap.get(productNameComboBox1.getSelectedItem());
+          Integer selectedProductGroupID = productionGroupMap.get(productionGroupComboBox1.getSelectedItem());
+          Integer selectedShiftID = shiftMap.get(shiftComboBox1.getSelectedItem());
+          Integer selectedStaffID = warehouseStaffMap.get(warehouseStaffComboBox.getSelectedItem());
+
+          // Lấy LotID từ bảng
+          int lotId = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
+          Lot lotToUpdate = daoLot.selectbyID(lotId);
+
+          // Cập nhật thông tin vào đối tượng Lot
+          if (lotToUpdate != null) {
+            lotToUpdate.setLotIDU(soPhieu);
+            lotToUpdate.setWeightDeviation(khoiLuongBi);
+            lotToUpdate.setWarehouseWeight(khoiLuongTong);
+            lotToUpdate.setWeight(khoiLuongTinh);
+            lotToUpdate.setProductionTime(ngaySanXuat.atStartOfDay());
+            lotToUpdate.setExpirationDays(hanSuDung.atStartOfDay());
+
+            if (selectedProductID != null) {
+              Product product = daoProduct.selectbyID(selectedProductID);
+              lotToUpdate.setProduct(product);
+            }
+
+            if (selectedProductGroupID != null) {
+              ProductionGroup group = daoProductionGroup.selectbyID(selectedProductGroupID);
+              lotToUpdate.setProductionGroup(group);
+            }
+
+            if (selectedShiftID != null) {
+              Shift shift = daoShift.selectbyID(selectedShiftID);
+              lotToUpdate.setShift(shift);
+            }
+
+            if (selectedStaffID != null) {
+              WarehouseStaff staff = daoWarehouseStaff.selectbyID(selectedStaffID);
+              lotToUpdate.setWarehouseStaff(staff);
+            }
+
+            daoLot.update(lotToUpdate);
+            txtSoPhieu.setText("");
+            txtKhoiLuongBi.setText("");
+            txtKhoiLuongTong.setText("");
+            txtKhoiLuongTinh.setText("");
+            txtNgaySanXuat.setText("");
+            txtSoLo.setText("");
+            txtHanSuDung.setText("");
+            warehouseStaffComboBox.setSelectedItem("Tất cả");
+            productionGroupComboBox1.setSelectedItem("Tất cả");
+            shiftComboBox1.setSelectedItem("Tất cả");
+            productNameComboBox1.setSelectedItem("Tất cả");
+            JOptionPane.showMessageDialog(null, "Cập nhật thành công!");
+            loadDataToTable();
+          }
+        } catch (Exception ex) {
+          JOptionPane.showMessageDialog(null, "Lỗi khi cập nhật: " + ex.getMessage());
+          System.out.println(ex.getMessage());
+          ex.printStackTrace();
+        }
+      } else {
+        JOptionPane.showMessageDialog(null, "Vui lòng chọn dòng để cập nhật.");
+      }
+    });
+
+    summaryPanel.add(createColumnBlue("Lưu Thay Đổi:",updateButton),gbc);
 
     gbc.gridx = 7;
-    summaryPanel.add(createColumnRed("Xóa Dữ Liệu:", new JButton(resizeIcon("/img/trash-bin.png", 25, 25))),gbc);
+    JButton deleteButton = new JButton(resizeIcon("/img/trash-bin.png", 25, 25));
+    deleteButton.addActionListener(e -> {
+      int selectedRow = table.getSelectedRow();
+      if (selectedRow >= 0) {
+        int lotId = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
+        int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn xóa LotID: " + lotId + "?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+          daoLot.deleteLotById(lotId);
+          loadDataToTable();
+          txtSoPhieu.setText("");
+          txtKhoiLuongBi.setText("");
+          txtKhoiLuongTong.setText("");
+          txtKhoiLuongTinh.setText("");
+          txtNgaySanXuat.setText("");
+          txtSoLo.setText("");
+          txtHanSuDung.setText("");
+          warehouseStaffComboBox.setSelectedItem("Tất cả");
+          productionGroupComboBox1.setSelectedItem("Tất cả");
+          shiftComboBox1.setSelectedItem("Tất cả");
 
-    // ====== HÀNG 2 ======
-    gbc.gridx = 0; // Cột đầu tiên
-    gbc.gridy = 1; // Hàng thứ hai
-    gbc.gridwidth = 2; // Chiếm 2 cột
-    summaryPanel.add(createColumn("Tên Đơn Hàng:", new JComboBox<>(new String[]{"Tất cả", "Tổ 1", "Tổ 2"})), gbc);
+          JOptionPane.showMessageDialog(null, "Xóa thành công LotID: " + lotId);
+        }
+      } else {
+        JOptionPane.showMessageDialog(null, "Vui lòng chọn một dòng để xóa.");
+      }
+    });
 
-    gbc.gridx = 2; // Cột thứ ba
-    gbc.gridwidth = 1; // Trở lại chiếm 1 cột
+    summaryPanel.add(createColumnRed("Xóa Dữ Liệu:", deleteButton), gbc);
+
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    gbc.gridwidth = 2;
+    productNameComboBox1 = new JComboBox<>();
+    loadProductNameToComboBox(productNameComboBox1);
+    summaryPanel.add(createColumn("Mã Hàng:", productNameComboBox1), gbc);
+
+    gbc.gridx = 2;
+    gbc.gridwidth = 1;
     summaryPanel.add(createColumn("Số Lô:", txtSoLo), gbc);
 
-    gbc.gridx = 3; // Cột thứ tư
-    summaryPanel.add(createColumn("Hạn Sử Dụng(Ngày):",txtHanSuDung), gbc);
+    gbc.gridx = 3;
+    expirationDateChooser.setDate(currentDate);
+    expirationDateChooser.setDateFormatString("dd/MM/yyyy");
+    summaryPanel.add(createColumn("Hạn Sử Dụng(Ngày):", expirationDateChooser), gbc);
 
-    gbc.gridx = 4; // Cột thứ năm
+    gbc.gridx = 4;
     productionGroupComboBox1 = new JComboBox<>();
     loadProductionGroupsToComboBox(productionGroupComboBox1);
     summaryPanel.add(createColumn("Tổ Sản Xuất:", productionGroupComboBox1),gbc);
 
-    gbc.gridx = 5; // Cột thứ sáu
+    gbc.gridx = 5;
     shiftComboBox1 = new JComboBox<>();
     loadShiftsToComboBox(shiftComboBox1);
     summaryPanel.add(createColumn("Ca Sản Xuất:",shiftComboBox1), gbc);
 
-    gbc.gridx = 6; // Cột thứ bảy
+    gbc.gridx = 6;
     summaryPanel.add(createColumnBlue("In Phiếu:",  new JButton(resizeIcon("/img/printer.png", 25, 25))),gbc);
 
-    gbc.gridx = 7; // Cột thứ tám
+    gbc.gridx = 7;
     summaryPanel.add(createColumnRed("Xóa Tất Cả:",new JButton(resizeIcon("/img/trash-bin.png", 25, 25))),gbc);
 
     footerPanel.add(summaryPanel, BorderLayout.CENTER);
@@ -318,39 +444,202 @@ public class ThongKePanel extends JPanel {
   }
 
 
-  //==========================================LOAD_DATA_TABLE==========================================
   private void loadDataToTable() {
-    tableModel.setRowCount(0); // Xóa dữ liệu hiện tại trong bảng
-    List<Lot> lots = daoLot.selectAll(); // Lấy dữ liệu từ cơ sở dữ liệu
+    tableModel.setRowCount(0);
+    List<Lot> lots = daoLot.selectAll();
 
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy"); // Define the date format
 
     for (Lot lot : lots) {
       String productionTimeFormatted = lot.getProductionTime() != null ? lot.getProductionTime().format(formatter) : "";
       String expirationDaysFormatted = lot.getExpirationDays() != null ? lot.getExpirationDays().format(formatter) : "";
-
-      // Lấy danh sách PalletID và chuyển thành chuỗi
-      String palletIDs = lot.getPallets().stream()
-          .map(pallet -> String.valueOf(pallet.getPalletID()))
-          .collect(Collectors.joining(", "));
+      String shiftName = "N/A";
+      if (lot.getShift() != null && lot.getShift().getShiftName() != null) {
+        shiftName = lot.getShift().getShiftName();
+      }
+      String productName = "N/A";
+      if (lot.getProduct() != null && lot.getProduct().getProductName() != null) {
+        productName = lot.getProduct().getProductName();
+      }
+      String productGroupName = "N/A";
+      if (lot.getProductionGroup() != null && lot.getProductionGroup().getGroupName() != null) {
+        productGroupName = lot.getProductionGroup().getGroupName();
+      }
+      String staffName = "N/A";
+      if (lot.getWarehouseStaff() != null && lot.getWarehouseStaff().getStaffName() != null) {
+        staffName = lot.getWarehouseStaff().getStaffName();
+      }
 
       Object[] row = {
-          lot.getLotID(),                               // "LotID"
-          lot.getProduct().getProductName(),            // "ProductName"
-          lot.getLotIDU(),                              // "LotIDU"
-          lot.getProductionGroup().getGroupName(),      // "GroupName"
-          lot.getShift().getShiftName(),                // "ShiftName"
-          productionTimeFormatted,                      // "ProductionTime" (formatted)
-          lot.getWarehouseWeight(),                     // "WarehouseWeight"
-          lot.getWeightDeviation(),                     // "WeightDeviation"
-          lot.getWeight(),                              // "Weight"
-          lot.getWarehouseStaff().getStaffName(),       // "StaffName"
-          expirationDaysFormatted,                      // "ExpirationDays" (formatted)
-          palletIDs                                     // "PalletIDs"
+          lot.getLotID(),
+          productName,
+          lot.getLotIDU(),
+          productGroupName,
+          shiftName,
+          productionTimeFormatted,
+          lot.getWarehouseWeight(),
+          lot.getWeightDeviation(),
+          lot.getWeight(),
+          staffName,
+          expirationDaysFormatted,
+          (lot.getPallets() != null && lot.getPallets().getPalletID() != null) ? lot.getPallets().getPalletID() : "N/A" // "PalletIDs"
       };
+
       tableModel.addRow(row);
     }
   }
+
+
+  private void loadDataToFields(int selectedRow) {
+    String soPhieu = tableModel.getValueAt(selectedRow, 0) != null
+        ? tableModel.getValueAt(selectedRow, 0).toString()
+        : "";
+    String mahang = tableModel.getValueAt(selectedRow, 1) != null
+        ? tableModel.getValueAt(selectedRow, 1).toString()
+        : "N/A";
+    String soLo = tableModel.getValueAt(selectedRow, 2) != null
+        ? tableModel.getValueAt(selectedRow, 2).toString()
+        : "";
+    String toSanXuat = tableModel.getValueAt(selectedRow, 3) != null
+        ? tableModel.getValueAt(selectedRow, 3).toString()
+        : "N/A";
+    String caSanXuat = tableModel.getValueAt(selectedRow, 4) != null
+        ? tableModel.getValueAt(selectedRow, 4).toString()
+        : "N/A";
+    String ngaySanXuat = tableModel.getValueAt(selectedRow, 5) != null
+        ? tableModel.getValueAt(selectedRow, 5).toString()
+        : "";
+    String khoiLuongBi = tableModel.getValueAt(selectedRow, 7) != null
+        ? tableModel.getValueAt(selectedRow, 7).toString()
+        : "";
+    String khoiLuongTong = tableModel.getValueAt(selectedRow, 6) != null
+        ? tableModel.getValueAt(selectedRow, 6).toString()
+        : "";
+    String khoiLuongTinh = tableModel.getValueAt(selectedRow, 8) != null
+        ? tableModel.getValueAt(selectedRow, 8).toString()
+        : "";
+    String thuKho = tableModel.getValueAt(selectedRow, 9) != null
+        ? tableModel.getValueAt(selectedRow, 9).toString()
+        : "N/A";
+    String hanSuDung = tableModel.getValueAt(selectedRow, 10) != null
+        ? tableModel.getValueAt(selectedRow, 10).toString()
+        : "";
+
+    txtSoPhieu.setText(soPhieu);
+    txtKhoiLuongBi.setText(khoiLuongBi);
+    txtKhoiLuongTong.setText(khoiLuongTong);
+    txtKhoiLuongTinh.setText(khoiLuongTinh);
+    txtNgaySanXuat.setText(ngaySanXuat);
+    txtSoLo.setText(soLo);
+    txtHanSuDung.setText(hanSuDung);
+
+    try {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+      if (!ngaySanXuat.isEmpty()) {
+        LocalDate productionDate = LocalDate.parse(ngaySanXuat, formatter);
+        productionDateChooser.setDate(java.sql.Date.valueOf(productionDate));
+      }
+
+      if (!hanSuDung.isEmpty()) {
+        LocalDate expirationDate = LocalDate.parse(hanSuDung, formatter);
+        expirationDateChooser.setDate(java.sql.Date.valueOf(expirationDate));
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      JOptionPane.showMessageDialog(null, "Lỗi khi cập nhật ngày.");
+    }
+
+    productNameComboBox1.setSelectedItem(mahang);
+    warehouseStaffComboBox.setSelectedItem(thuKho);
+    productionGroupComboBox1.setSelectedItem(toSanXuat);
+    shiftComboBox1.setSelectedItem(caSanXuat);
+  }
+
+
+
+  private Map<String, Integer> productionGroupMap = new HashMap<>();
+
+  private void loadProductionGroupsToComboBox(JComboBox<String> comboBox) {
+    comboBox.removeAllItems();
+    comboBox.addItem("Tất cả");
+
+    List<ProductionGroup> groups = daoProductionGroup.selectAll();
+    if (groups != null && !groups.isEmpty()) {
+      productionGroupMap.clear();
+
+      for (ProductionGroup group : groups) {
+        if (group != null && group.getGroupName() != null) {
+          comboBox.addItem(group.getGroupName());
+          productionGroupMap.put(group.getGroupName(), group.getGroupID());
+        }
+      }
+    } else {
+      JOptionPane.showMessageDialog(null, "Không có ProductionGroup nào để tải vào ComboBox.");
+    }
+  }
+
+
+  private Map<String, Integer> shiftMap = new HashMap<>();
+  private void loadShiftsToComboBox(JComboBox<String> comboBox) {
+    comboBox.removeAllItems();
+    comboBox.addItem("Tất cả");
+
+    List<Shift> shifts = daoShift.selectAll();
+    if (shifts != null && !shifts.isEmpty()) {
+      shiftMap.clear();
+
+      for (Shift shift : shifts) {
+        if (shift != null && shift.getShiftName() != null) {
+          comboBox.addItem(shift.getShiftName());
+          shiftMap.put(shift.getShiftName(), shift.getShiftId());
+        }
+      }
+    } else {
+      JOptionPane.showMessageDialog(null, "Không có Shift nào để tải vào ComboBox.");
+    }
+  }
+
+  private Map<String, Integer> productMap = new HashMap<>();
+  private void loadProductNameToComboBox(JComboBox<String> comboBox) {
+    comboBox.removeAllItems();
+    comboBox.addItem("Tất cả");
+
+    List<Product> products = daoProduct.selectAll();
+    if (products != null && !products.isEmpty()) {
+      productMap.clear();
+      for (Product product : products) {
+        if (product != null && product.getProductName() != null) {
+          comboBox.addItem(product.getProductName());
+
+          productMap.put(product.getProductName(), product.getProductID());
+        }
+      }
+    } else {
+      JOptionPane.showMessageDialog(null, "Không có Product nào để tải vào ComboBox.");
+    }
+  }
+
+  private Map<String, Integer> warehouseStaffMap = new HashMap<>();
+  private void loadWarehouseStaffToComboBox(JComboBox<String> comboBox) {
+    comboBox.removeAllItems();
+    comboBox.addItem("Tất cả");
+
+    List<WarehouseStaff> warehouseStaffs = daoWarehouseStaff.selectAll();
+    if (warehouseStaffs != null && !warehouseStaffs.isEmpty()) {
+      warehouseStaffMap.clear();
+      for (WarehouseStaff warehouseStaff : warehouseStaffs) {
+        if (warehouseStaff != null && warehouseStaff.getStaffName() != null) {
+          comboBox.addItem(warehouseStaff.getStaffName());
+          warehouseStaffMap.put(warehouseStaff.getStaffName(), warehouseStaff.getStaffId());
+        }
+      }
+    } else {
+      JOptionPane.showMessageDialog(null, "Không có WarehouseStaff nào để tải vào ComboBox.");
+    }
+  }
+
+
 
 
   //==========================================FILTER_COMBOBOX=========================================
@@ -366,9 +655,6 @@ public class ThongKePanel extends JPanel {
     for (Lot lot : lots) {
       // Kiểm tra nếu "Tổ Sản Xuất" phù hợp với lựa chọn hoặc người dùng chọn "Tất cả"
       if (selectedGroup.equals("Tất cả") || lot.getProductionGroup().getGroupName().equals(selectedGroup)) {
-        String palletIDs = lot.getPallets().stream()
-            .map(pallet -> String.valueOf(pallet.getPalletID()))
-            .collect(Collectors.joining(", "));
         // Thêm hàng vào bảng
         tableModel.addRow(new Object[]{
             lot.getLotID(),                               // "LotID"
@@ -382,7 +668,7 @@ public class ThongKePanel extends JPanel {
             lot.getWeight(),                              // "Weight"
             lot.getWarehouseStaff().getStaffName(),       // "StaffName"
             lot.getExpirationDays(),                      // "ExpirationDays"
-            palletIDs
+            lot.getPallets().getPalletID()
         });
       }
     }
@@ -398,10 +684,6 @@ public class ThongKePanel extends JPanel {
     for (Lot lot : lots) {
       // Kiểm tra nếu "Mã Hàng" phù hợp với lựa chọn hoặc người dùng chọn "Tất cả"
       if (selectedProduct.equals("Tất cả") || lot.getProduct().getProductName().equals(selectedProduct)) {
-        String palletIDs = lot.getPallets().stream()
-            .map(pallet -> String.valueOf(pallet.getPalletID()))
-            .collect(Collectors.joining(", "));
-        // Thêm hàng vào bảng
         tableModel.addRow(new Object[]{
             lot.getLotID(),                               // "LotID"
             lot.getProduct().getProductName(),            // "ProductID"
@@ -414,7 +696,7 @@ public class ThongKePanel extends JPanel {
             lot.getWeight(),                              // "Weight"
             lot.getWarehouseStaff().getStaffName(),       // "StaffName"
             lot.getExpirationDays(),                      // "ExpirationDays"
-            palletIDs
+            lot.getPallets().getPalletID()
         });
       }
     }
@@ -430,9 +712,6 @@ public class ThongKePanel extends JPanel {
     for (Lot lot : lots) {
       // Kiểm tra nếu "Ca Sản Xuất" phù hợp với lựa chọn hoặc người dùng chọn "Tất cả"
       if (selectedShift.equals("Tất cả") || lot.getShift().getShiftName().equals(selectedShift)) {
-        String palletIDs = lot.getPallets().stream()
-            .map(pallet -> String.valueOf(pallet.getPalletID()))
-            .collect(Collectors.joining(", "));
         // Thêm hàng vào bảng
         tableModel.addRow(new Object[]{
             lot.getLotID(),                               // "LotID"
@@ -446,111 +725,9 @@ public class ThongKePanel extends JPanel {
             lot.getWeight(),                              // "Weight"
             lot.getWarehouseStaff().getStaffName(),       // "StaffName"
             lot.getExpirationDays(),                      // "ExpirationDays"
-            palletIDs
+            lot.getPallets().getPalletID()
         });
       }
-    }
-  }
-
-
-  //==========================================LOAD_DATA_CLICK_TABLE==========================================
-
-  private void loadDataToFields(int selectedRow) {
-    // Lấy dữ liệu từ bảng và chuyển thành String
-    String soPhieu = tableModel.getValueAt(selectedRow, 0) != null
-        ? tableModel.getValueAt(selectedRow, 0).toString()
-        : ""; // Số Phiếu
-    String soLo = tableModel.getValueAt(selectedRow, 2) != null
-        ? tableModel.getValueAt(selectedRow, 2).toString()
-        : ""; // Số Lô
-    String khoiLuongBi = tableModel.getValueAt(selectedRow, 6) != null
-        ? tableModel.getValueAt(selectedRow, 6).toString()
-        : ""; // Khối Lượng Bì
-    String khoiLuongTong = tableModel.getValueAt(selectedRow, 7) != null
-        ? tableModel.getValueAt(selectedRow, 7).toString()
-        : ""; // Khối Lượng Tổng
-    String khoiLuongTinh = tableModel.getValueAt(selectedRow, 8) != null
-        ? tableModel.getValueAt(selectedRow, 8).toString()
-        : ""; // Khối Lượng Tịnh
-    String ngaySanXuat = tableModel.getValueAt(selectedRow, 5) != null
-        ? tableModel.getValueAt(selectedRow, 5).toString()
-        : ""; // Ngày Sản Xuất
-    String hanSuDung = tableModel.getValueAt(selectedRow, 10) != null
-        ? tableModel.getValueAt(selectedRow, 10).toString()
-        : ""; // Hạn Sử Dụng
-    String thuKho = tableModel.getValueAt(selectedRow, 9) != null
-        ? tableModel.getValueAt(selectedRow, 9).toString()
-        : ""; // Thủ Kho
-    String toSanXuat = tableModel.getValueAt(selectedRow, 3) != null
-        ? tableModel.getValueAt(selectedRow, 3).toString()
-        : ""; // Tổ Sản Xuất
-    String caSanXuat = tableModel.getValueAt(selectedRow, 4) != null
-        ? tableModel.getValueAt(selectedRow, 4).toString()
-        : ""; // Ca Sản Xuất
-
-    // Điền dữ liệu vào các JTextField
-    txtSoPhieu.setText(soPhieu);
-    txtKhoiLuongBi.setText(khoiLuongBi);
-    txtKhoiLuongTong.setText(khoiLuongTong);
-    txtKhoiLuongTinh.setText(khoiLuongTinh);
-    txtNgaySanXuat.setText(ngaySanXuat);
-    txtSoLo.setText(soLo);
-    txtHanSuDung.setText(hanSuDung);
-
-    // Set giá trị cho các JComboBox
-    warehouseStaffComboBox.setSelectedItem(thuKho);
-    productionGroupComboBox1.setSelectedItem(toSanXuat);
-    shiftComboBox1.setSelectedItem(caSanXuat);
-  }
-
-
-  //==========================================LOADDATACOMBOBOX==========================================
-
-  // Phương thức tải dữ liệu vào JComboBox ProductionGroup
-  private void loadProductionGroupsToComboBox(JComboBox<String> comboBox) {
-    comboBox.removeAllItems(); // Xóa các mục cũ (nếu có)
-    comboBox.addItem("Tất cả"); // Thêm tùy chọn mặc định
-
-    // Lấy danh sách ProductionGroup từ database
-    List<ProductionGroup> groups = daoProductionGroup.selectAll();
-    for (ProductionGroup group : groups) {
-      comboBox.addItem(group.getGroupName());
-    }
-  }
-
-  // Phương thức tải dữ liệu vào JComboBox Shifts
-  private void loadShiftsToComboBox(JComboBox<String> comboBox) {
-    comboBox.removeAllItems(); // Xóa các mục cũ (nếu có)
-    comboBox.addItem("Tất cả"); // Thêm tùy chọn mặc định
-
-    // Lấy danh sách shifts từ database
-    List<Shift> shifts = daoShift.selectAll();
-    for (Shift shift : shifts) {
-      comboBox.addItem(shift.getShiftName());
-    }
-  }
-
-  // Phương thức tải dữ liệu vào JComboBox ProductName
-  private void loadProductNameToComboBox(JComboBox<String> comboBox) {
-    comboBox.removeAllItems(); // Xóa các mục cũ (nếu có)
-    comboBox.addItem("Tất cả"); // Thêm tùy chọn mặc định
-
-    // Lấy danh sách product từ database
-    List<Product> products = daoProduct.selectAll();
-    for (Product product : products) {
-      comboBox.addItem(product.getProductName());
-    }
-  }
-
-  // Phương thức tải dữ liệu vào JComboBox ProductName
-  private void loadWarehouseStaffToComboBox(JComboBox<String> comboBox) {
-    comboBox.removeAllItems(); // Xóa các mục cũ (nếu có)
-    comboBox.addItem("Tất cả"); // Thêm tùy chọn mặc định
-
-    // Lấy danh sách product từ database
-    List<WarehouseStaff> warehouseStaffs = daoWarehouseStaff.selectAll();
-    for (WarehouseStaff warehouseStaff : warehouseStaffs) {
-      comboBox.addItem(warehouseStaff.getStaffName());
     }
   }
 
@@ -563,6 +740,7 @@ public class ThongKePanel extends JPanel {
     columnPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY)); // Thêm viền màu xám
     JLabel label = new JLabel(labelText, JLabel.LEFT); // Tiêu đề cột
     label.setFont(new Font("Arial", Font.BOLD, 15));
+    label.setHorizontalAlignment(SwingConstants.LEFT); // Căn giữa văn bản trong JLabel
     label.setHorizontalAlignment(SwingConstants.LEFT); // Căn giữa văn bản trong JLabel
     columnPanel.add(label, BorderLayout.NORTH); // Thêm JLabel ở trên
     columnPanel.add(inputComponent, BorderLayout.CENTER); // Thêm thành phần nhập liệu ở dưới
