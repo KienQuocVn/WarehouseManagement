@@ -9,6 +9,7 @@ import dao.DaoWarehouseStaff;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -172,11 +173,13 @@ public class ThongKePanel extends JPanel {
       String productName = (String) productNameComboBox.getSelectedItem();
       productName = productName != null && !productName.equals("Tất cả") ? productName : null;
 
-      java.util.Date fromDateUtil = fromDateChooser.getDate();
-      java.sql.Date fromDate = fromDateUtil != null ? new java.sql.Date(fromDateUtil.getTime()) : null;
+      Date fromDateUtil = fromDateChooser.getDate();
+      LocalDate fromDate = fromDateUtil != null ? new java.sql.Date(fromDateUtil.getTime()).toLocalDate()
+          : null;
 
-      java.util.Date toDateUtil = toDateChooser.getDate();
-      java.sql.Date toDate = toDateUtil != null ? new java.sql.Date(toDateUtil.getTime()) : null;
+      Date toDateUtil = toDateChooser.getDate();
+      LocalDate  toDate = toDateUtil != null ? new java.sql.Date(toDateUtil.getTime()).toLocalDate()
+          : null;
 
       // Gọi phương thức tìm kiếm với các tham số đã xử lý
       List<Lot> searchResults = daoLot.searchLots(productionGroup, shift, productName, fromDate, toDate);
@@ -196,8 +199,7 @@ public class ThongKePanel extends JPanel {
               lot.getWeightDeviation(),
               lot.getWeight(),
               lot.getWarehouseStaff().getStaffName(),
-              lot.getExpirationDays(),
-              lot.getPallets().getPalletID()
+              lot.getExpirationDate(),
           });
         }
       } else {
@@ -206,7 +208,9 @@ public class ThongKePanel extends JPanel {
     });
 
     filterPanel.add(createColumn("Loại Report:", new JComboBox<>(new String[]{"Kê Nhập", "Thống Kê"})));
+
     filterPanel.add(createColumnBlue("Xem Trước:", new JButton(resizeIcon("/img/printer.png", 25, 25))));
+
     filterPanel.add(createColumnBlue("Excel:",new JButton(resizeIcon("/img/document.png", 25, 25))));
 
 
@@ -214,19 +218,6 @@ public class ThongKePanel extends JPanel {
     headerPanel.add(filterPanel, BorderLayout.CENTER);
     add(headerPanel, BorderLayout.NORTH);
     add(headerPanel, BorderLayout.NORTH);
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     // Table
     String[] columnNames = {"Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Ngày Sản Xuất", "KL Cân", "KL Bì", "KL Hàng", "Thủ Kho", "HSD", "Số Pallet", "Xuất/Nhập"};
@@ -324,8 +315,8 @@ public class ThongKePanel extends JPanel {
             lotToUpdate.setWeightDeviation(khoiLuongBi);
             lotToUpdate.setWarehouseWeight(khoiLuongTong);
             lotToUpdate.setWeight(khoiLuongTinh);
-            lotToUpdate.setProductionTime(ngaySanXuat.atStartOfDay());
-            lotToUpdate.setExpirationDays(hanSuDung.atStartOfDay());
+            lotToUpdate.setProductionTime(LocalDate.from(ngaySanXuat.atStartOfDay()));
+            lotToUpdate.setExpirationDate(LocalDate.from(hanSuDung.atStartOfDay()));
 
             if (selectedProductID != null) {
               Product product = daoProduct.selectbyID(selectedProductID);
@@ -382,15 +373,18 @@ public class ThongKePanel extends JPanel {
         int lotId = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn xóa LotID: " + lotId + "?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
+          // Lấy ngày hiện tại
+          SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+          String currentDate = dateFormat.format(new Date());
           daoLot.deleteLotById(lotId);
           loadDataToTable();
           txtSoPhieu.setText("");
           txtKhoiLuongBi.setText("");
           txtKhoiLuongTong.setText("");
           txtKhoiLuongTinh.setText("");
-          txtNgaySanXuat.setText("");
+          txtNgaySanXuat.setText(currentDate);
           txtSoLo.setText("");
-          txtHanSuDung.setText("");
+          txtHanSuDung.setText(currentDate);
           warehouseStaffComboBox.setSelectedItem("Tất cả");
           productionGroupComboBox1.setSelectedItem("Tất cả");
           shiftComboBox1.setSelectedItem("Tất cả");
@@ -434,7 +428,16 @@ public class ThongKePanel extends JPanel {
     summaryPanel.add(createColumnBlue("In Phiếu:",  new JButton(resizeIcon("/img/printer.png", 25, 25))),gbc);
 
     gbc.gridx = 7;
-    summaryPanel.add(createColumnRed("Xóa Tất Cả:",new JButton(resizeIcon("/img/trash-bin.png", 25, 25))),gbc);
+    JButton deleteAllButton = new JButton(resizeIcon("/img/trash-bin.png", 25, 25));
+    deleteAllButton.addActionListener(e -> {
+      int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc chắn muốn xóa tất cả dữ liệu?", "Xác nhận xóa", JOptionPane.YES_NO_OPTION);
+      if (confirm == JOptionPane.YES_OPTION) {
+        daoLot.deleteAllLots();
+        loadDataToTable();
+        JOptionPane.showMessageDialog(null, "Đã xóa tất cả dữ liệu.");
+      }
+    });
+    summaryPanel.add(createColumnRed("Xóa Tất Cả:", deleteAllButton), gbc);
 
     footerPanel.add(summaryPanel, BorderLayout.CENTER);
 
@@ -452,7 +455,7 @@ public class ThongKePanel extends JPanel {
 
     for (Lot lot : lots) {
       String productionTimeFormatted = lot.getProductionTime() != null ? lot.getProductionTime().format(formatter) : "";
-      String expirationDaysFormatted = lot.getExpirationDays() != null ? lot.getExpirationDays().format(formatter) : "";
+      String expirationDaysFormatted = lot.getExpirationDate() != null ? lot.getExpirationDate().format(formatter) : "";
       String shiftName = "N/A";
       if (lot.getShift() != null && lot.getShift().getShiftName() != null) {
         shiftName = lot.getShift().getShiftName();
@@ -469,6 +472,9 @@ public class ThongKePanel extends JPanel {
       if (lot.getWarehouseStaff() != null && lot.getWarehouseStaff().getStaffName() != null) {
         staffName = lot.getWarehouseStaff().getStaffName();
       }
+      String palletIDs = lot.getPallets().stream()
+          .map(pallet -> String.valueOf(pallet.getPalletID()))
+          .collect(Collectors.joining(", ")); // Nối các PalletID bằng dấu phẩy
 
       Object[] row = {
           lot.getLotID(),
@@ -482,13 +488,12 @@ public class ThongKePanel extends JPanel {
           lot.getWeight(),
           staffName,
           expirationDaysFormatted,
-          (lot.getPallets() != null && lot.getPallets().getPalletID() != null) ? lot.getPallets().getPalletID() : "N/A" // "PalletIDs"
+          palletIDs
       };
 
       tableModel.addRow(row);
     }
   }
-
 
   private void loadDataToFields(int selectedRow) {
     String soPhieu = tableModel.getValueAt(selectedRow, 0) != null
@@ -565,17 +570,12 @@ public class ThongKePanel extends JPanel {
     comboBox.addItem("Tất cả");
 
     List<ProductionGroup> groups = daoProductionGroup.selectAll();
-    if (groups != null && !groups.isEmpty()) {
-      productionGroupMap.clear();
-
-      for (ProductionGroup group : groups) {
-        if (group != null && group.getGroupName() != null) {
-          comboBox.addItem(group.getGroupName());
-          productionGroupMap.put(group.getGroupName(), group.getGroupID());
-        }
+    productionGroupMap.clear();
+    for (ProductionGroup group : groups) {
+      if (group != null && group.getGroupName() != null) {
+        comboBox.addItem(group.getGroupName());
+        productionGroupMap.put(group.getGroupName(), group.getGroupID());
       }
-    } else {
-      JOptionPane.showMessageDialog(null, "Không có ProductionGroup nào để tải vào ComboBox.");
     }
   }
 
@@ -586,17 +586,12 @@ public class ThongKePanel extends JPanel {
     comboBox.addItem("Tất cả");
 
     List<Shift> shifts = daoShift.selectAll();
-    if (shifts != null && !shifts.isEmpty()) {
-      shiftMap.clear();
-
-      for (Shift shift : shifts) {
-        if (shift != null && shift.getShiftName() != null) {
-          comboBox.addItem(shift.getShiftName());
-          shiftMap.put(shift.getShiftName(), shift.getShiftId());
-        }
+    shiftMap.clear();
+    for (Shift shift : shifts) {
+      if (shift != null && shift.getShiftName() != null) {
+        comboBox.addItem(shift.getShiftName());
+        shiftMap.put(shift.getShiftName(), shift.getShiftId());
       }
-    } else {
-      JOptionPane.showMessageDialog(null, "Không có Shift nào để tải vào ComboBox.");
     }
   }
 
@@ -606,17 +601,13 @@ public class ThongKePanel extends JPanel {
     comboBox.addItem("Tất cả");
 
     List<Product> products = daoProduct.selectAll();
-    if (products != null && !products.isEmpty()) {
-      productMap.clear();
-      for (Product product : products) {
-        if (product != null && product.getProductName() != null) {
-          comboBox.addItem(product.getProductName());
+    productMap.clear();
+    for (Product product : products) {
+      if (product != null && product.getProductName() != null) {
+        comboBox.addItem(product.getProductName());
 
-          productMap.put(product.getProductName(), product.getProductID());
-        }
+        productMap.put(product.getProductName(), product.getProductID());
       }
-    } else {
-      JOptionPane.showMessageDialog(null, "Không có Product nào để tải vào ComboBox.");
     }
   }
 
@@ -626,16 +617,12 @@ public class ThongKePanel extends JPanel {
     comboBox.addItem("Tất cả");
 
     List<WarehouseStaff> warehouseStaffs = daoWarehouseStaff.selectAll();
-    if (warehouseStaffs != null && !warehouseStaffs.isEmpty()) {
-      warehouseStaffMap.clear();
-      for (WarehouseStaff warehouseStaff : warehouseStaffs) {
-        if (warehouseStaff != null && warehouseStaff.getStaffName() != null) {
-          comboBox.addItem(warehouseStaff.getStaffName());
-          warehouseStaffMap.put(warehouseStaff.getStaffName(), warehouseStaff.getStaffId());
-        }
+    warehouseStaffMap.clear();
+    for (WarehouseStaff warehouseStaff : warehouseStaffs) {
+      if (warehouseStaff != null && warehouseStaff.getStaffName() != null) {
+        comboBox.addItem(warehouseStaff.getStaffName());
+        warehouseStaffMap.put(warehouseStaff.getStaffName(), warehouseStaff.getStaffId());
       }
-    } else {
-      JOptionPane.showMessageDialog(null, "Không có WarehouseStaff nào để tải vào ComboBox.");
     }
   }
 
@@ -667,8 +654,7 @@ public class ThongKePanel extends JPanel {
             lot.getWeightDeviation(),                     // "WeightDeviation"
             lot.getWeight(),                              // "Weight"
             lot.getWarehouseStaff().getStaffName(),       // "StaffName"
-            lot.getExpirationDays(),                      // "ExpirationDays"
-            lot.getPallets().getPalletID()
+            lot.getExpirationDate(),                      // "ExpirationDays"
         });
       }
     }
@@ -695,8 +681,7 @@ public class ThongKePanel extends JPanel {
             lot.getWeightDeviation(),                     // "WeightDeviation"
             lot.getWeight(),                              // "Weight"
             lot.getWarehouseStaff().getStaffName(),       // "StaffName"
-            lot.getExpirationDays(),                      // "ExpirationDays"
-            lot.getPallets().getPalletID()
+            lot.getExpirationDate(),                      // "ExpirationDays"
         });
       }
     }
@@ -724,8 +709,7 @@ public class ThongKePanel extends JPanel {
             lot.getWeightDeviation(),                     // "WeightDeviation"
             lot.getWeight(),                              // "Weight"
             lot.getWarehouseStaff().getStaffName(),       // "StaffName"
-            lot.getExpirationDays(),                      // "ExpirationDays"
-            lot.getPallets().getPalletID()
+            lot.getExpirationDate(),                      // "ExpirationDays"
         });
       }
     }
