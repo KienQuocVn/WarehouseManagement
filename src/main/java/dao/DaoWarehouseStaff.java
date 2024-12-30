@@ -80,4 +80,10 @@ public class DaoWarehouseStaff extends WHMA<WarehouseStaff, Integer> {
     }
     return list;
   }
+
+  public WarehouseStaff selectbyName(String name) {
+    String sql = "SELECT * FROM WarehouseStaff WHERE StaffName = ?";
+    List<WarehouseStaff> staffList = selectBySql(sql, name);
+    return staffList.isEmpty() ? null : staffList.get(0);
+  }
 }

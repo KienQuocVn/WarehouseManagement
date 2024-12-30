@@ -80,4 +80,10 @@ public class DaoProductionGroup extends WHMA<ProductionGroup, Integer> {
     }
     return list;
   }
+
+  public ProductionGroup selectbyName(String name) {
+    String sql = "SELECT * FROM ProductionGroups WHERE GroupName = ?";
+    List<ProductionGroup> groups = selectBySql(sql, name);
+    return groups.isEmpty() ? null : groups.get(0);
+  }
 }

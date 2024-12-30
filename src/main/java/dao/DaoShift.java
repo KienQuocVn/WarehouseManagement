@@ -80,4 +80,11 @@ public class DaoShift extends WHMA<Shift, Integer> {
     }
     return list;
   }
+
+  public Shift selectbyName(String name) {
+    String sql = "SELECT * FROM Shifts WHERE ShiftName = ?";
+    List<Shift> shifts = selectBySql(sql, name);
+    return shifts.isEmpty() ? null : shifts.get(0);
+  }
+
 }
