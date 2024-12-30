@@ -90,60 +90,107 @@ CREATE TABLE Pallets (
 );
 
 
-INSERT INTO Products ( ProductName, HSD, Color) VALUES
-('Sản phẩm A', 12.50, 'Đỏ'),
-('Sản phẩm B', 24.75, 'Xanh'),
-('Sản phẩm C', 18.00, 'Vàng'),
-('Sản phẩm D', 36.25, 'Trắng'),
-('Sản phẩm E', 48.00, 'Đen');
+select*from Products
 
-SELECT * FROM Products
-SELECT ProductID FROM Products WHERE ProductID = 1;
+-- Table: Product
+INSERT INTO Products (ProductName, HSD, Color)
+VALUES 
+('Product A', 24.5, 'Red'),
+('Product B', 12.0, 'Blue'),
+('Product C', 18.0, 'Green');
+
+-- Table: Shift
+INSERT INTO Shifts (ShiftName)
+VALUES 
+('Morning Shift'),
+('Evening Shift'),
+('Night Shift');
+
+-- Table: ProductionGroup
+INSERT INTO ProductionGroups (GroupName)
+VALUES 
+('Group Alpha'),
+('Group Beta'),
+('Group Gamma');
+
+-- Table: WarehouseStaff
+INSERT INTO WarehouseStaff (StaffName)
+VALUES 
+('John Doe'),
+('Jane Smith'),
+('Mike Johnson');
+
+-- Table: Lot
+INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, GroupID, WarehouseStaffID)
+VALUES 
+('LOT001', 1, '2024-01-01', '2025-01-01', 100.50, 105.00, 4.50, 1, 1, 1),
+('LOT002', 2, '2024-02-01', '2025-02-01', 200.75, 210.00, 9.25, 2, 2, 2),
+('LOT003', 3, '2024-03-01', '2025-03-01', 150.25, 155.00, 4.75, 3, 3, 3),
+('LOT004', 1, '2024-01-01', '2025-01-01', 100.50, 105.00, 4.50, 1, 1, 1),
+('LOT005', 2, '2024-02-01', '2025-02-01', 200.75, 210.00, 9.25, 2, 2, 2),
+('LOT006', 3, '2024-03-01', '2025-03-01', 150.25, 155.00, 4.75, 3, 3, 3),
+('LOT007', 1, '2024-01-01', '2025-01-01', 100.50, 105.00, 4.50, 1, 1, 1),
+('LOT008', 2, '2024-02-01', '2025-02-01', 200.75, 210.00, 9.25, 2, 2, 2),
+('LOT009', 3, '2024-03-01', '2025-03-01', 150.25, 155.00, 4.75, 3, 3, 3),
+('LOT0010', 1, '2024-01-01', '2025-01-01', 100.50, 105.00, 4.50, 1, 1, 1),
+('LOT0011', 2, '2024-02-01', '2025-02-01', 200.75, 210.00, 9.25, 2, 2, 2),
+('LOT0012', 3, '2024-03-01', '2025-03-01', 150.25, 155.00, 4.75, 3, 3, 3),
+('LOT0013', 1, '2024-01-01', '2025-01-01', 100.50, 105.00, 4.50, 1, 1, 1),
+('LOT0014', 2, '2024-02-01', '2025-02-01', 200.75, 210.00, 9.25, 2, 2, 2),
+('LOT0015', 3, '2024-03-01', '2025-03-01', 150.25, 155.00, 4.75, 3, 3, 3),
+('LOT0016', 1, '2024-01-01', '2025-01-01', 100.50, 105.00, 4.50, 1, 1, 1),
+('LOT0017', 2, '2024-02-01', '2025-02-01', 200.75, 210.00, 9.25, 2, 2, 2),
+('LOT0018', 3, '2024-03-01', '2025-03-01', 150.25, 155.00, 4.75, 3, 3, 3),
+('LOT0019', 1, '2024-01-01', '2025-01-01', 100.50, 105.00, 4.50, 1, 1, 1),
+('LOT0020', 2, '2024-02-01', '2025-02-01', 200.75, 210.00, 9.25, 2, 2, 2),
+('LOT0021', 3, '2024-03-01', '2025-03-01', 150.25, 155.00, 4.75, 3, 3, 3),
+('LOT0022', 1, '2024-01-01', '2025-01-01', 100.50, 105.00, 4.50, 1, 1, 1),
+('LOT0023', 2, '2024-02-01', '2025-02-01', 200.75, 210.00, 9.25, 2, 2, 2),
+('LOT0024', 3, '2024-03-01', '2025-03-01', 150.25, 155.00, 4.75, 3, 3, 3);
+
+-- Table: Pallet
+INSERT INTO Pallets (PalletName, PalletIDU, LotID)
+VALUES 
+('Pallet A1', 'PAL001', 11),
+('Pallet B1', 'PAL002', 12),
+('Pallet C1', 'PAL003', 13);
+
+-- Table: SerialPortConfig
+INSERT INTO SerialPortConfig (comPort, baudRate, dataBits, stopBits, parityBits)
+VALUES 
+('COM1', 9600, 8, 1, 'None'),
+('COM2', 115200, 8, 1, 'Even'),
+('COM3', 4800, 7, 2, 'Odd');
+
+-- Table: SettingSystem
+INSERT INTO SettingSystem (DirSave, NameFile, WeightThreshold, Printer)
+VALUES 
+('C:\\Data', 'Report.pdf', 50.00, 'Printer A'),
+('D:\\Exports', 'ExportData.xlsx', 100.00, 'Printer B'),
+('E:\\Logs', 'Log.txt', 25.00, 'Printer C');
+
+-- Table: User
+INSERT INTO [Users] (Username, FullName, Role)
+VALUES 
+('john_doe', 'John Doe', 'Manager'),
+('jane_smith', 'Jane Smith', 'Warehouse Staff'),
+('mike_johnson', 'Mike Johnson', 'Employee');
+
+-- Table: Transaction
+INSERT INTO Transactions (TransactionType, Date, Customer, Staff)
+VALUES 
+('Export', '2024-12-01 10:00:00', 'Customer A', 'john_doe'),
+('Import', '2024-12-02 14:00:00', NULL, 'jane_smith'),
+('Export', '2024-12-03 09:30:00', 'Customer B', 'mike_johnson');
+
+-- Table: TransactionDetail
+INSERT INTO TransactionDetails (TransactionID, LotID, Quantity)
+VALUES 
+(2, 1, 50.00),
+(3, 2, 100.00),
+(4, 3, 75.00);
 
 
-
-INSERT INTO ProductionGroups( GroupName) VALUES
-('Nhóm A'),
-('Nhóm B'),
-('Nhóm C');
-
-
-INSERT INTO Shifts ( ShiftName) VALUES
-('Ca sáng'),
-('Ca chiều'),
-('Ca đêm');
-
-INSERT INTO WarehouseStaff ( StaffName) VALUES
-('Nguyễn Văn A'),
-('Trần Thị B'),
-('Lê Văn C');
-
-INSERT INTO Pallets(PalletName) VALUES
-('PalletsName1'),
-('PalletsName2'),
-('PalletsName3'),
-('PalletsName4'),
-('PalletsName5'),
-('PalletsName6'),
-('PalletsName7'),
-('PalletsName8'),
-('PalletsName9'),
-('PalletsName10');
-
-INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDays, Weight, WarehouseWeight, WeightDeviation, ShiftID, GroupID, WarehouseStaffID,PalletID) VALUES
-('LOT001', 1, '2024-01-01', '2024-06-30', 100.50, 105.00, 04.50, 1, 1, 1,1),
-('LOT002', 2, '2024-02-01', '2024-07-31', 200.75, 210.00, 09.25, 2, 2, 2,2),
-('LOT003', 3, '2024-03-01', '2024-08-31', 300.25, 315.00, 14.75, 3, 3, 3,3),
-('LOT004', 4, '2024-04-01', '2024-09-30', 400.00, 420.00, 20.00, 1, 1, 1,4),
-('LOT005', 5, '2024-05-01', '2024-10-31', 500.50, 525.00, 24.50, 2, 2, 2,5),
-('LOT006', 1, '2024-06-01', '2024-11-30', 600.25, 630.00, 29.75, 3, 3, 3,6),
-('LOT007', 2, '2024-07-01', '2024-12-31', 700.75, 735.00, 34.25, 1, 1, 1,7),
-('LOT008', 3, '2024-08-01', '2025-01-31', 800.00, 840.00, 40.00, 2, 2, 2,8),
-('LOT009', 4, '2024-09-01', '2025-02-28', 900.50, 945.00, 44.50, 3, 3, 3,9),
-('LOT010', 5, '2024-10-01', '2025-03-31', 100.75, 105.00, 49.25, 1, 1, 1,10);
-
-
-SELECT *FROM Lots
 
 
 UPDATE Lots
@@ -162,27 +209,14 @@ WHERE
     LotID = 11;
 
 
-INSERT INTO Users(Username, FullName, Role) VALUES
-('user1', 'Nguyễn Văn A', 'Thủ kho'),
-('user2', 'Trần Thị B', 'Quản lý'),
-('user3', 'Lê Văn C', 'Nhân viên');
-
-INSERT INTO Transactions (TransactionType, Date, Customer, Staff)
-VALUES
-('Nhập', '2024-01-01 10:00:00', NULL, 'user1'),
-('Xuất', '2024-02-01 11:00:00', 'Công ty A', 'user2'),
-('Nhập', '2024-03-01 12:00:00', NULL, 'user3');
-
-INSERT INTO TransactionDetails (TransactionID, LotID, Quantity) VALUES
-(1, 1, 50.00),
-(1, 2, 100.00),
-(1, 3, 150.00);
-
-
+/*Delete Id*/
 CREATE PROCEDURE DeleteLot
     @LotID INT
 AS
 BEGIN
+	-- Xóa dữ liệu từ Pallets liên kết với Lot
+     DELETE FROM Pallets WHERE LotID = @LotID;
+
     -- Xóa dữ liệu từ TransactionDetails
     DELETE FROM TransactionDetails WHERE LotID = @LotID;
 
@@ -191,7 +225,20 @@ BEGIN
 END;
 GO
 
+/*Delete All*/
+CREATE PROCEDURE DeleteAllLots
+AS
+BEGIN
+    -- Xóa toàn bộ dữ liệu từ Pallets
+    DELETE FROM Pallets;
 
+    -- Xóa toàn bộ dữ liệu từ TransactionDetails
+    DELETE FROM TransactionDetails;
+
+    -- Xóa toàn bộ dữ liệu từ Lots
+    DELETE FROM Lots;
+END;
+GO
 
 
 
