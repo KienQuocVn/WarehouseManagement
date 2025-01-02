@@ -42,6 +42,12 @@ public class DaoPallet extends WHMA<Pallet, Integer> {
     return pallets.isEmpty() ? null : pallets.get(0);
   }
 
+  public Pallet selectbyLotID(Integer id) {
+    String sql = "SELECT * FROM Pallets WHERE LotID = ?";
+    List<Pallet> pallets = selectBySql(sql, id);
+    return pallets.isEmpty() ? null : pallets.get(0);
+  }
+
   @Override
   public List<Pallet> selectbyID(String sql, Object... args) {
     return selectBySql(sql, args);

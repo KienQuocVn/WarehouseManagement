@@ -1,17 +1,22 @@
 package view;
 
+import Utils.DialogHelper;
 import Utils.RoundedBorder;
 import com.toedter.calendar.JDateChooser;
 import controller.HomeController;
 import dao.*;
+import model.Lot;
 import model.SettingSystem;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.awt.event.MouseAdapter;
@@ -24,6 +29,8 @@ public class HomePanel extends JPanel {
   public DaoWarehouseStaff daoWarehouseStaff;
   public DaoSettingSystem daoSettingSystem;
   private JPopupMenu popupMenu;
+  HomeController homeController = new HomeController(this);
+  public Lot lotSendController;
 
   public HomePanel() {
     setLayout(new BorderLayout());
@@ -62,14 +69,15 @@ public class HomePanel extends JPanel {
     menuItem1.addActionListener(e -> {
       refreshComboBoxData();
       refreshprinter();
+      RefreshT();
       refreshToSXComboBoxData();
       refreshcaSanxuatComboBoxData();
       refreshThukhoComboBoxData();
       JOptionPane.showMessageDialog(this, "Trang Chủ Đã Làm Mới!");
     });
 
-    JMenuItem menuItem2 = new JMenuItem("Thoát");
-    menuItem2.addActionListener(e -> System.exit(0));
+    JMenuItem menuItem2 = new JMenuItem("Đóng");
+
 
 
     popupMenu.add(menuItem1);
@@ -90,7 +98,7 @@ public class HomePanel extends JPanel {
     softwarePanel.setBackground(Color.WHITE);
     softwarePanel.setBorder(new RoundedBorder(0));
 
-    JLabel softwareLabel = new JLabel("PHẦN MỀM CÂN XUẤT NHẬP KHO");
+    JLabel softwareLabel = new JLabel("PHẦN MỀM CÂN BÁN THÀNH PHẨM");
     softwareLabel.setVerticalAlignment(SwingConstants.TOP);
     softwareLabel.setFont(new Font("Arial", Font.BOLD, 16));
     softwarePanel.add(softwareLabel);
@@ -122,13 +130,13 @@ public class HomePanel extends JPanel {
   JTextField soLoField;
   JTextField klBiField;
   JComboBox<String> printerBox;
+  JButton printButton;
   private JPanel createLeftPanel() {
     JPanel leftPanel = new JPanel();
     leftPanel.setLayout(new GridBagLayout());
     leftPanel.setBorder(new RoundedBorder(20));
     leftPanel.setBackground(Color.WHITE);
 
-    HomeController homeController = new HomeController(this);
 
     GridBagConstraints gbc = new GridBagConstraints();
     gbc.insets = new Insets(5, 5, 5, 5); // Khoảng cách giữa các thành phần
@@ -140,7 +148,7 @@ public class HomePanel extends JPanel {
     gbc.gridy = 0;
     gbc.gridwidth = 2; // Tiêu đề chiếm 2 cột
     JLabel titleLabel = new JLabel("THÔNG TIN ĐƠN HÀNG", SwingConstants.CENTER);
-    titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    titleLabel.setFont(new Font("Arial", Font.BOLD, 15));
     leftPanel.add(titleLabel, gbc);
 
     // Mã Hàng
@@ -149,6 +157,7 @@ public class HomePanel extends JPanel {
     gbc.gridwidth = 1; // Reset về 1 cột
     gbc.anchor = GridBagConstraints.WEST; // Căn trái
     JLabel maHangLabel = new JLabel("Mã Hàng:");
+    maHangLabel.setFont(new Font("Arial", Font.BOLD, 14));
     leftPanel.add(maHangLabel, gbc);
 
 
@@ -162,6 +171,7 @@ public class HomePanel extends JPanel {
     gbc.gridx = 0;
     gbc.gridy = 2;
     JLabel mauLabel = new JLabel("Màu Giấy In:");
+    mauLabel.setFont(new Font("Arial", Font.BOLD, 14));
     leftPanel.add(mauLabel, gbc);
 
     gbc.gridx = 1;
@@ -175,6 +185,7 @@ public class HomePanel extends JPanel {
     gbc.gridx = 0;
     gbc.gridy = 3;
     JLabel hanSDLabel = new JLabel("Hạn Sử Dụng(Ngày):");
+    hanSDLabel.setFont(new Font("Arial", Font.BOLD, 14));
     leftPanel.add(hanSDLabel, gbc);
 
     gbc.gridx = 1;
@@ -188,10 +199,11 @@ public class HomePanel extends JPanel {
     gbc.gridx = 0;
     gbc.gridy = 4;
     JLabel soLoLabel = new JLabel("Số Lô:");
+    soLoLabel.setFont(new Font("Arial", Font.BOLD, 14));
     leftPanel.add(soLoLabel, gbc);
 
     gbc.gridx = 1;
-     soLoField = new JTextField();
+    soLoField = new JTextField();
     soLoField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
     leftPanel.add(soLoField, gbc);
 
@@ -199,6 +211,7 @@ public class HomePanel extends JPanel {
     gbc.gridx = 0;
     gbc.gridy = 5;
     JLabel klBiLabel = new JLabel("Khối Lượng BÌ (Kg):");
+    klBiLabel.setFont(new Font("Arial", Font.BOLD, 14));
     leftPanel.add(klBiLabel, gbc);
 
     gbc.gridx = 1;
@@ -210,13 +223,14 @@ public class HomePanel extends JPanel {
     gbc.gridx = 0;
     gbc.gridy = 6;
     JLabel printerLabel = new JLabel("Printer:");
+    printerLabel.setFont(new Font("Arial", Font.BOLD, 14));
     leftPanel.add(printerLabel, gbc);
 
     gbc.gridx = 1;
     JPanel printerPanel = new JPanel(new BorderLayout());
     printerBox = new JComboBox<>();
     refreshprinter();
-    JButton printButton = new JButton();
+    printButton = new JButton();
     // Tải icon từ file và thay đổi kích thước
     ImageIcon originalIcon = new javax.swing.ImageIcon(getClass().getResource("/img/printer2.png"));
     Image iconImage = originalIcon.getImage(); // Lấy hình ảnh từ ImageIcon
@@ -226,6 +240,7 @@ public class HomePanel extends JPanel {
     printButton.setBackground(new Color(71,138,173,255));
     printButton.setIcon(new ImageIcon(scaledImage));
     printButton.setForeground(Color.WHITE);
+    printButton.setEnabled(false);
     printerPanel.add(printerBox, BorderLayout.CENTER);
     printerPanel.add(printButton, BorderLayout.EAST);
     leftPanel.add(printerPanel, gbc);
@@ -268,6 +283,8 @@ public class HomePanel extends JPanel {
   JComboBox<String> ToSXComboBox;
   JComboBox<String> caSanxuatComboBox;
   JComboBox<String> ThukhoComboBox;
+  JTextField SoPalletTe;
+  JDateChooser NSXDate;
   private JPanel createCenterPanel() {
     JPanel CentePanel = new JPanel();
     CentePanel.setLayout(new GridBagLayout());
@@ -284,7 +301,7 @@ public class HomePanel extends JPanel {
     gbc.gridy = 0;
     gbc.gridwidth = 2; // Tiêu đề chiếm 2 cột
     JLabel titleLabel = new JLabel("THÔNG TIN SẢN XUẤT", SwingConstants.CENTER);
-    titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    titleLabel.setFont(new Font("Arial", Font.BOLD, 15));
     CentePanel.add(titleLabel, gbc);
 
     // Mã Hàng
@@ -292,8 +309,9 @@ public class HomePanel extends JPanel {
     gbc.gridy = 1;
     gbc.gridwidth = 1; // Reset về 1 cột
     gbc.anchor = GridBagConstraints.WEST; // Căn trái
-    JLabel maHangLabel = new JLabel("Tổ Sản Xuất:");
-    CentePanel.add(maHangLabel, gbc);
+    JLabel TSXLabel = new JLabel("Tổ Sản Xuất:");
+    TSXLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    CentePanel.add(TSXLabel, gbc);
 
     gbc.gridx = 1;
     ToSXComboBox = new JComboBox<>();
@@ -304,8 +322,9 @@ public class HomePanel extends JPanel {
     // Màu
     gbc.gridx = 0;
     gbc.gridy = 2;
-    JLabel mauLabel = new JLabel("Ca Sản Xuất:");
-    CentePanel.add(mauLabel, gbc);
+    JLabel CSXLabel = new JLabel("Ca Sản Xuất:");
+    CSXLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    CentePanel.add(CSXLabel, gbc);
 
     gbc.gridx = 1;
     caSanxuatComboBox =  new JComboBox<>();
@@ -317,8 +336,9 @@ public class HomePanel extends JPanel {
     // Số Lô
     gbc.gridx = 0;
     gbc.gridy = 3;
-    JLabel soLoLabel = new JLabel("Thủ Kho:");
-    CentePanel.add(soLoLabel, gbc);
+    JLabel tHUKHOLabel = new JLabel("Thủ Kho:");
+    tHUKHOLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    CentePanel.add(tHUKHOLabel, gbc);
 
     gbc.gridx = 1;
     ThukhoComboBox = new JComboBox<>();
@@ -330,10 +350,11 @@ public class HomePanel extends JPanel {
     gbc.gridx = 0;
     gbc.gridy = 4;
     JLabel NSXLabel = new JLabel("Ngày Sản Xuất:");
+    NSXLabel.setFont(new Font("Arial", Font.BOLD, 14));
     CentePanel.add(NSXLabel, gbc);
 
     gbc.gridx = 1;
-    JDateChooser NSXDate = new JDateChooser();
+     NSXDate = new JDateChooser();
     NSXDate.setDate(new Date());
     NSXDate.setDateFormatString("dd/MM/yyyy");
     CentePanel.add(NSXDate, gbc);
@@ -342,10 +363,11 @@ public class HomePanel extends JPanel {
     gbc.gridx = 0;
     gbc.gridy = 5;
     JLabel SoPalletLabel = new JLabel("Số Pallet:");
+    SoPalletLabel.setFont(new Font("Arial", Font.BOLD, 14));
     CentePanel.add(SoPalletLabel, gbc);
 
     gbc.gridx = 1;
-    JTextField SoPalletTe= new JTextField("0");
+    SoPalletTe= new JTextField("");
     SoPalletTe.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
     CentePanel.add(SoPalletTe, gbc);
 
@@ -354,6 +376,7 @@ public class HomePanel extends JPanel {
     gbc.gridx = 0;
     gbc.gridy = 6;
     JLabel printerLabel = new JLabel("Tìm mã hàng và số lô:");
+    printerLabel.setFont(new Font("Arial", Font.BOLD, 13));
     CentePanel.add(printerLabel, gbc);
 
     gbc.gridx = 1;
@@ -452,7 +475,8 @@ public class HomePanel extends JPanel {
 
 
 
-
+  JLabel KLCLabel;
+  JTextField KLTField;
 
   private JPanel createRightPanel() {
     JPanel RightPanel = new JPanel();
@@ -470,7 +494,7 @@ public class HomePanel extends JPanel {
     gbc.gridy = 0;
     gbc.gridwidth = 2; // Tiêu đề chiếm 2 cột
     JLabel titleLabel = new JLabel("KHỐI LƯỢNG CÂN", SwingConstants.CENTER);
-    titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+    titleLabel.setFont(new Font("Arial", Font.BOLD, 15));
     RightPanel.add(titleLabel, gbc);
 
     // Tạo TPanel chứa LPanel và RPanel
@@ -523,8 +547,8 @@ public class HomePanel extends JPanel {
     LPane2.setBorder(new RoundedBorder(2));
     LPane2.setBackground(Color.WHITE);
     LPane2.setLayout(new BorderLayout());
-    JLabel DonviLabel2 = new JLabel("", SwingConstants.LEFT);
-    DonviLabel2.setFont(new Font("Arial", Font.BOLD, 30));
+    JLabel DonviLabel2 = new JLabel("Kg", SwingConstants.CENTER);
+    DonviLabel2.setFont(new Font("Arial", Font.BOLD, 24));
     LPane2.add(DonviLabel2, BorderLayout.CENTER);
 
     innerGbc.gridx = 0;
@@ -539,9 +563,9 @@ public class HomePanel extends JPanel {
     RPane2.setBorder(new RoundedBorder(2));
     RPane2.setBackground(Color.WHITE);
     RPane2.setLayout(new BorderLayout());
-    JLabel SCLabel2 = new JLabel("0.00", SwingConstants.CENTER);
-    SCLabel2.setFont(new Font("Arial", Font.BOLD, 50));
-    RPane2.add(SCLabel2, BorderLayout.CENTER);
+    KLCLabel = new JLabel("3.00", SwingConstants.CENTER);
+    KLCLabel.setFont(new Font("Arial", Font.BOLD, 50));
+    RPane2.add(KLCLabel, BorderLayout.CENTER);
 
     innerGbc.gridx = 1;
     innerGbc.gridy = 1;
@@ -554,7 +578,7 @@ public class HomePanel extends JPanel {
     JPanel KLTPanel = new JPanel();
     KLTPanel.setBackground(Color.WHITE);
     KLTPanel.setLayout(new BorderLayout());
-    JLabel KLTLabel = new JLabel("Khối Lượng Tịnh (KG):", SwingConstants.LEFT);
+    JLabel KLTLabel = new JLabel("Khối Lượng Tịnh (Kg):", SwingConstants.LEFT);
     KLTLabel.setFont(new Font("Arial", Font.BOLD, 14));
     KLTPanel.add(KLTLabel, BorderLayout.CENTER);
 
@@ -569,9 +593,10 @@ public class HomePanel extends JPanel {
     JPanel KLTFieldPanel = new JPanel();
     KLTFieldPanel.setBackground(new Color(255, 228, 181)); // Màu nền vàng nhạt
     KLTFieldPanel.setLayout(new BorderLayout());
-    JTextField KLTField = new JTextField();
+     KLTField = new JTextField();
     KLTField.setBackground(new Color(255, 255, 204)); // Màu vàng nhạt
     KLTField.setText("0.00");
+    KLTField.setEnabled(false);
     KLTField.setFont(new Font("Arial", Font.BOLD, 14));
     KLTFieldPanel.add(KLTField, BorderLayout.CENTER);
 
@@ -589,6 +614,7 @@ public class HomePanel extends JPanel {
     confirmButton.setBackground(new Color(0, 128, 255)); // Màu nền xanh
     confirmButton.setForeground(Color.WHITE); // Chữ trắng
     confirmButton.setFont(new Font("Arial", Font.BOLD, 12));
+    confirmButton.addActionListener(homeController);
     ButtonPanel.add(confirmButton, BorderLayout.CENTER);
 
     innerGbc.gridx = 0;
@@ -621,18 +647,16 @@ public class HomePanel extends JPanel {
 
 
   // Phương thức tạo bảng JTable
+  DefaultTableModel modelTableLot;
+  JTable tableLot;
   private JScrollPane createTablePanel() {
-    String[] columns = {"Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Thời Gian SX", "KL Cân", "KL Bì", "KL Hàng", "Thủ Kho", "HSD", "Số Pallet"};
-    Object[][] data = {
-            {17, "145R12C CA406T 86/84P CASUMINA TL", "BD2024100", "Tổ 1", "Ca 1", "08/10/2024", 100.00, 13.00, 85.00, "Dương Nguyễn Tấn Hòa", 12.00, "BL100"},
-            {16, "145R12C CA406T 86/84P CASUMINA TL", "BD2024015", "Tổ 1", "Ca 1", "08/10/2024", 85.00, 11.75, 70.00, "Dương Nguyễn Tấn Hòa", 18.00, "BL015"},
-    };
 
-    DefaultTableModel model = new DefaultTableModel(data, columns);
-    JTable table = new JTable(model);
-    styleTable(table);
 
-    return new JScrollPane(table);
+    tableLot = new JTable();
+    updateTableLot();
+    styleTable(tableLot);
+
+    return new JScrollPane(tableLot);
   }
 
   // Phương thức tùy chỉnh bảng JTable
@@ -680,6 +704,126 @@ public class HomePanel extends JPanel {
     }
   }
 
+  public void updateTableLot() {
+    DaoLot daoLot = new DaoLot();
+    DaoPallet daoPallet = new DaoPallet();
+    List<Lot> lots = daoLot.selectAll(); // Lấy danh sách lô từ cơ sở dữ liệu
+
+    // Chuyển đổi danh sách thành mảng hai chiều
+    Object[][] data = new Object[lots.size()][13]; // Thêm cột "LotID"
+    Object[][] originalData = new Object[lots.size()][13]; // Lưu dữ liệu ban đầu
+
+    for (int i = 0; i < lots.size(); i++) {
+      Lot lot = lots.get(i);
+      data[i][0] = i + 1; // STT
+      data[i][1] = lot.getProduct().getProductName(); // Mã Hàng
+      data[i][2] = lot.getLotIDU(); // Số Lô
+      data[i][3] = lot.getProductionGroup().getGroupName(); // Tổ
+      data[i][4] = lot.getShift().getShiftName(); // Ca
+      data[i][5] = lot.getProductionTime(); // Thời Gian SX
+      data[i][6] = lot.getWarehouseWeight(); // KL Cân
+      data[i][7] = lot.getWeightDeviation(); // KL Bì
+      data[i][8] = lot.getWeight(); // KL Hàng
+      data[i][9] = lot.getWarehouseStaff().getStaffName(); // Thủ Kho
+      data[i][10] = lot.getProduct().getHSD(); // HSD
+      data[i][11] = daoPallet.selectbyLotID(lot.getLotID()).getPalletIDU(); // Số Pallet
+      data[i][12] = lot.getLotID(); // LotID (ẩn)
+
+      System.arraycopy(data[i], 0, originalData[i], 0, data[i].length);
+    }
+
+    // Định nghĩa DefaultTableModel với đầy đủ cột, bao gồm cả "LotID" (ẩn)
+    modelTableLot = new DefaultTableModel(data, new Object[]{
+            "Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Thời Gian SX", "KL Cân",
+            "KL Bì", "KL Tịnh", "Thủ Kho", "HSD", "Số Pallet", "LotID"
+    }) {
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return column != 0 && column != 12; // Không cho phép chỉnh sửa cột STT và LotID
+      }
+    };
+
+    tableLot.setModel(modelTableLot);
+
+    // Ẩn cột "LotID"
+    tableLot.getColumnModel().getColumn(12).setMinWidth(0);
+    tableLot.getColumnModel().getColumn(12).setMaxWidth(0);
+    tableLot.getColumnModel().getColumn(12).setWidth(0);
+
+    styleTable(tableLot); // Gọi hàm styleTable để định dạng bảng
+
+    // Đăng ký TableModelListener để xử lý sự kiện thay đổi dữ liệu
+    modelTableLot.addTableModelListener(new TableModelListener() {
+      @Override
+      public void tableChanged(TableModelEvent e) {
+        if (e.getType() == TableModelEvent.UPDATE) {
+          int row = e.getFirstRow();
+          int column = e.getColumn();
+
+          // Chỉ xử lý khi sửa cột cần thiết
+          if (column == 1 || column == 5 || column == 6) {
+            String updatedValue = modelTableLot.getValueAt(row, column).toString();
+            String originalValue = originalData[row][column].toString();
+
+            // Kiểm tra xem giá trị mới có khác giá trị cũ không
+            if (!updatedValue.equals(originalValue)) {
+              try {
+                Integer lotID = (Integer) modelTableLot.getValueAt(row, 12);
+
+                // Kiểm tra nhập liệu
+                if (column == 1 && updatedValue.isEmpty()) {
+                  DialogHelper.alert(null, "Vui lòng nhập Mã Lô trong bảng!");
+                  return;
+                }
+
+                if ((column == 5 || column == 6)) {
+                  try {
+                    new BigDecimal(updatedValue); // Kiểm tra giá trị là số hợp lệ
+                  } catch (NumberFormatException ex) {
+                    DialogHelper.alert(null, "Khối lượng phải là một số hợp lệ!");
+                    return;
+                  }
+                }
+
+                // Cập nhật dữ liệu
+                Lot updatedLot = new Lot(
+                        lotID,
+                        modelTableLot.getValueAt(row, 1).toString(),
+                        lots.get(row).getProduct(),
+                        lots.get(row).getProductionTime(),
+                        lots.get(row).getExpirationDate(),
+                        new BigDecimal(modelTableLot.getValueAt(row, 5).toString()),
+                        new BigDecimal(modelTableLot.getValueAt(row, 6).toString()),
+                        lots.get(row).getWeightDeviation(),
+                        lots.get(row).getShift(),
+                        lots.get(row).getProductionGroup(),
+                        lots.get(row).getWarehouseStaff(),
+                        lots.get(row).getPallets()
+                );
+
+                daoLot.update(updatedLot); // Gọi phương thức update từ DAO
+
+                // Cập nhật giá trị ban đầu
+                originalData[row][column] = updatedValue;
+                DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
+                updateTableLot(); // Cập nhật lại bảng
+              } catch (Exception ex) {
+                if (ex.getMessage().contains("UNIQUE")) {
+                  DialogHelper.alert(null, "Mã Lô đã tồn tại! Vui lòng nhập mã khác.");
+                } else {
+                  DialogHelper.alert(null, "Lỗi khi cập nhật Lô: " + ex.getMessage());
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+
+
+
+
   //getter
 
   // Getter cho maHangComboBox
@@ -711,6 +855,48 @@ public class HomePanel extends JPanel {
   public JComboBox<String> getPrinterBox() {
     return printerBox;
   }
+
+  //center panel
+
+  public JComboBox<String> getToSXComboBox() {
+    return ToSXComboBox;
+  }
+
+  public JComboBox<String> getCaSanxuatComboBox() {
+    return caSanxuatComboBox;
+  }
+
+  public JComboBox<String> getThukhoComboBox() {
+    return ThukhoComboBox;
+  }
+
+  public JTextField getSoPalletTe() {
+    return SoPalletTe;
+  }
+
+  public JDateChooser getNSXDate() {
+    return NSXDate;
+  }
+
+  //right center
+
+  public JLabel getKLCLabel() {
+    return KLCLabel;
+  }
+
+  public JTextField getKLTField() {
+    return KLTField;
+  }
+
+
+  public void  RefreshT() {
+      getSoLoField().setText("");
+      getKlBiField().setText("0");
+    getSoPalletTe().setText("");
+    getNSXDate().setDate(new Date());
+    getKLCLabel().setText("0.00");
+  }
+
 
 
 }

@@ -27,6 +27,8 @@ public class TransactionDetail {
 
     @Column(name = "Quantity", columnDefinition = "DECIMAL(10, 2)", nullable = false)
     private Double quantity; // Số lượng của giao dịch
+
+
 }
 
 
