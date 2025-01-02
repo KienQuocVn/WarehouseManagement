@@ -94,5 +94,29 @@ public class DaoProduct extends WHMA<Product, Integer> {
         return list;
     }
 
+    public String getStaffNameByProductName(String productName) {
+        String sql = "SELECT ws.StaffName " +
+            "FROM Products p " +
+            "JOIN Lots l ON p.productID = l.ProductID " +
+            "JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.staffId " +
+            "WHERE p.ProductName = ?";
 
+        List<String> staffNames = new ArrayList<>();
+        try (Connection conn = JdbcHelper.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Set the product name parameter
+            stmt.setString(1, productName);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    staffNames.add(rs.getString("StaffName"));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Error while fetching staff name: " + e.getMessage());
+        }
+
+        return staffNames.isEmpty() ? null : staffNames.get(0);
+    }
 }

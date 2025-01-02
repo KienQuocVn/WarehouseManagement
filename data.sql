@@ -99,6 +99,8 @@ VALUES
 ('Product B', 12.0, 'Blue'),
 ('Product C', 18.0, 'Green');
 
+SELECT LotIDU FROM Lots WHERE ProductID = 1
+
 -- Table: Shift
 INSERT INTO Shifts (ShiftName)
 VALUES 
@@ -119,6 +121,12 @@ VALUES
 ('John Doe'),
 ('Jane Smith'),
 ('Mike Johnson');
+
+--Dem Identity LotID
+SELECT IDENT_CURRENT('Lots') AS CurrentIdentity, 
+       IDENT_INCR('Lots') AS IncrementStep,
+       IDENT_CURRENT('Lots') + IDENT_INCR('Lots') AS NextIdentity;
+
 
 -- Table: Lot
 INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, GroupID, WarehouseStaffID)
@@ -264,7 +272,7 @@ SELECT
     s.ShiftID,
     s.ShiftName,
     l.ProductionTime,
-    l.ExpirationDays,
+    l.ExpirationDate,
     l.Weight,
     l.WarehouseWeight,
     l.WeightDeviation,
@@ -319,3 +327,25 @@ WHERE (pg.GroupName = 'Nhóm A')
 ORDER BY l.ProductionTime DESC;
 
 
+SELECT ws.StaffName
+FROM Products p
+JOIN Lots l ON p.productID = l.ProductID
+JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.staffId
+WHERE p.ProductName = N'Product A';
+
+
+SELECT 
+    l.LotID,
+    u.Username,
+    t.Date,
+    ws.StaffName
+FROM 
+    TransactionDetails td
+JOIN 
+    Lots l ON td.LotID = l.LotID
+JOIN 
+    Transactions t ON td.TransactionID = t.TransactionID
+JOIN 
+    WarehouseStaff ws ON l.WarehouseStaffID = ws.staffId
+JOIN 
+    [Users] u ON t.Staff = u.Username

@@ -28,7 +28,4 @@ public class Product {
 
     @Column(name = "Color", columnDefinition = "NVARCHAR(255)")
     private String color; // Màu sắc sản phẩm
-
-
-
 }

@@ -295,4 +295,17 @@ public class DaoLot extends WHMA<Lot, Integer> {
     }
   }
 
+  public List<String> getLotIDUByProductID(int productID) {
+    String sql = "SELECT LotIDU FROM Lots WHERE ProductID = ?";
+    List<String> lotIDs = new ArrayList<>();
+    try (ResultSet rs = JdbcHelper.executeQuery(sql, productID)) {
+      while (rs.next()) {
+        lotIDs.add(rs.getString("LotIDU"));
+      }
+    } catch (SQLException ex) {
+      ex.printStackTrace(); // Xử lý lỗi
+    }
+    return lotIDs;
+  }
+
 }
