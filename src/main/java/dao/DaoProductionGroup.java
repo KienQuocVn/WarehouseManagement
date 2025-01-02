@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import model.Product;
 import model.ProductionGroup;
+import model.Shift;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,6 +49,12 @@ public class DaoProductionGroup extends WHMA<ProductionGroup, Integer> {
     String sql = "SELECT * FROM ProductionGroups WHERE GroupID = ?";
     List<ProductionGroup> groups = selectBySql(sql, id);
     return groups.isEmpty() ? null : groups.get(0);
+  }
+
+  public ProductionGroup selectbyName(String name) {
+    String sql = "SELECT * FROM ProductionGroups WHERE GroupName = ?";
+    List<ProductionGroup> ProductionGroups = selectBySql(sql, name);
+    return ProductionGroups.isEmpty() ? null : ProductionGroups.get(0);
   }
 
   public List<String> getAllProductionGroupNames() {

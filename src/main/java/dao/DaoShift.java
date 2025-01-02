@@ -50,6 +50,8 @@ public class DaoShift extends WHMA<Shift, Integer> {
     return shifts.isEmpty() ? null : shifts.get(0);
   }
 
+
+
   public List<String> getAllShiftNames() {
     List<String> productNames = new ArrayList<>();
     String sql = "SELECT ShiftName FROM Shifts";
@@ -89,6 +91,7 @@ public class DaoShift extends WHMA<Shift, Integer> {
     List<Shift> shifts = selectBySql(sql, name);
     return shifts.isEmpty() ? null : shifts.get(0);
   }
+
   public Shift findByName(String shiftName) {
     String sql = "SELECT * FROM Shifts WHERE ShiftName = ?";
     try (Connection connection = JdbcHelper.getConnection(); // Obtain connection

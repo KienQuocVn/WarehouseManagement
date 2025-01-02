@@ -78,16 +78,18 @@ public class HomeController implements ActionListener {
                         lot.setLotIDU("BD" + currentYear + homePanel.getSoLoField().getText().trim());
                         lot.setProduct(daoProduct.selectbyName((String) homePanel.getMaHangComboBox().getSelectedItem()));
                         lot.setProductionTime(homePanel.getNSXDate().getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-                        lot.setExpirationDate(LocalDate.parse(homePanel.getHanSDField().getText().trim()));
-                        lot.setWeight(new BigDecimal(homePanel.getKLTField().getText().trim()));
+                        lot.setExpirationDate(LocalDate.now().plusDays((int) Math.floor(Double.parseDouble(homePanel.getHanSDField().getText().trim()))));
+                        lot.setWeight(new BigDecimal(homePanel.getKLCLabel().getText().trim())
+                                .subtract(new BigDecimal(homePanel.getKlBiField().getText().trim())));
                         lot.setWarehouseWeight(new BigDecimal(homePanel.getKLCLabel().getText().trim()));
                         lot.setWeightDeviation(new BigDecimal(homePanel.getKlBiField().getText().trim()));
-                        lot.setShift(daoShift.selectbyID(homePanel.getCaSanxuatComboBox().getSelectedIndex()));
-                        lot.setProductionGroup(daoProductionGroup.selectbyID(homePanel.getToSXComboBox().getSelectedIndex()));
-                        lot.setWarehouseStaff(daoWarehouseStaff.selectbyID(homePanel.getThukhoComboBox().getSelectedIndex()));
+                        lot.setShift(daoShift.selectbyName((String) homePanel.getCaSanxuatComboBox().getSelectedItem()));
+                        lot.setProductionGroup(daoProductionGroup.selectbyName((String) homePanel.getToSXComboBox().getSelectedItem()));
+                        lot.setWarehouseStaff(daoWarehouseStaff.selectbyName((String)  homePanel.getThukhoComboBox().getSelectedItem()));
 
                         // Thêm Lot và lấy LotID
                         int lotID = daoLot.insertAndGetID(lot);
+                        System.out.println(lotID);
 
                         if (lotID > 0) {
                             // Tạo đối tượng Pallet
@@ -100,10 +102,12 @@ public class HomeController implements ActionListener {
 
                             // Hiển thị thông báo thành công
                             DialogHelper.alert(homePanel, "Lô hàng và Pallet đã được thêm thành công!");
+                            ResetForm();
                         } else {
                             DialogHelper.alert(homePanel, "Không thể thêm lô hàng!");
                         }
                     } catch (Exception ex) {
+                        System.out.println(ex);
                         DialogHelper.alert(homePanel, "Lỗi khi thêm dữ liệu: " + ex.getMessage());
                     }
                 }
@@ -112,6 +116,18 @@ public class HomeController implements ActionListener {
 
 
     }
+
+
+    public void ResetForm() {
+        homePanel.refreshComboBoxData();
+        homePanel.refreshprinter();
+        homePanel.RefreshT();
+        homePanel.refreshToSXComboBoxData();
+        homePanel.refreshcaSanxuatComboBoxData();
+        homePanel.refreshThukhoComboBoxData();
+        homePanel.updateTableLot();
+    }
+
 
     public boolean CheckValid() {
         // Kiểm tra ComboBox

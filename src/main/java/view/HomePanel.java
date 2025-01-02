@@ -6,6 +6,8 @@ import com.toedter.calendar.JDateChooser;
 import controller.HomeController;
 import dao.*;
 import model.Lot;
+import model.Pallet;
+import model.Product;
 import model.SettingSystem;
 
 import javax.swing.*;
@@ -17,6 +19,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.awt.event.MouseAdapter;
@@ -73,6 +77,7 @@ public class HomePanel extends JPanel {
       refreshToSXComboBoxData();
       refreshcaSanxuatComboBoxData();
       refreshThukhoComboBoxData();
+      updateTableLot();
       JOptionPane.showMessageDialog(this, "Trang Chủ Đã Làm Mới!");
     });
 
@@ -249,7 +254,7 @@ public class HomePanel extends JPanel {
   }
 
   // Hàm làm mới dữ liệu cho JComboBox
-  private void refreshComboBoxData() {
+  public void refreshComboBoxData() {
     daoProduct = new DaoProduct();
     List<String> productNames = daoProduct.getAllProductNames(); // Lấy danh sách mới từ DAO
 
@@ -269,7 +274,7 @@ public class HomePanel extends JPanel {
   }
 
   // Hàm Cập nhật printer
-  private void refreshprinter() {
+  public void refreshprinter() {
     daoSettingSystem = new DaoSettingSystem();
     SettingSystem settingSystem = daoSettingSystem.selectLatest();
     if(settingSystem != null) {
@@ -415,7 +420,7 @@ public class HomePanel extends JPanel {
   }
 
   // Hàm làm mới dữ liệu cho JComboBox
-  private void refreshToSXComboBoxData() {
+  public void refreshToSXComboBoxData() {
     DaoProductionGroup = new DaoProductionGroup();
     List<String> productNames = DaoProductionGroup.getAllProductionGroupNames(); // Lấy danh sách mới từ DAO
     if(productNames.size() > 0) {
@@ -434,7 +439,7 @@ public class HomePanel extends JPanel {
   }
 
   // Hàm làm mới dữ liệu cho JComboBox
-  private void refreshcaSanxuatComboBoxData() {
+  public void refreshcaSanxuatComboBoxData() {
     daoShift = new DaoShift();
     List<String> productNames = daoShift.getAllShiftNames(); // Lấy danh sách mới từ DAO
 
@@ -453,7 +458,7 @@ public class HomePanel extends JPanel {
   }
 
   // Hàm làm mới dữ liệu cho JComboBox
-  private void refreshThukhoComboBoxData() {
+  public void refreshThukhoComboBoxData() {
     daoWarehouseStaff = new DaoWarehouseStaff();
     List<String> productNames = daoWarehouseStaff.getAllWarehouseStaffNames(); // Lấy danh sách mới từ DAO
 
@@ -475,9 +480,9 @@ public class HomePanel extends JPanel {
 
 
 
+  //panel phai
   JLabel KLCLabel;
   JTextField KLTField;
-
   private JPanel createRightPanel() {
     JPanel RightPanel = new JPanel();
     RightPanel.setLayout(new GridBagLayout());
@@ -563,7 +568,7 @@ public class HomePanel extends JPanel {
     RPane2.setBorder(new RoundedBorder(2));
     RPane2.setBackground(Color.WHITE);
     RPane2.setLayout(new BorderLayout());
-    KLCLabel = new JLabel("3.00", SwingConstants.CENTER);
+    KLCLabel = new JLabel("0.00", SwingConstants.CENTER);
     KLCLabel.setFont(new Font("Arial", Font.BOLD, 50));
     RPane2.add(KLCLabel, BorderLayout.CENTER);
 
@@ -596,8 +601,8 @@ public class HomePanel extends JPanel {
      KLTField = new JTextField();
     KLTField.setBackground(new Color(255, 255, 204)); // Màu vàng nhạt
     KLTField.setText("0.00");
-    KLTField.setEnabled(false);
-    KLTField.setFont(new Font("Arial", Font.BOLD, 14));
+    KLTField.setEditable(false);
+    KLTField.setFont(new Font("Arial", Font.BOLD, 19));
     KLTFieldPanel.add(KLTField, BorderLayout.CENTER);
 
     innerGbc.gridx = 1;
@@ -643,7 +648,7 @@ public class HomePanel extends JPanel {
   }
 
 
-
+//may cai nut nam o tren cai bang
 
 
   // Phương thức tạo bảng JTable
@@ -725,7 +730,7 @@ public class HomePanel extends JPanel {
       data[i][7] = lot.getWeightDeviation(); // KL Bì
       data[i][8] = lot.getWeight(); // KL Hàng
       data[i][9] = lot.getWarehouseStaff().getStaffName(); // Thủ Kho
-      data[i][10] = lot.getProduct().getHSD(); // HSD
+      data[i][10] = lot.getExpirationDate(); // HSD
       data[i][11] = daoPallet.selectByLotID(lot.getLotID()).getPalletIDU(); // Số Pallet
       data[i][12] = lot.getLotID(); // LotID (ẩn)
 
@@ -739,7 +744,7 @@ public class HomePanel extends JPanel {
     }) {
       @Override
       public boolean isCellEditable(int row, int column) {
-        return column != 0 && column != 12; // Không cho phép chỉnh sửa cột STT và LotID
+        return column != 0 && column != 1 && column != 3 && column != 4 && column != 5 && column != 6 && column != 8 && column != 9 && column != 10 && column != 12; // Không cho phép chỉnh sửa cột STT và LotID
       }
     };
 
@@ -761,7 +766,7 @@ public class HomePanel extends JPanel {
           int column = e.getColumn();
 
           // Chỉ xử lý khi sửa cột cần thiết
-          if (column == 1 || column == 5 || column == 6) {
+          if (column == 2 || column == 7 || column == 11) {
             String updatedValue = modelTableLot.getValueAt(row, column).toString();
             String originalValue = originalData[row][column].toString();
 
@@ -771,12 +776,12 @@ public class HomePanel extends JPanel {
                 Integer lotID = (Integer) modelTableLot.getValueAt(row, 12);
 
                 // Kiểm tra nhập liệu
-                if (column == 1 && updatedValue.isEmpty()) {
+                if (column == 2 && updatedValue.isEmpty()) {
                   DialogHelper.alert(null, "Vui lòng nhập Mã Lô trong bảng!");
                   return;
                 }
 
-                if ((column == 5 || column == 6)) {
+                if ((column == 7)) {
                   try {
                     new BigDecimal(updatedValue); // Kiểm tra giá trị là số hợp lệ
                   } catch (NumberFormatException ex) {
@@ -785,24 +790,39 @@ public class HomePanel extends JPanel {
                   }
                 }
 
+                if (column == 11 && updatedValue.isEmpty()) {
+                  DialogHelper.alert(null, "Vui lòng nhập Số Pallet trong bảng!");
+                  return;
+                }
+
+
                 // Cập nhật dữ liệu
-                Lot updatedLot = new Lot(
-                        lotID,
-                        modelTableLot.getValueAt(row, 1).toString(),
-                        lots.get(row).getProduct(),
-                        lots.get(row).getProductionTime(),
-                        lots.get(row).getExpirationDate(),
-                        new BigDecimal(modelTableLot.getValueAt(row, 5).toString()),
-                        new BigDecimal(modelTableLot.getValueAt(row, 6).toString()),
-                        lots.get(row).getWeightDeviation(),
-                        lots.get(row).getShift(),
-                        lots.get(row).getProductionGroup(),
-                        lots.get(row).getWarehouseStaff(),
-                        lots.get(row).getPallets()
+
+
+                Lot updatedLot = new Lot();
+
+            // Gán các thuộc tính từng bước
+                updatedLot.setLotID(lotID);
+                updatedLot.setLotIDU(modelTableLot.getValueAt(row, 2).toString());
+                updatedLot.setProduct(lots.get(row).getProduct());
+                updatedLot.setProductionTime(lots.get(row).getProductionTime());
+                updatedLot.setExpirationDate(lots.get(row).getExpirationDate());
+                updatedLot.setWeight(
+                        new BigDecimal(modelTableLot.getValueAt(row, 6).toString())
+                                .subtract(new BigDecimal(modelTableLot.getValueAt(row, 7).toString()))
                 );
+                updatedLot.setWarehouseWeight(new BigDecimal(modelTableLot.getValueAt(row, 6).toString()));
+                updatedLot.setWeightDeviation(new BigDecimal(modelTableLot.getValueAt(row, 7).toString()));
+                updatedLot.setShift(lots.get(row).getShift());
+                updatedLot.setProductionGroup(lots.get(row).getProductionGroup());
+                updatedLot.setWarehouseStaff(lots.get(row).getWarehouseStaff());
+
+                Pallet palletUpdate = daoPallet.selectByLotID(lotID);
+                palletUpdate.setPalletIDU(modelTableLot.getValueAt(row, 11).toString());
+
 
                 daoLot.update(updatedLot); // Gọi phương thức update từ DAO
-
+                daoPallet.update(palletUpdate);
                 // Cập nhật giá trị ban đầu
                 originalData[row][column] = updatedValue;
                 DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
@@ -819,6 +839,44 @@ public class HomePanel extends JPanel {
         }
       }
     });
+
+
+    // Thêm sự kiện lắng nghe khi người dùng chọn dòng
+    tableLot.getSelectionModel().addListSelectionListener(e -> {
+      if (!e.getValueIsAdjusting() && tableLot.getSelectedRow() != -1) {
+
+
+        int selectedRow = tableLot.getSelectedRow();
+        Integer LotID = (Integer) modelTableLot.getValueAt(selectedRow, 12);
+
+        // Lấy sản phẩm từ cơ sở dữ liệu
+        Lot selectedLot = daoLot.selectbyID(LotID);
+
+        if (selectedLot != null) {
+          // Gán giá trị cho các trường combo box và text field
+          getMaHangComboBox().setSelectedItem(selectedLot.getProduct().getProductName());
+
+          getSoLoField().setText(selectedLot.getLotIDU());
+          getKlBiField().setText(selectedLot.getWeightDeviation().toString());
+
+          getToSXComboBox().setSelectedItem(selectedLot.getProductionGroup().getGroupName());
+          getCaSanxuatComboBox().setSelectedItem(selectedLot.getShift().getShiftName());
+          getThukhoComboBox().setSelectedItem(selectedLot.getWarehouseStaff().getStaffName());
+          getSoPalletTe().setText(daoPallet.selectByLotID(selectedLot.getLotID()).getPalletIDU());
+
+          // Chuyển đổi LocalDate sang java.util.Date
+          LocalDate expirationDate = selectedLot.getProductionTime();
+          Date utilDate = Date.from(expirationDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+// Gán giá trị vào JDateChooser
+          getNSXDate().setDate(utilDate);
+
+          getKLCLabel().setText(selectedLot.getWarehouseWeight().toString());
+          getKLTField().setText(selectedLot.getWeight().toString());
+        }
+      }
+    });
+
   }
 
 
@@ -894,7 +952,7 @@ public class HomePanel extends JPanel {
       getKlBiField().setText("0");
     getSoPalletTe().setText("");
     getNSXDate().setDate(new Date());
-    getKLCLabel().setText("0.00");
+    getKLCLabel().setText("100.00");
   }
 
 
