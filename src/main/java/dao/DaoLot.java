@@ -1,13 +1,12 @@
 package dao;
 
 import AbtractClass.WHMA;
-import java.sql.CallableStatement;
-import java.sql.Connection;
+
+import java.sql.*;
+
 import model.Lot;
 import Utils.JdbcHelper;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -48,6 +47,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
   public void update(Lot entity) {
     String sql = """
         UPDATE Lots SET 
+        LotIDU = ?,
         ProductID = ?, 
         GroupID = ?, 
         ShiftID = ?, 
@@ -62,6 +62,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
 
     JdbcHelper.executeUpdate(
         sql,
+        entity.getLotIDU(),
         entity.getProduct().getProductID(),
         entity.getProductionGroup().getGroupID(),
         entity.getShift().getShiftId(),
@@ -210,32 +211,41 @@ public class DaoLot extends WHMA<Lot, Integer> {
   }
 
   public int insertAndGetID(Lot lot) {
-    String sql = "INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, ProductionGroupID, WarehouseStaffID) " +
-        "OUTPUT INSERTED.LotID " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    try (ResultSet rs = JdbcHelper.executeQueryWithGeneratedKeys(sql,
-        lot.getLotIDU(),
-        lot.getProduct().getProductID(),
-        lot.getProductionTime(),
-        lot.getExpirationDate(),
-        lot.getWeight(),
-        lot.getWarehouseWeight(),
-        lot.getWeightDeviation(),
-        lot.getShift().getShiftId(),
-        lot.getProductionGroup().getGroupID(),
-        lot.getWarehouseStaff().getStaffId())) {
+    String sql = "INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, GroupID, WarehouseStaffID) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    try (Connection con = JdbcHelper.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-      if (rs.next()) {
-        return rs.getInt(1); // Lấy LotID được sinh ra
+      // Gán giá trị cho các tham số
+      ps.setString(1, lot.getLotIDU());
+      ps.setInt(2, lot.getProduct().getProductID());
+      ps.setObject(3, lot.getProductionTime());
+      ps.setObject(4, lot.getExpirationDate());
+      ps.setBigDecimal(5, lot.getWeight());
+      ps.setBigDecimal(6, lot.getWarehouseWeight());
+      ps.setBigDecimal(7, lot.getWeightDeviation());
+      ps.setInt(8, lot.getShift().getShiftId());
+      ps.setInt(9, lot.getProductionGroup().getGroupID());
+      ps.setInt(10, lot.getWarehouseStaff().getStaffId());
+
+      // Thực thi câu lệnh và lấy khóa tự động sinh
+      ps.executeUpdate();
+      try (ResultSet rs = ps.getGeneratedKeys()) {
+        if (rs.next()) {
+          return rs.getInt(1); // Lấy giá trị LotID
+        }
       }
+
     } catch (SQLException ex) {
       throw new RuntimeException("Lỗi khi chèn Lot và lấy ID: " + ex.getMessage(), ex);
     }
+
     return -1; // Trả về -1 nếu không thành công
   }
 
 
   public List<Lot> searchLots(String productionGroup, String shift, String productName, LocalDate fromDate, LocalDate toDate, String status) {
+
     StringBuilder sql = new StringBuilder("""
         SELECT 
             l.LotID,

@@ -4,6 +4,8 @@ import AbtractClass.WHMA;
 import Utils.JdbcHelper;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+
+import model.Shift;
 import model.WarehouseStaff;
 
 import java.sql.ResultSet;
@@ -47,6 +49,12 @@ public class DaoWarehouseStaff extends WHMA<WarehouseStaff, Integer> {
     String sql = "SELECT * FROM WarehouseStaff WHERE StaffId = ?";
     List<WarehouseStaff> staffList = selectBySql(sql, id);
     return staffList.isEmpty() ? null : staffList.get(0);
+  }
+
+  public WarehouseStaff selectbyName(String name) {
+    String sql = "SELECT * FROM WarehouseStaff WHERE StaffName = ?";
+    List<WarehouseStaff> WarehouseStaffs = selectBySql(sql, name);
+    return WarehouseStaffs.isEmpty() ? null : WarehouseStaffs.get(0);
   }
 
   public List<String> getAllWarehouseStaffNames() {
