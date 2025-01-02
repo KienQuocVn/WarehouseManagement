@@ -84,14 +84,14 @@ public class DaoTransactionDetail extends WHMA<TransactionDetail, Integer> {
   public List<Object[]> selectTransactionDetails() {
     String sql = "SELECT " +
         "l.LotID, " +
-        "u.FullName, " +
+        "a.username, " +
         "t.Date, " +
         "ws.StaffName " +
         "FROM TransactionDetails td " +
         "JOIN Lots l ON td.LotID = l.LotID " +
         "JOIN Transactions t ON td.TransactionID = t.TransactionID " +
         "JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.staffId " +
-        "JOIN Users u ON t.Staff = u.FullName"; // Đổi [Users] thành Users nếu không cần ngoặc vuông
+        "JOIN Accounts a ON t.Staff = a.username"; // Đổi [Users] thành Users nếu không cần ngoặc vuông
     return selectBySql1(sql);
   }
 
@@ -101,7 +101,7 @@ public class DaoTransactionDetail extends WHMA<TransactionDetail, Integer> {
       while (rs.next()) {
         Object[] result = new Object[4];
         result[0] = rs.getInt("LotID");             // LotID
-        result[1] = rs.getString("FullName");       // Username
+        result[1] = rs.getString("username");       // Username
         result[2] = rs.getTimestamp("Date").toLocalDateTime(); // Date (converted to LocalDateTime)
         result[3] = rs.getString("StaffName");      // StaffName
         list.add(result);

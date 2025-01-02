@@ -1,6 +1,5 @@
 package model;
 import jakarta.persistence.*;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,6 +29,6 @@ public class Transaction {
 
     @ManyToOne
     @JoinColumn(name = "Staff", nullable = false)
-    private User staff; // Nhân viên thực hiện giao dịch
+    private Account staff; // Nhân viên thực hiện giao dịch
 }
 

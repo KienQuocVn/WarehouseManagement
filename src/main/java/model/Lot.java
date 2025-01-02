@@ -63,4 +63,7 @@ public class Lot {
 
     @OneToMany(mappedBy = "lot", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Pallet> pallets = new ArrayList<>(); // Cascade ALL và orphanRemoval để xóa đúng dữ liệu liên quan
+
+    @Column(name = "Status", columnDefinition = "NVARCHAR(255)")
+    private String status; //trạng thái
 }
