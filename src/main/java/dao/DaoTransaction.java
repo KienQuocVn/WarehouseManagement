@@ -19,7 +19,7 @@ public class DaoTransaction extends WHMA<Transaction, Integer> {
         entity.getTransactionType(),
         entity.getDate(),
         entity.getCustomer(),
-        entity.getStaff().getUsername());
+        entity.getStaff().getId());
   }
 
   @Override
@@ -29,7 +29,7 @@ public class DaoTransaction extends WHMA<Transaction, Integer> {
         entity.getTransactionType(),
         entity.getDate(),
         entity.getCustomer(),
-        entity.getStaff().getUsername(),
+        entity.getStaff().getId(),
         entity.getTransactionID());
   }
 
@@ -70,7 +70,7 @@ public class DaoTransaction extends WHMA<Transaction, Integer> {
 
         // Assuming `User` object is retrieved elsewhere or a separate DaoUser method is used
         User staff = new User();
-        staff.setUsername(rs.getString("Staff"));
+        staff.setId(rs.getInt("Staff"));
         transaction.setStaff(staff);
 
         list.add(transaction);

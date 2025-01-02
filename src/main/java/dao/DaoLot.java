@@ -211,6 +211,33 @@ public class DaoLot extends WHMA<Lot, Integer> {
     return list;
   }
 
+  public int insertAndGetID(Lot lot) {
+    String sql = "INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, ProductionGroupID, WarehouseStaffID) " +
+            "OUTPUT INSERTED.LotID " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    try (ResultSet rs = JdbcHelper.executeQueryWithGeneratedKeys(sql,
+            lot.getLotIDU(),
+            lot.getProduct().getProductID(),
+            lot.getProductionTime(),
+            lot.getExpirationDate(),
+            lot.getWeight(),
+            lot.getWarehouseWeight(),
+            lot.getWeightDeviation(),
+            lot.getShift().getShiftId(),
+            lot.getProductionGroup().getGroupID(),
+            lot.getWarehouseStaff().getStaffId())) {
+
+      if (rs.next()) {
+        return rs.getInt(1); // Lấy LotID được sinh ra
+      }
+    } catch (SQLException ex) {
+      throw new RuntimeException("Lỗi khi chèn Lot và lấy ID: " + ex.getMessage(), ex);
+    }
+    return -1; // Trả về -1 nếu không thành công
+  }
+
+
+
   // Search Lots by criteria
   public List<Lot> searchLots(String productionGroup, String shift, String productName, LocalDate fromDate, LocalDate toDate) {
     StringBuilder sql = new StringBuilder("""

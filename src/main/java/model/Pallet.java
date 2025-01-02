@@ -16,9 +16,6 @@ public class Pallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer palletID;
 
-    @Column(name = "PalletName", columnDefinition = "NVARCHAR(255)", nullable = false)
-    private String palletName;
-  
     @Column(name = "palletIDU", columnDefinition = "NVARCHAR(255)", unique = true, length = 20, nullable = false)
     private String palletIDU;
 
@@ -26,4 +23,3 @@ public class Pallet {
     @JoinColumn(name = "LotID", nullable = false)
     private Lot lot; // Khóa ngoại tham chiếu đến bảng Lots
 }
-

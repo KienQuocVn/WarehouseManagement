@@ -22,7 +22,9 @@ public class CaiDonPanel extends JPanel {
   public Shift ShiftSendController;
   public ProductionGroup ProductionGroupSendController;
   public WarehouseStaff WarehouseStaffSendController;
+  public User KhachHangSendController;
 
+  //main
   public CaiDonPanel() {
     setLayout(new BorderLayout());
 
@@ -32,7 +34,7 @@ public class CaiDonPanel extends JPanel {
 
     // Thanh dashboard bên trái
     JPanel dashboard = new JPanel();
-    dashboard.setLayout(new GridLayout(5, 1, 0, 0));
+    dashboard.setLayout(new GridLayout(6, 1, 0, 0));
     dashboard.setPreferredSize(new Dimension(170, 0));
 
     // Tải icon từ file và thay đổi kích thước
@@ -61,6 +63,12 @@ public class CaiDonPanel extends JPanel {
     btnThuKho.setBackground(Color.WHITE);
     btnThuKho.setIcon(new ImageIcon(scaledImage));
     btnThuKho.setFont(new Font("Arial", Font.BOLD, 14));
+    //-------------btn khach hang
+
+    JButton btnKhachang = new JButton("Khách Hàng");
+    btnKhachang.setBackground(Color.WHITE);
+    btnKhachang.setIcon(new ImageIcon(scaledImage));
+    btnKhachang.setFont(new Font("Arial", Font.BOLD, 14));
     //-------------- btn Cấu Hình
     // Tải icon từ file và thay đổi kích thước
     ImageIcon originalIcon2 = new javax.swing.ImageIcon(getClass().getResource("/img/setting.png"));
@@ -81,12 +89,14 @@ public class CaiDonPanel extends JPanel {
     btnCaSanXuat.setPreferredSize(buttonSize);
     btnToSanXuat.setPreferredSize(buttonSize);
     btnThuKho.setPreferredSize(buttonSize);
+    btnKhachang.setPreferredSize(buttonSize);
     btnCauHinh.setPreferredSize(buttonSize);
 
     dashboard.add(btnMaHang);
     dashboard.add(btnCaSanXuat);
     dashboard.add(btnToSanXuat);
     dashboard.add(btnThuKho);
+    dashboard.add(btnKhachang);
     dashboard.add(btnCauHinh);
 
     add(dashboard, BorderLayout.WEST);
@@ -100,6 +110,7 @@ public class CaiDonPanel extends JPanel {
     mainPanel.add(createCaSanXuatPanel(), "CaSanXuat");
     mainPanel.add(createToSanXuatPanel(), "ToSanXuat");
     mainPanel.add(createThuKhoPanel(), "ThuKho");
+    mainPanel.add(createKhachHangPanel(), "KhachHang");
     mainPanel.add(createCauHinhPanel(), "CauHinh");
 
     add(mainPanel, BorderLayout.CENTER);
@@ -109,6 +120,7 @@ public class CaiDonPanel extends JPanel {
     btnCaSanXuat.addActionListener(e -> cardLayout.show(mainPanel, "CaSanXuat"));
     btnToSanXuat.addActionListener(e -> cardLayout.show(mainPanel, "ToSanXuat"));
     btnThuKho.addActionListener(e -> cardLayout.show(mainPanel, "ThuKho"));
+    btnKhachang.addActionListener(e -> cardLayout.show(mainPanel, "KhachHang"));
     btnCauHinh.addActionListener(e -> cardLayout.show(mainPanel, "CauHinh"));
   }
 
@@ -259,7 +271,8 @@ public class CaiDonPanel extends JPanel {
   }
 
 
-
+  // Ca sx
+  // bien public
   JTable tableShift;
   private DefaultTableModel tableModelShift;
   JTextField CSXShiftField;
@@ -349,6 +362,8 @@ public class CaiDonPanel extends JPanel {
     return panel;
   }
 
+  // To sx
+  // bien public
   JTable tableProductionGroup;
   private DefaultTableModel tableModelProductionGroup;
   JTextField TSXField;
@@ -438,7 +453,8 @@ public class CaiDonPanel extends JPanel {
     return panel;
   }
 
-
+  // Thu kho
+  // bien public
   JTable tableWarehouseStaff;
   private DefaultTableModel tableModelWarehouseStaff;
   JTextField TKField;
@@ -529,6 +545,104 @@ public class CaiDonPanel extends JPanel {
     return panel;
   }
 
+  // Khach hang
+  // bien public
+  JTable tableKhachHang;
+  private DefaultTableModel tableModelKhachHang;
+  JTextField KhachHangField;
+  JButton btnThemKhachHang;
+  JButton btnSuaKhachHang;
+  JButton btnXoaKhachHang;
+  JButton btnXoaTatCaKhachHang;
+  JButton btnResetKhachHang;
+  private JPanel createKhachHangPanel() {
+    JPanel panel = new JPanel(new BorderLayout());
+
+    ActionListener KHC = new KhachHangController(this);
+
+    tableKhachHang = new JTable();
+    updateTableDataKhachHang();
+    styleTable2(tableKhachHang);
+    JScrollPane scrollPane = new JScrollPane(tableKhachHang);
+    panel.add(scrollPane, BorderLayout.CENTER);
+
+    JPanel PanelD = new JPanel(new GridLayout(1, 1, 6, 0));
+
+    // Panel1
+    JPanel Panel1 = new JPanel();
+    Panel1.setLayout(new BoxLayout(Panel1, BoxLayout.Y_AXIS));  // Sử dụng BoxLayout theo chiều dọc
+    Panel1.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+    JLabel Label1 = new JLabel("Tên Khách Hàng");
+    KhachHangField = new JTextField();
+    KhachHangField.setFont(new Font("Arial", Font.BOLD, 14));
+    Label1.setAlignmentX(Component.LEFT_ALIGNMENT);
+    KhachHangField.setAlignmentX(Component.LEFT_ALIGNMENT);
+    Panel1.add(Label1);
+    Panel1.add(KhachHangField);
+
+    PanelD.add(Panel1);
+
+
+    // Tạo panel chứa PanelD và buttonPanel
+    JPanel bottomPanel = new JPanel(new BorderLayout());
+    bottomPanel.add(PanelD, BorderLayout.CENTER);
+
+    // Các nút chức năng
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)); // Đặt FlowLayout.LEFT để căn chỉnh nút sang trái
+// Tạo các nút và thêm màu nền
+    btnThemKhachHang = new JButton("Thêm");
+    btnThemKhachHang.setBackground(new Color(152, 201, 226, 255));
+    btnThemKhachHang.setOpaque(true);
+    btnThemKhachHang.setBorderPainted(false);
+    btnThemKhachHang.addActionListener(KHC);
+
+    btnSuaKhachHang = new JButton("Sửa");
+    btnSuaKhachHang.setBackground(new Color(152, 201, 226, 255));
+    btnSuaKhachHang.setOpaque(true);
+    btnSuaKhachHang.setBorderPainted(false);
+    btnSuaKhachHang.addActionListener(KHC);
+
+    btnXoaKhachHang = new JButton("Xóa");
+    btnXoaKhachHang.setBackground(new Color(152, 201, 226, 255));
+    btnXoaKhachHang.setOpaque(true);
+    btnXoaKhachHang.setBorderPainted(false);
+    btnXoaKhachHang.addActionListener(KHC);
+
+    btnXoaTatCaKhachHang = new JButton("Xóa Tất Cả");
+    btnXoaTatCaKhachHang.setBackground(new Color(152, 201, 226, 255));
+    btnXoaTatCaKhachHang.setOpaque(true);
+    btnXoaTatCaKhachHang.setBorderPainted(false);
+    btnXoaTatCaKhachHang.addActionListener(KHC);
+
+    btnResetKhachHang = new JButton("Làm Mới");
+    btnResetKhachHang.setBackground(new Color(152, 201, 226, 255));
+    btnResetKhachHang.setOpaque(true);
+    btnResetKhachHang.setBorderPainted(false);
+    btnResetKhachHang.addActionListener(KHC);
+
+// Thêm các nút vào buttonPanel
+    buttonPanel.add(btnThemKhachHang);
+    buttonPanel.add(btnSuaKhachHang);
+    buttonPanel.add(btnXoaKhachHang);
+    buttonPanel.add(btnXoaTatCaKhachHang);
+    buttonPanel.add(btnResetKhachHang);
+
+// Đặt trạng thái mặc định cho nút
+    btnSuaKhachHang.setEnabled(false);
+    btnXoaKhachHang.setEnabled(false);
+
+    bottomPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+    panel.add(bottomPanel, BorderLayout.SOUTH);  // Thêm bottomPanel vào panel chính
+
+    return panel;
+  }
+
+
+
+  // Setting
+  // bien public
   JTextField thuMucField;
   JTextField tenFileField;
   JTextField nguongCanField;
@@ -794,9 +908,6 @@ public class CaiDonPanel extends JPanel {
         }
       }
     });
-
-
-
   }
 
 
@@ -1038,7 +1149,7 @@ public class CaiDonPanel extends JPanel {
     }
 
     // Cập nhật model cho JTable
-    tableModelWarehouseStaff = new DefaultTableModel(data, new Object[]{"STT", "Tổ Sản Xuất", "grID"}) {
+    tableModelWarehouseStaff = new DefaultTableModel(data, new Object[]{"STT", "Thủ Kho", "grID"}) {
       @Override
       public boolean isCellEditable(int row, int column) {
         return column != 0; // Không cho phép chỉnh sửa cột STT
@@ -1127,6 +1238,112 @@ public class CaiDonPanel extends JPanel {
     });
   }
 
+
+  public void updateTableDataKhachHang() {
+    DaoUser daoUser = new DaoUser();
+    List<User> users = daoUser.selectAll(); // Lấy danh sách Users từ cơ sở dữ liệu
+
+    // Chuyển đổi danh sách thành mảng hai chiều
+    Object[][] data = new Object[users.size()][3]; // Thêm cột ẩn Id
+    Object[][] originalData = new Object[users.size()][3]; // Lưu dữ liệu ban đầu
+
+    for (int i = 0; i < users.size(); i++) {
+      User user = users.get(i);
+      data[i][0] = i + 1; // STT
+      data[i][1] = user.getFullName(); // Tên đầy đủ
+      data[i][2] = user.getId(); // Id (ẩn)
+
+      originalData[i][0] = data[i][0];
+      originalData[i][1] = data[i][1];
+      originalData[i][2] = data[i][2];
+    }
+
+    // Cập nhật model cho JTable
+    tableModelKhachHang = new DefaultTableModel(data, new Object[]{"STT", "Tên Khách Hàng", "ID"}) {
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return column != 0; // Không cho phép chỉnh sửa cột STT
+      }
+    };
+    tableKhachHang.setModel(tableModelKhachHang);
+
+    // Ẩn cột ID
+    tableKhachHang.getColumnModel().getColumn(2).setMinWidth(0);
+    tableKhachHang.getColumnModel().getColumn(2).setMaxWidth(0);
+    tableKhachHang.getColumnModel().getColumn(2).setWidth(0);
+
+    styleTable2(tableKhachHang);
+
+    // Đăng ký TableModelListener để nhận sự kiện thay đổi dữ liệu
+    tableModelKhachHang.addTableModelListener(new TableModelListener() {
+      @Override
+      public void tableChanged(TableModelEvent e) {
+        if (e.getType() == TableModelEvent.UPDATE) {
+          int row = e.getFirstRow();
+          int column = e.getColumn();
+
+          // Chỉ xử lý khi sửa cột "Tên Khách Hàng"
+          if (column == 1) {
+            String updatedValue = tableModelKhachHang.getValueAt(row, column).toString();
+            String originalValue = originalData[row][column].toString();
+
+            // Kiểm tra xem giá trị mới có khác giá trị cũ không
+            if (!updatedValue.equals(originalValue)) {
+              try {
+                Integer userId = (Integer) tableModelKhachHang.getValueAt(row, 2);
+
+                // Kiểm tra các trường nhập liệu
+                if (updatedValue.isEmpty()) {
+                  DialogHelper.alert(null, "Vui lòng nhập Tên Khách Hàng trong Bảng!");
+                  return;
+                }
+
+                // Cập nhật dữ liệu
+                User updatedUser = new User(userId, updatedValue);
+                daoUser.update(updatedUser); // Gọi phương thức update từ DAO
+
+                // Cập nhật giá trị ban đầu
+                originalData[row][column] = updatedValue;
+                DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
+                updateTableDataKhachHang(); // Tải lại bảng sau khi cập nhật
+              } catch (Exception ex) {
+                if (ex.getMessage().contains("UNIQUE")) {
+                  DialogHelper.alert(null, "Tên Khách Hàng đã tồn tại! Vui lòng nhập tên khác.");
+                } else {
+                  DialogHelper.alert(null, "Lỗi khi cập nhật Tên Khách Hàng: " + ex.getMessage());
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Thêm sự kiện lắng nghe khi người dùng chọn dòng
+    tableKhachHang.getSelectionModel().addListSelectionListener(e -> {
+      if (!e.getValueIsAdjusting() && tableKhachHang.getSelectedRow() != -1) {
+        btnThemKhachHang.setEnabled(false);
+        btnXoaKhachHang.setEnabled(true);
+        btnSuaKhachHang.setEnabled(true);
+        btnXoaTatCaKhachHang.setEnabled(false);
+        btnResetKhachHang.setEnabled(true);
+
+        // Lấy chỉ số dòng được chọn
+        int selectedRow = tableKhachHang.getSelectedRow();
+
+        // Lấy ID từ cột ẩn
+        Integer userId = (Integer) tableModelKhachHang.getValueAt(selectedRow, 2);
+
+        // Lấy User từ cơ sở dữ liệu
+        User user = daoUser.selectbyID(userId);
+
+        if (user != null) {
+          KhachHangSendController = user;
+          KhachHangField.setText(user.getFullName());
+        }
+      }
+    });
+  }
 
 
 
@@ -1378,6 +1595,44 @@ public class CaiDonPanel extends JPanel {
     getbtnXoaWarehouseStaff().setEnabled(false);
     getbtnXoaTatCaWarehouseStaff().setEnabled(true);
   }
+
+  //khach hang
+  public JTextField getKhachHangField() {
+    return KhachHangField;
+  }
+
+  public JButton getBtnThemKhachHang() {
+    return btnThemKhachHang;
+  }
+
+  public JButton getBtnSuaKhachHang() {
+    return btnSuaKhachHang;
+  }
+
+  public JButton getBtnXoaKhachHang() {
+    return btnXoaKhachHang;
+  }
+
+  public JButton getBtnXoaTatCaKhachHang() {
+    return btnXoaTatCaKhachHang;
+  }
+
+  public JButton getBtnResetKhachHang() {
+    return btnResetKhachHang;
+  }
+
+  public User getKhachhangSendController() {
+    return KhachHangSendController;
+  }
+
+  public void ResetFormKhacHang() {
+    getKhachHangField().setText("");
+    getBtnThemKhachHang().setEnabled(true);
+    getBtnSuaKhachHang().setEnabled(false);
+    getBtnXoaKhachHang().setEnabled(false);
+    getBtnXoaTatCaKhachHang().setEnabled(true);
+  }
+
 
 //setting
 

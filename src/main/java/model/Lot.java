@@ -26,7 +26,7 @@ public class Lot {
     @Column(name = "LotID")
     private Integer lotID;
 
-    @Column(name = "LotIDU", unique = true, columnDefinition = "NVARCHAR(255)", length = 20, nullable = false)
+    @Column(name = "LotIDU", columnDefinition = "NVARCHAR(255)", length = 20, nullable = false)
     private String lotIDU;
 
     @ManyToOne

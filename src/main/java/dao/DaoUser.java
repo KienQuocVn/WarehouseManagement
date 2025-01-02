@@ -9,24 +9,29 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DaoUser extends WHMA<User, String> {
+public class DaoUser extends WHMA<User, Integer> {
 
   @Override
   public void insert(User entity) {
-    String sql = "INSERT INTO Users (Username, FullName, Role) VALUES (?, ?, ?)";
-    JdbcHelper.executeUpdate(sql, entity.getUsername(), entity.getFullName(), entity.getRole());
+    String sql = "INSERT INTO Users (FullName) VALUES (?)";
+    JdbcHelper.executeUpdate(sql, entity.getFullName());
   }
 
   @Override
   public void update(User entity) {
-    String sql = "UPDATE Users SET FullName = ?, Role = ? WHERE Username = ?";
-    JdbcHelper.executeUpdate(sql, entity.getFullName(), entity.getRole(), entity.getUsername());
+    String sql = "UPDATE Users SET FullName = ? WHERE Id = ?";
+    JdbcHelper.executeUpdate(sql, entity.getFullName(), entity.getId());
   }
 
   @Override
-  public void delete(String username) {
-    String sql = "DELETE FROM Users WHERE Username = ?";
-    JdbcHelper.executeUpdate(sql, username);
+  public void delete(Integer id) {
+    String sql = "DELETE FROM Users WHERE Id = ?";
+    JdbcHelper.executeUpdate(sql, id);
+  }
+
+  public void deleteAll() {
+    String sql = "DELETE FROM Users";
+    JdbcHelper.executeUpdate(sql);
   }
 
   @Override
@@ -36,9 +41,9 @@ public class DaoUser extends WHMA<User, String> {
   }
 
   @Override
-  public User selectbyID(String username) {
-    String sql = "SELECT * FROM Users WHERE Username = ?";
-    List<User> users = selectBySql(sql, username);
+  public User selectbyID(Integer id) {
+    String sql = "SELECT * FROM Users WHERE Id = ?";
+    List<User> users = selectBySql(sql, id);
     return users.isEmpty() ? null : users.get(0);
   }
 
@@ -53,9 +58,8 @@ public class DaoUser extends WHMA<User, String> {
     try (ResultSet rs = JdbcHelper.executeQuery(sql, args)) {
       while (rs.next()) {
         User user = new User();
-        user.setUsername(rs.getString("Username"));
+        user.setId(rs.getInt("Id"));
         user.setFullName(rs.getString("FullName"));
-        user.setRole(rs.getString("Role"));
         list.add(user);
       }
     } catch (SQLException e) {
