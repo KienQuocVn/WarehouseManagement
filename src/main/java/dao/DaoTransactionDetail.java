@@ -56,7 +56,6 @@ public class DaoTransactionDetail extends WHMA<TransactionDetail, Integer> {
     return selectBySql(sql, args);
   }
 
-  // Common method to execute SQL queries and map results
   private List<TransactionDetail> selectBySql(String sql, Object... args) {
     List<TransactionDetail> list = new ArrayList<>();
     try (ResultSet rs = JdbcHelper.executeQuery(sql, args)) {
@@ -64,7 +63,6 @@ public class DaoTransactionDetail extends WHMA<TransactionDetail, Integer> {
         TransactionDetail detail = new TransactionDetail();
         detail.setDetailID(rs.getInt("DetailID"));
 
-        // Assuming DaoTransaction and DaoLot exist to fetch related entities
         Transaction transaction = new Transaction();
         transaction.setTransactionID(rs.getInt("TransactionID"));
         detail.setTransaction(transaction);
@@ -76,6 +74,37 @@ public class DaoTransactionDetail extends WHMA<TransactionDetail, Integer> {
         detail.setQuantity(rs.getDouble("Quantity"));
 
         list.add(detail);
+      }
+    } catch (SQLException e) {
+      throw new RuntimeException("Error while querying TransactionDetails: " + e.getMessage(), e);
+    }
+    return list;
+  }
+
+  public List<Object[]> selectTransactionDetails() {
+    String sql = "SELECT " +
+        "l.LotID, " +
+        "u.Username, " +
+        "t.Date, " +
+        "ws.StaffName " +
+        "FROM TransactionDetails td " +
+        "JOIN Lots l ON td.LotID = l.LotID " +
+        "JOIN Transactions t ON td.TransactionID = t.TransactionID " +
+        "JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.staffId " +
+        "JOIN Users u ON t.Staff = u.Username"; // Đổi [Users] thành Users nếu không cần ngoặc vuông
+    return selectBySql1(sql);
+  }
+
+  private List<Object[]> selectBySql1(String sql) {
+    List<Object[]> list = new ArrayList<>();
+    try (ResultSet rs = JdbcHelper.executeQuery(sql)) { // Bỏ args nếu không cần
+      while (rs.next()) {
+        Object[] result = new Object[4];
+        result[0] = rs.getInt("LotID");             // LotID
+        result[1] = rs.getString("Username");       // Username
+        result[2] = rs.getTimestamp("Date").toLocalDateTime(); // Date (converted to LocalDateTime)
+        result[3] = rs.getString("StaffName");      // StaffName
+        list.add(result);
       }
     } catch (SQLException e) {
       throw new RuntimeException("Error while querying TransactionDetails: " + e.getMessage(), e);

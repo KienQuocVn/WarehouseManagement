@@ -266,6 +266,7 @@ public class ThongKePanel extends JPanel {
     String[] columnNames = {"Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Ngày Sản Xuất", "KL Cân", "KL Bì", "KL Hàng", "Thủ Kho", "HSD", "Số Pallet", "Xuất/Nhập"};
     tableModel = new DefaultTableModel(columnNames, 0);
     table = new JTable(tableModel);
+    table.getTableHeader().setBackground(new Color(255, 153, 51));
     JScrollPane scrollPane = new JScrollPane(table);
 
     DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -276,7 +277,6 @@ public class ThongKePanel extends JPanel {
 
     table.setRowHeight(25);
     table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 15));
-    table.getTableHeader().setBackground(Color.LIGHT_GRAY);
     table.setFont(new Font("Arial", Font.PLAIN, 12));
     table.addMouseListener(new MouseAdapter() {
       @Override
@@ -287,6 +287,7 @@ public class ThongKePanel extends JPanel {
         }
       }
     });
+
     add(scrollPane, BorderLayout.CENTER);
 
 
@@ -1188,6 +1189,4 @@ public class ThongKePanel extends JPanel {
       JOptionPane.showMessageDialog(null, "Lỗi khi xuất file Excel!");
     }
   }
-
-
 }
