@@ -59,6 +59,7 @@ public class JdbcHelper {
 		}
 	}
 
+
 	// Thực thi câu lệnh INSERT và trả về khóa sinh tự động
 	public static ResultSet executeQueryWithGeneratedKeys(String sql, Object... args) {
 		try {
@@ -86,4 +87,9 @@ public class JdbcHelper {
 			if (con != null) con.close();
 		} catch (SQLException ignored) {}
 	}
+
+	public static Connection getConnection() throws SQLException {
+		return DriverManager.getConnection(dburl, username, password);
+	}
+
 }

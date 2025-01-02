@@ -1,6 +1,8 @@
 package dao;
 
 import AbtractClass.WHMA;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import model.Product;
 import Utils.JdbcHelper;
 
@@ -9,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import model.WarehouseStaff;
 
 public class DaoProduct extends WHMA<Product, Integer> {
 

@@ -1,7 +1,5 @@
 # 🏡 WarehouseManagement - Phần Mềm Quản Lý Kho 
 
-**Phần mềm Desktop**: [Xem tại đây](https://rrms.vercel.app)
-
 ---
 
 ## 📖 Giới thiệu

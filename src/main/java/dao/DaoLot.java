@@ -1,8 +1,8 @@
 package dao;
 
 import AbtractClass.WHMA;
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
+import java.sql.CallableStatement;
+import java.sql.Connection;
 import model.Lot;
 import Utils.JdbcHelper;
 
@@ -19,16 +19,14 @@ import model.Shift;
 import model.WarehouseStaff;
 
 public class DaoLot extends WHMA<Lot, Integer> {
-  private DaoLot daoLot;
-  private DaoShift daoShift;
-  private DaoProductionGroup daoProductionGroup;
-  private DaoProduct daoProduct;
-  private DaoWarehouseStaff daoWarehouseStaff;
 
   @Override
   public void insert(Lot entity) {
-    String sql = "INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, GroupID, WarehouseStaffID) " + // Sửa cột
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    String sql = """
+        INSERT INTO Lots 
+        (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, GroupID, WarehouseStaffID) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """;
 
     JdbcHelper.executeUpdate(
         sql,
@@ -45,22 +43,33 @@ public class DaoLot extends WHMA<Lot, Integer> {
     );
   }
 
+  // Update an existing Lot
   @Override
   public void update(Lot entity) {
-    String sql = "UPDATE Lots SET LotIDU = ?, ProductID = ?, ProductionTime = ?, ExpirationDate = ?, Weight = ?, WarehouseWeight = ?, WeightDeviation = ?, ShiftID = ?, GroupID = ?, WarehouseStaffID = ? " + // Sửa cột
-        "WHERE LotID = ?";
+    String sql = """
+        UPDATE Lots SET 
+        ProductID = ?, 
+        GroupID = ?, 
+        ShiftID = ?, 
+        ProductionTime = ?, 
+        ExpirationDate = ?, 
+        Weight = ?, 
+        WarehouseWeight = ?, 
+        WeightDeviation = ?, 
+        WarehouseStaffID = ?
+        WHERE LotID = ?
+        """;
 
     JdbcHelper.executeUpdate(
         sql,
-        entity.getLotIDU(),
         entity.getProduct().getProductID(),
+        entity.getProductionGroup().getGroupID(),
+        entity.getShift().getShiftId(),
         entity.getProductionTime(),
         entity.getExpirationDate(),
         entity.getWeight(),
         entity.getWarehouseWeight(),
         entity.getWeightDeviation(),
-        entity.getShift().getShiftId(),
-        entity.getProductionGroup().getGroupID(),
         entity.getWarehouseStaff().getStaffId(),
         entity.getLotID()
     );
@@ -72,46 +81,74 @@ public class DaoLot extends WHMA<Lot, Integer> {
     JdbcHelper.executeUpdate(sql, id);
   }
 
+  // Select all Lots
   @Override
   public List<Lot> selectAll() {
-    String sql = "SELECT \n"
-        + "            l.LotID,\n"
-        + "            l.LotIDU,\n"
-        + "            p.ProductID,\n"
-        + "            p.ProductName,\n"
-        + "            pg.GroupID,\n"
-        + "            pg.GroupName,\n"
-        + "            s.ShiftID,\n"
-        + "            s.ShiftName,\n"
-        + "            l.ProductionTime,\n"
-        + "            l.ExpirationDate,\n"
-        + "            l.Weight,\n"
-        + "            l.WarehouseWeight,\n"
-        + "            l.WeightDeviation,\n"
-        + "            ws.StaffID,\n"
-        + "            ws.StaffName,\n"
-        + "            pal.PalletID\n"
-        + "        FROM \n"
-        + "            Lots l\n"
-        + "        JOIN \n"
-        + "            Products p ON l.ProductID = p.ProductID\n"
-        + "        JOIN \n"
-        + "            ProductionGroups pg ON l.GroupID = pg.GroupID\n"
-        + "        JOIN \n"
-        + "            Shifts s ON l.ShiftID = s.ShiftID\n"
-        + "        JOIN \n"
-        + "            WarehouseStaff ws ON l.WarehouseStaffID = ws.StaffID"
-        + "        LEFT JOIN \n"
-        + "            Pallets pal ON pal.LotID = l.LotID";
+    String sql = """
+        SELECT 
+            l.LotID,
+            l.LotIDU,
+            p.ProductID,
+            p.ProductName,
+            pg.GroupID,
+            pg.GroupName,
+            s.ShiftID,
+            s.ShiftName,
+            l.ProductionTime,
+            l.ExpirationDate,
+            l.Weight,
+            l.WarehouseWeight,
+            l.WeightDeviation,
+            ws.StaffID,
+            ws.StaffName,
+            pal.PalletID,
+            pal.PalletName
+        FROM Lots l
+        JOIN Products p ON l.ProductID = p.ProductID
+        JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
+        JOIN Shifts s ON l.ShiftID = s.ShiftID
+        JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.StaffID
+        LEFT JOIN Pallets pal ON pal.LotID = l.LotID
+        """;
     return selectBySql(sql);
   }
 
+
+
+  // Select a Lot by its ID
   @Override
   public Lot selectbyID(Integer id) {
-    String sql = "SELECT * FROM Lots WHERE LotID = ?";
+    String sql = """
+        SELECT 
+            l.LotID,
+            l.LotIDU,
+            p.ProductID,
+            p.ProductName,
+            pg.GroupID,
+            pg.GroupName,
+            s.ShiftID,
+            s.ShiftName,
+            l.ProductionTime,
+            l.ExpirationDate,
+            l.Weight,
+            l.WarehouseWeight,
+            l.WeightDeviation,
+            ws.StaffID,
+            ws.StaffName,
+            pal.PalletID,
+            pal.PalletName
+        FROM Lots l
+        JOIN Products p ON l.ProductID = p.ProductID
+        JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
+        JOIN Shifts s ON l.ShiftID = s.ShiftID
+        JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.StaffID
+        LEFT JOIN Pallets pal ON pal.LotID = l.LotID
+        WHERE l.LotID = ?
+        """;
     List<Lot> list = selectBySql(sql, id);
     return list.isEmpty() ? null : list.get(0);
   }
+
 
   @Override
   public List<Lot> selectbyID(String sql, Object... args) {
@@ -129,7 +166,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
         // Mapping khóa ngoại ProductID
         Product product = new Product();
         product.setProductID(rs.getInt("ProductID"));
-        product.setProductName(rs.getString("ProductName")); // Ánh xạ thêm ProductName
+        product.setProductName(rs.getString("ProductName"));
         lot.setProduct(product);
 
         // Mapping các cột khác
@@ -152,17 +189,18 @@ public class DaoLot extends WHMA<Lot, Integer> {
         lot.setProductionGroup(productionGroup);
 
         WarehouseStaff warehouseStaff = new WarehouseStaff();
-        warehouseStaff.setStaffId(rs.getInt("StaffID")); // Truy vấn đúng cột StaffID
+        warehouseStaff.setStaffId(rs.getInt("StaffID"));
         warehouseStaff.setStaffName(rs.getString("StaffName"));
         lot.setWarehouseStaff(warehouseStaff);
 
-        // Mapping Pallets
+        // Mapping danh sách Pallet (nếu có)
         Integer palletID = rs.getObject("PalletID", Integer.class);
-        if (palletID != null) {
+        if (palletID != null) { // Nếu có pallet liên kết
           Pallet pallet = new Pallet();
           pallet.setPalletID(palletID);
-          pallet.setLot(lot); // Thiết lập mối quan hệ ngược
-          lot.getPallets().add(pallet); // Thêm vào danh sách pallets
+          pallet.setPalletName(rs.getString("PalletName"));
+          pallet.setLot(lot);
+          lot.getPallets().add(pallet);
         }
 
         list.add(lot);
@@ -200,7 +238,8 @@ public class DaoLot extends WHMA<Lot, Integer> {
 
 
 
-  public List<Lot> searchLots(String productionGroup, String shift, String productName, java.sql.Date fromDate, java.sql.Date toDate) {
+  // Search Lots by criteria
+  public List<Lot> searchLots(String productionGroup, String shift, String productName, LocalDate fromDate, LocalDate toDate) {
     StringBuilder sql = new StringBuilder("""
         SELECT 
             l.LotID,
@@ -212,13 +251,14 @@ public class DaoLot extends WHMA<Lot, Integer> {
             s.ShiftID,
             s.ShiftName,
             l.ProductionTime,
-            l.ExpirationDays,
+            l.ExpirationDate,
             l.Weight,
             l.WarehouseWeight,
             l.WeightDeviation,
             ws.StaffID,
             ws.StaffName,
-            pal.PalletID
+            pal.PalletID,
+            pal.PalletName
         FROM Lots l
         JOIN Products p ON l.ProductID = p.ProductID
         JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
@@ -226,11 +266,10 @@ public class DaoLot extends WHMA<Lot, Integer> {
         JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.StaffID
         LEFT JOIN Pallets pal ON pal.LotID = l.LotID
         WHERE 1=1
-    """);
+        """);
 
     List<Object> params = new ArrayList<>();
 
-    // Điều kiện lọc
     if (productionGroup != null) {
       sql.append(" AND pg.GroupName = ?");
       params.add(productionGroup);
@@ -245,20 +284,42 @@ public class DaoLot extends WHMA<Lot, Integer> {
     }
     if (fromDate != null) {
       sql.append(" AND l.ProductionTime >= ?");
-      params.add(fromDate);
+      params.add(java.sql.Date.valueOf(fromDate));
     }
     if (toDate != null) {
       sql.append(" AND l.ProductionTime <= ?");
-      params.add(toDate);
+      params.add(java.sql.Date.valueOf(toDate));
     }
 
-    // Sắp xếp kết quả
     sql.append(" ORDER BY l.ProductionTime DESC");
 
-    // Trả về kết quả
     return selectBySql(sql.toString(), params.toArray());
   }
 
+  public void deleteLotById(int lotId) {
+    String sql = "{CALL DeleteLot(?)}";
 
+    try (Connection connection = JdbcHelper.getConnection();
+        CallableStatement stmt = connection.prepareCall(sql)) {
+
+      stmt.setInt(1, lotId);
+      stmt.executeUpdate();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void deleteAllLots() {
+    String sql = "{CALL DeleteAllLots()}"; // Gọi stored procedure xóa tất cả
+
+    try (Connection connection = JdbcHelper.getConnection();
+        CallableStatement stmt = connection.prepareCall(sql)) {
+
+      // Thực thi câu lệnh xóa tất cả dữ liệu
+      stmt.executeUpdate();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
 
 }

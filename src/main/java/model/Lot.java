@@ -23,6 +23,7 @@ public class Lot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "LotID")
     private Integer lotID;
 
     @Column(name = "LotIDU", columnDefinition = "NVARCHAR(255)", length = 20, nullable = false)
