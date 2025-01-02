@@ -798,7 +798,8 @@ public class HomePanel extends JPanel {
                         lots.get(row).getShift(),
                         lots.get(row).getProductionGroup(),
                         lots.get(row).getWarehouseStaff(),
-                        lots.get(row).getPallets()
+                        lots.get(row).getPallets(),
+                        lots.get(row).getStatus()
                 );
 
                 daoLot.update(updatedLot); // Gọi phương thức update từ DAO

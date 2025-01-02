@@ -1,7 +1,6 @@
 package view;
 
 import com.itextpdf.text.Element;
-import com.itextpdf.text.FontFactory;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.Phrase;
 import com.itextpdf.text.pdf.BaseFont;
@@ -47,7 +46,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-public class ThongKePanel extends JPanel {
+public class QuanLyKhoPanel extends JPanel {
   private JTable table;
   private DefaultTableModel tableModel;
   private DaoLot daoLot;
@@ -78,7 +77,7 @@ public class ThongKePanel extends JPanel {
   Date currentDate = new Date();
   Calendar calendar = Calendar.getInstance();
 
-  public ThongKePanel() {
+  public QuanLyKhoPanel() {
     daoLot = new DaoLot();
     daoProductionGroup = new DaoProductionGroup();
     daoShift = new DaoShift();
@@ -109,7 +108,7 @@ public class ThongKePanel extends JPanel {
     headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
     // Tiêu đề
-    JLabel titleLabel = new JLabel("KẾT QUẢ CẦN BÁN THÀNH PHẨM", JLabel.CENTER);
+    JLabel titleLabel = new JLabel("QUẢN LÝ KHO", JLabel.CENTER);
     titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
     // Panel chứa bộ lọc
@@ -133,7 +132,9 @@ public class ThongKePanel extends JPanel {
 //      filterTableByShift(selectedShift);
 //    });
 
-    filterPanel.add(createColumn("Xuất/Nhập:", new JComboBox<>(new String[]{"Xuất", "Nhập"})));
+    JComboBox<String> statusComboBox = new JComboBox<>(new String[]{"Tất cả", "Xuất", "Nhập"});
+    filterPanel.add(createColumn("Xuất/Nhập:", statusComboBox));
+//    filterPanel.add(createColumn("", new JComboBox<>(new String[]{"Xuất", "Nhập"})));
 
     JComboBox<String> productNameComboBox = new JComboBox<>();
     loadProductNameToComboBox(productNameComboBox);
@@ -192,42 +193,71 @@ public class ThongKePanel extends JPanel {
       productName = productName != null && !productName.equals("Tất cả") ? productName : null;
 
       Date fromDateUtil = fromDateChooser.getDate();
-      LocalDate fromDate = fromDateUtil != null ? new java.sql.Date(fromDateUtil.getTime()).toLocalDate()
-          : null;
+      LocalDate fromDate = fromDateUtil != null ? new java.sql.Date(fromDateUtil.getTime()).toLocalDate() : null;
 
       Date toDateUtil = toDateChooser.getDate();
-      LocalDate  toDate = toDateUtil != null ? new java.sql.Date(toDateUtil.getTime()).toLocalDate()
-          : null;
+      LocalDate toDate = toDateUtil != null ? new java.sql.Date(toDateUtil.getTime()).toLocalDate() : null;
+
+      String status = (String) statusComboBox.getSelectedItem();
+      status = status != null && !status.equals("Tất cả") ? status : null;
 
       // Gọi phương thức tìm kiếm với các tham số đã xử lý
-      List<Lot> searchResults = daoLot.searchLots(productionGroup, shift, productName, fromDate, toDate);
+      List<Lot> searchResults = daoLot.searchLots(productionGroup, shift, productName, fromDate, toDate, status);
 
       // Hiển thị kết quả tìm kiếm trên bảng
       tableModel.setRowCount(0); // Xóa dữ liệu cũ
       if (searchResults != null && !searchResults.isEmpty()) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
         for (Lot lot : searchResults) {
+          String productionTimeFormatted = lot.getProductionTime() != null ? lot.getProductionTime().format(formatter) : "";
+          String expirationDaysFormatted = lot.getExpirationDate() != null ? lot.getExpirationDate().format(formatter) : "";
+
+          String shiftName = "N/A";
+          if (lot.getShift() != null && lot.getShift().getShiftName() != null) {
+            shiftName = lot.getShift().getShiftName();
+          }
+
+          String productNameResult = "N/A";
+          if (lot.getProduct() != null && lot.getProduct().getProductName() != null) {
+            productNameResult = lot.getProduct().getProductName();
+          }
+
+          String productGroupName = "N/A";
+          if (lot.getProductionGroup() != null && lot.getProductionGroup().getGroupName() != null) {
+            productGroupName = lot.getProductionGroup().getGroupName();
+          }
+
+          String staffName = "N/A";
+          if (lot.getWarehouseStaff() != null && lot.getWarehouseStaff().getStaffName() != null) {
+            staffName = lot.getWarehouseStaff().getStaffName();
+          }
+
           String palletIDs = lot.getPallets().stream()
               .map(pallet -> String.valueOf(pallet.getPalletID()))
               .collect(Collectors.joining(", "));
+
           tableModel.addRow(new Object[]{
               lot.getLotID(),
-              lot.getProduct().getProductName(),
+              productNameResult,
               lot.getLotIDU(),
-              lot.getProductionGroup().getGroupName(),
-              lot.getShift().getShiftName(),
-              lot.getProductionTime(),
+              productGroupName,
+              shiftName,
+              productionTimeFormatted,
               lot.getWarehouseWeight(),
               lot.getWeightDeviation(),
               lot.getWeight(),
-              lot.getWarehouseStaff().getStaffName(),
-              lot.getExpirationDate(),
-              palletIDs
+              staffName,
+              expirationDaysFormatted,
+              palletIDs,
+              lot.getStatus()
           });
         }
       } else {
         JOptionPane.showMessageDialog(this, "Không tìm thấy kết quả phù hợp!");
       }
     });
+
 
     filterPanel.add(createColumn("Loại Report:", new JComboBox<>(new String[]{"Kê Nhập", "Thống Kê"})));
 
@@ -512,9 +542,13 @@ public class ThongKePanel extends JPanel {
     tableModel.setRowCount(0);
     List<Lot> lots = daoLot.selectAll();
 
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy"); // Định dạng ngày
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
     for (Lot lot : lots) {
+      if (lot.getStatus() == null || lot.getStatus().trim().isEmpty()) {
+        continue;
+      }
+
       String productionTimeFormatted = lot.getProductionTime() != null ? lot.getProductionTime().format(formatter) : "";
       String expirationDaysFormatted = lot.getExpirationDate() != null ? lot.getExpirationDate().format(formatter) : "";
 
@@ -554,12 +588,14 @@ public class ThongKePanel extends JPanel {
           lot.getWeight(),
           staffName,
           expirationDaysFormatted,
-          palletIDs
+          palletIDs,
+          lot.getStatus()
       };
 
       tableModel.addRow(row);
     }
   }
+
 
 
   private void loadDataToFields(int selectedRow) {
@@ -872,7 +908,7 @@ public class ThongKePanel extends JPanel {
   }
 
 
-//===================================================Show Preview PDF
+  //===================================================Show Preview PDF
   private void showPreview() {
     List<Lot> lots = daoLot.selectAll();
 
@@ -930,7 +966,8 @@ public class ThongKePanel extends JPanel {
           lot.getWeight(),
           lot.getWarehouseStaff() != null ? lot.getWarehouseStaff().getStaffName() : "N/A",
           expirationDate,
-          palletIDs
+          palletIDs,
+          lot.getStatus()
       };
       tableModel.addRow(rowData);
     }
@@ -984,7 +1021,7 @@ public class ThongKePanel extends JPanel {
   }
 
 
-//===================================================In PDF
+  //===================================================In PDF
   private void exportToPDF( String filePath) {
     List<Lot> data = daoLot.selectAll();
     Document document = new Document();
@@ -1041,7 +1078,7 @@ public class ThongKePanel extends JPanel {
         table.addCell(new PdfPCell(new Phrase(lot.getWarehouseStaff() != null ? lot.getWarehouseStaff().getStaffName() : "", regularFont)));
         table.addCell(new PdfPCell(new Phrase(lot.getExpirationDate() != null ? lot.getExpirationDate().format(dateFormatter) : "", regularFont)));
         table.addCell(new PdfPCell(new Phrase(lot.getPallets() != null ? lot.getPallets().stream().map(pallet -> String.valueOf(pallet.getPalletID())).collect(Collectors.joining(", ")) : "", regularFont)));
-        table.addCell(new PdfPCell(new Phrase("", regularFont))); // Cột "Xuất/Nhập"
+        table.addCell(new PdfPCell(new Phrase(lot.getStatus() != null ? lot.getStatus() : "", regularFont)));
       }
 
 
@@ -1169,7 +1206,7 @@ public class ThongKePanel extends JPanel {
                 .map(pallet -> String.valueOf(pallet.getPalletID()))
                 .collect(Collectors.joining(", "))
         );
-        row.createCell(12).setCellValue(""); // Cột "Xuất/Nhập"
+        row.createCell(12).setCellValue(lot.getStatus() != null ? lot.getStatus() : "");
       }
 
       // Tự động điều chỉnh kích thước cột

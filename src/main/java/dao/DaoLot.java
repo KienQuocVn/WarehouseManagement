@@ -81,7 +81,6 @@ public class DaoLot extends WHMA<Lot, Integer> {
     JdbcHelper.executeUpdate(sql, id);
   }
 
-  // Select all Lots
   @Override
   public List<Lot> selectAll() {
     String sql = """
@@ -102,7 +101,8 @@ public class DaoLot extends WHMA<Lot, Integer> {
             ws.StaffID,
             ws.StaffName,
             pal.PalletID,
-            pal.palletIDU
+            pal.palletIDU,
+            l.Status
         FROM Lots l
         JOIN Products p ON l.ProductID = p.ProductID
         JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
@@ -114,8 +114,6 @@ public class DaoLot extends WHMA<Lot, Integer> {
   }
 
 
-
-  // Select a Lot by its ID
   @Override
   public Lot selectbyID(Integer id) {
     String sql = """
@@ -136,7 +134,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
             ws.StaffID,
             ws.StaffName,
             pal.PalletID,
-            pal.PalletName
+            l.Status
         FROM Lots l
         JOIN Products p ON l.ProductID = p.ProductID
         JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
@@ -175,6 +173,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
         lot.setWeight(rs.getBigDecimal("Weight"));
         lot.setWarehouseWeight(rs.getBigDecimal("WarehouseWeight"));
         lot.setWeightDeviation(rs.getBigDecimal("WeightDeviation"));
+        lot.setStatus(rs.getString("Status"));
 
         // Mapping khóa ngoại ShiftID
         Shift shift = new Shift();
@@ -212,19 +211,19 @@ public class DaoLot extends WHMA<Lot, Integer> {
 
   public int insertAndGetID(Lot lot) {
     String sql = "INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, ProductionGroupID, WarehouseStaffID) " +
-            "OUTPUT INSERTED.LotID " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        "OUTPUT INSERTED.LotID " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     try (ResultSet rs = JdbcHelper.executeQueryWithGeneratedKeys(sql,
-            lot.getLotIDU(),
-            lot.getProduct().getProductID(),
-            lot.getProductionTime(),
-            lot.getExpirationDate(),
-            lot.getWeight(),
-            lot.getWarehouseWeight(),
-            lot.getWeightDeviation(),
-            lot.getShift().getShiftId(),
-            lot.getProductionGroup().getGroupID(),
-            lot.getWarehouseStaff().getStaffId())) {
+        lot.getLotIDU(),
+        lot.getProduct().getProductID(),
+        lot.getProductionTime(),
+        lot.getExpirationDate(),
+        lot.getWeight(),
+        lot.getWarehouseWeight(),
+        lot.getWeightDeviation(),
+        lot.getShift().getShiftId(),
+        lot.getProductionGroup().getGroupID(),
+        lot.getWarehouseStaff().getStaffId())) {
 
       if (rs.next()) {
         return rs.getInt(1); // Lấy LotID được sinh ra
@@ -236,9 +235,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
   }
 
 
-
-  // Search Lots by criteria
-  public List<Lot> searchLots(String productionGroup, String shift, String productName, LocalDate fromDate, LocalDate toDate) {
+  public List<Lot> searchLots(String productionGroup, String shift, String productName, LocalDate fromDate, LocalDate toDate, String status) {
     StringBuilder sql = new StringBuilder("""
         SELECT 
             l.LotID,
@@ -257,7 +254,8 @@ public class DaoLot extends WHMA<Lot, Integer> {
             ws.StaffID,
             ws.StaffName,
             pal.PalletID,
-            pal.palletIDU
+            pal.palletIDU,
+            l.Status
         FROM Lots l
         JOIN Products p ON l.ProductID = p.ProductID
         JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
@@ -289,7 +287,10 @@ public class DaoLot extends WHMA<Lot, Integer> {
       sql.append(" AND l.ProductionTime <= ?");
       params.add(java.sql.Date.valueOf(toDate));
     }
-
+    if (status != null) {
+      sql.append(" AND l.Status = ?");
+      params.add(status);
+    }
     sql.append(" ORDER BY l.ProductionTime DESC");
 
     return selectBySql(sql.toString(), params.toArray());

@@ -45,16 +45,16 @@ public class MainFrame extends JFrame {
     btnOrder.setBounds(150, 10, 90, 30);
     btnOrder.addActionListener(e -> showPanel("Order"));
 
-    JButton btnReport = createButton("Thống kê");
-    btnReport.setBounds(250, 10, 90, 30);
+    JButton btnReport = createButton("Quản Lý Kho");
+    btnReport.setBounds(250, 10, 110, 30);
     btnReport.addActionListener(e -> showPanel("Report"));
 
     JButton btnImportExport = createButton("Xuất nhập");
-    btnImportExport.setBounds(350, 10, 90, 30);
+    btnImportExport.setBounds(370, 10, 90, 30);
     btnImportExport.addActionListener(e -> showPanel("Import/Export"));
 
     JButton btnLogin = createButton("Đăng nhập");
-    btnLogin.setBounds(450, 10, 90, 30);
+    btnLogin.setBounds(470, 10, 90, 30);
     btnLogin.addActionListener(e -> {
       this.setVisible(false); // Ẩn MainFrame
       JFrame loginFrame = new JFrame("Đăng nhập");
@@ -126,7 +126,7 @@ public class MainFrame extends JFrame {
 
     contentPanel.add(new HomePanel(), "Home");
     contentPanel.add(new CaiDonPanel(), "Order");
-    contentPanel.add(new ThongKePanel(), "Report");
+    contentPanel.add(new QuanLyKhoPanel(), "Report");
     contentPanel.add(new XuatNhapPanel(), "Import/Export");
     contentPanel.add(new Login(), "Login");
 
