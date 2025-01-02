@@ -16,7 +16,7 @@ public class Pallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer palletID;
 
-    @Column(name = "palletIDU", columnDefinition = "NVARCHAR(255)", unique = true, length = 20, nullable = false)
+    @Column(name = "palletIDU", columnDefinition = "NVARCHAR(255)", length = 20, nullable = false)
     private String palletIDU;
 
     @ManyToOne

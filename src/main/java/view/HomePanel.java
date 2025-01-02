@@ -726,7 +726,7 @@ public class HomePanel extends JPanel {
       data[i][8] = lot.getWeight(); // KL Hàng
       data[i][9] = lot.getWarehouseStaff().getStaffName(); // Thủ Kho
       data[i][10] = lot.getProduct().getHSD(); // HSD
-      data[i][11] = daoPallet.selectbyLotID(lot.getLotID()).getPalletIDU(); // Số Pallet
+      data[i][11] = daoPallet.selectByLotID(lot.getLotID()).getPalletIDU(); // Số Pallet
       data[i][12] = lot.getLotID(); // LotID (ẩn)
 
       System.arraycopy(data[i], 0, originalData[i], 0, data[i].length);

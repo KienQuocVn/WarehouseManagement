@@ -1306,6 +1306,7 @@ public class CaiDonPanel extends JPanel {
                 originalData[row][column] = updatedValue;
                 DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
                 updateTableDataKhachHang(); // Tải lại bảng sau khi cập nhật
+                ResetFormKhacHang();
               } catch (Exception ex) {
                 if (ex.getMessage().contains("UNIQUE")) {
                   DialogHelper.alert(null, "Tên Khách Hàng đã tồn tại! Vui lòng nhập tên khác.");
