@@ -8,14 +8,14 @@ public class JdbcHelper {
 
 	private static final Dotenv dotenv = Dotenv.configure().load();
 
-	private static final String driver = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-	private static final String dburl = dotenv.get("DB_URL");
-	private static final String username = dotenv.get("DB_USERNAME");
-	private static final String password = dotenv.get("DB_PASSWORD");
+	private static final String DRIVER = "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+	private static final String DB_URL = dotenv.get("DB_URL");
+	private static final String DB_USERNAME = dotenv.get("DB_USERNAME");
+	private static final String DB_PASSWORD = dotenv.get("DB_PASSWORD");
 
 	static {
 		try {
-			Class.forName(driver);
+			Class.forName(DRIVER);
 		} catch (ClassNotFoundException ex) {
 			throw new RuntimeException("Failed to load database driver: " + ex.getMessage(), ex);
 		}
@@ -23,7 +23,7 @@ public class JdbcHelper {
 
 	// Kết nối với cơ sở dữ liệu
 	public static Connection getConnection() throws SQLException {
-		return DriverManager.getConnection(dburl, username, password);
+		return DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
 	}
 
 	// Chuẩn bị câu lệnh SQL
@@ -31,7 +31,6 @@ public class JdbcHelper {
 		PreparedStatement pstmt = sql.trim().startsWith("{")
 				? con.prepareCall(sql)
 				: con.prepareStatement(sql);
-
 		for (int i = 0; i < args.length; i++) {
 			pstmt.setObject(i + 1, args[i]);
 		}
@@ -51,16 +50,15 @@ public class JdbcHelper {
 	// Thực thi câu lệnh SELECT
 	public static ResultSet executeQuery(String sql, Object... args) {
 		try {
-			Connection con = getConnection(); // Kết nối cần được đóng bởi người gọi
+			Connection con = getConnection();
 			PreparedStatement stmt = prepareStatement(con, sql, args);
-			return stmt.executeQuery(); // Kết quả cần được xử lý bởi người gọi
+			return stmt.executeQuery(); // Kết quả cần được xử lý và đóng bởi người gọi
 		} catch (SQLException e) {
 			throw new RuntimeException("Error executing query: " + e.getMessage(), e);
 		}
 	}
 
-
-	// Thực thi câu lệnh INSERT và trả về khóa sinh tự động
+	// Thực thi câu lệnh INSERT và trả về khóa tự động sinh
 	public static ResultSet executeQueryWithGeneratedKeys(String sql, Object... args) {
 		try {
 			Connection con = getConnection();
@@ -87,9 +85,4 @@ public class JdbcHelper {
 			if (con != null) con.close();
 		} catch (SQLException ignored) {}
 	}
-
-	public static Connection getConnection() throws SQLException {
-		return DriverManager.getConnection(dburl, username, password);
-	}
-
 }
