@@ -102,7 +102,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
             ws.StaffID,
             ws.StaffName,
             pal.PalletID,
-            pal.PalletName
+            pal.palletIDU
         FROM Lots l
         JOIN Products p ON l.ProductID = p.ProductID
         JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
@@ -198,7 +198,6 @@ public class DaoLot extends WHMA<Lot, Integer> {
         if (palletID != null) { // Nếu có pallet liên kết
           Pallet pallet = new Pallet();
           pallet.setPalletID(palletID);
-          pallet.setPalletName(rs.getString("PalletName"));
           pallet.setLot(lot);
           lot.getPallets().add(pallet);
         }
@@ -258,7 +257,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
             ws.StaffID,
             ws.StaffName,
             pal.PalletID,
-            pal.PalletName
+            pal.palletIDU
         FROM Lots l
         JOIN Products p ON l.ProductID = p.ProductID
         JOIN ProductionGroups pg ON l.GroupID = pg.GroupID

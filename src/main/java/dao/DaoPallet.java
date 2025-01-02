@@ -2,6 +2,7 @@ package dao;
 
 import AbtractClass.WHMA;
 import Utils.JdbcHelper;
+import model.Lot;
 import model.Pallet;
 
 import java.sql.ResultSet;
@@ -13,19 +14,19 @@ public class DaoPallet extends WHMA<Pallet, Integer> {
 
   @Override
   public void insert(Pallet entity) {
-    String sql = "INSERT INTO Pallets (LotID) VALUES (?)";
-    JdbcHelper.executeUpdate(sql, entity.getPalletName());
+    String sql = "INSERT INTO Pallets (palletIDU, LotID) VALUES (?, ?)";
+    JdbcHelper.executeUpdate(sql, entity.getPalletIDU(), entity.getLot().getLotID());
   }
 
   @Override
   public void update(Pallet entity) {
-    String sql = "UPDATE Pallets SET LotID = ? WHERE PalletID = ?";
-    JdbcHelper.executeUpdate(sql, entity.getPalletName(), entity.getPalletID());
+    String sql = "UPDATE Pallets SET palletIDU = ?, LotID = ? WHERE palletID = ?";
+    JdbcHelper.executeUpdate(sql, entity.getPalletIDU(), entity.getLot().getLotID(), entity.getPalletID());
   }
 
   @Override
   public void delete(Integer id) {
-    String sql = "DELETE FROM Pallets WHERE PalletID = ?";
+    String sql = "DELETE FROM Pallets WHERE palletID = ?";
     JdbcHelper.executeUpdate(sql, id);
   }
 
@@ -37,14 +38,14 @@ public class DaoPallet extends WHMA<Pallet, Integer> {
 
   @Override
   public Pallet selectbyID(Integer id) {
-    String sql = "SELECT * FROM Pallets WHERE PalletID = ?";
+    String sql = "SELECT * FROM Pallets WHERE palletID = ?";
     List<Pallet> pallets = selectBySql(sql, id);
     return pallets.isEmpty() ? null : pallets.get(0);
   }
 
-  public Pallet selectbyLotID(Integer id) {
+  public Pallet selectByLotID(Integer lotID) {
     String sql = "SELECT * FROM Pallets WHERE LotID = ?";
-    List<Pallet> pallets = selectBySql(sql, id);
+    List<Pallet> pallets = selectBySql(sql, lotID);
     return pallets.isEmpty() ? null : pallets.get(0);
   }
 
@@ -53,13 +54,20 @@ public class DaoPallet extends WHMA<Pallet, Integer> {
     return selectBySql(sql, args);
   }
 
-   private List<Pallet> selectBySql(String sql, Object... args) {
+  // Common method to execute SQL queries and map results
+  private List<Pallet> selectBySql(String sql, Object... args) {
     List<Pallet> list = new ArrayList<>();
     try (ResultSet rs = JdbcHelper.executeQuery(sql, args)) {
       while (rs.next()) {
         Pallet pallet = new Pallet();
-        pallet.setPalletID(rs.getInt("PalletID"));
-        pallet.setPalletName(rs.getString("PalletName"));
+        pallet.setPalletID(rs.getInt("palletID"));
+        pallet.setPalletIDU(rs.getString("palletIDU"));
+
+        // Tạo đối tượng Lot nếu cần thiết, chỉ set LotID
+        Lot lot = new Lot();
+        lot.setLotID(rs.getInt("LotID"));
+        pallet.setLot(lot);
+
         list.add(pallet);
       }
     } catch (SQLException e) {
