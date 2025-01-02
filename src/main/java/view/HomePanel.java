@@ -568,7 +568,7 @@ public class HomePanel extends JPanel {
     RPane2.setBorder(new RoundedBorder(2));
     RPane2.setBackground(Color.WHITE);
     RPane2.setLayout(new BorderLayout());
-    KLCLabel = new JLabel("0.00", SwingConstants.CENTER);
+    KLCLabel = new JLabel("220.00", SwingConstants.CENTER);
     KLCLabel.setFont(new Font("Arial", Font.BOLD, 50));
     RPane2.add(KLCLabel, BorderLayout.CENTER);
 
