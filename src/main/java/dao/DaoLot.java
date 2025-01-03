@@ -212,6 +212,40 @@ public class DaoLot extends WHMA<Lot, Integer> {
     return list;
   }
 
+  public List<Lot> searchByLotIDUOrPalletIDU(String id) {
+    String sql = """
+        SELECT 
+            l.LotID,
+            l.LotIDU,
+            p.ProductID,
+            p.ProductName,
+            pg.GroupID,
+            pg.GroupName,
+            s.ShiftID,
+            s.ShiftName,
+            l.ProductionTime,
+            l.ExpirationDate,
+            l.Weight,
+            l.WarehouseWeight,
+            l.WeightDeviation,
+            ws.StaffID,
+            ws.StaffName,
+            pal.PalletID,
+            pal.PalletIDU,
+            l.Status
+        FROM Lots l
+        JOIN Products p ON l.ProductID = p.ProductID
+        JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
+        JOIN Shifts s ON l.ShiftID = s.ShiftID
+        JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.StaffID
+        LEFT JOIN Pallets pal ON pal.LotID = l.LotID
+        WHERE (l.LotIDU = ? OR  p.ProductName = ?)
+          AND (l.Status IS NULL OR l.Status = '')
+        """;
+    return selectBySql(sql, id, id);
+  }
+
+
   public int insertAndGetID(Lot lot) {
     String sql = "INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, GroupID, WarehouseStaffID) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";

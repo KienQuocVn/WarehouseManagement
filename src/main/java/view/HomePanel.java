@@ -71,13 +71,9 @@ public class HomePanel extends JPanel {
 
     JMenuItem menuItem1 = new JMenuItem("Refresh");
     menuItem1.addActionListener(e -> {
-      refreshComboBoxData();
-      refreshprinter();
+
       RefreshT();
-      refreshToSXComboBoxData();
-      refreshcaSanxuatComboBoxData();
-      refreshThukhoComboBoxData();
-      updateTableLot();
+
       JOptionPane.showMessageDialog(this, "Trang Chủ Đã Làm Mới!");
     });
 
@@ -289,6 +285,9 @@ public class HomePanel extends JPanel {
   JComboBox<String> ThukhoComboBox;
   JTextField SoPalletTe;
   JDateChooser NSXDate;
+  JTextField searchField;
+  JButton lamMoiButton;
+  JButton timButton;
   private JPanel createCenterPanel() {
     JPanel CentePanel = new JPanel();
     CentePanel.setLayout(new GridBagLayout());
@@ -385,23 +384,23 @@ public class HomePanel extends JPanel {
 
     gbc.gridx = 1;
     JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    JTextField searchField = new JTextField(10);
+    searchField = new JTextField(10);
     searchField.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, Color.GRAY));
-    JButton timButton = new JButton();
+     timButton = new JButton();
     // Tải icon từ file và thay đổi kích thước
     ImageIcon originalIcon = new javax.swing.ImageIcon(getClass().getResource("/img/search.png"));
     Image iconImage = originalIcon.getImage(); // Lấy hình ảnh từ ImageIcon
-
+    timButton.addActionListener(homeController);
 // Thay đổi kích thước của icon (ví dụ: 20x20 pixels)
     Image scaledImage = iconImage.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
     timButton.setIcon(new ImageIcon(scaledImage));
     timButton.setBackground(new Color(71,138,173,255));
 
-    JButton lamMoiButton = new JButton();
+     lamMoiButton = new JButton();
     // Tải icon từ file và thay đổi kích thước
     ImageIcon originalIcon2 = new javax.swing.ImageIcon(getClass().getResource("/img/refresh.png"));
     Image iconImage2 = originalIcon2.getImage(); // Lấy hình ảnh từ ImageIcon
-
+    lamMoiButton.addActionListener(homeController);
 // Thay đổi kích thước của icon (ví dụ: 20x20 pixels)
     Image scaledImage2 = iconImage2.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
     lamMoiButton.setIcon(new ImageIcon(scaledImage2));
@@ -567,7 +566,7 @@ public class HomePanel extends JPanel {
     RPane2.setBorder(new RoundedBorder(2));
     RPane2.setBackground(Color.WHITE);
     RPane2.setLayout(new BorderLayout());
-    KLCLabel = new JLabel("0.00", SwingConstants.CENTER);
+    KLCLabel = new JLabel("220.00", SwingConstants.CENTER);
     KLCLabel.setFont(new Font("Arial", Font.BOLD, 50));
     RPane2.add(KLCLabel, BorderLayout.CENTER);
 
@@ -652,22 +651,33 @@ public class HomePanel extends JPanel {
   // Phương thức tạo bảng JTable
   DefaultTableModel modelTableLot;
   JTable tableLot;
+  JButton buttonXoaLot;
+  JButton buttonSuaLot;
+  JButton buttonLamMoiLot;
   private JPanel createTablePanel() {
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    JButton button1 = new JButton("Thêm");
-    button1.setBackground(new Color(152, 201, 226, 255));
-    button1.setOpaque(true);
-    button1.setBorderPainted(false);
 
-    JButton button2 = new JButton("Xóa");
-    button2.setBackground(new Color(152, 201, 226, 255));
-    button2.setOpaque(true);
-    button2.setBorderPainted(false);
+     buttonXoaLot = new JButton("Xóa");
+    buttonXoaLot.setBackground(new Color(152, 201, 226, 255));
+    buttonXoaLot.setOpaque(true);
+    buttonXoaLot.setBorderPainted(false);
+    buttonXoaLot.setEnabled(false);
+    buttonXoaLot.addActionListener(homeController);
 
-    JButton button3 = new JButton("Sửa");
-    button3.setBackground(new Color(152, 201, 226, 255));
-    button3.setOpaque(true);
-    button3.setBorderPainted(false);
+    buttonSuaLot = new JButton("Sửa");
+    buttonSuaLot.setBackground(new Color(152, 201, 226, 255));
+    buttonSuaLot.setOpaque(true);
+    buttonSuaLot.setBorderPainted(false);
+    buttonSuaLot.setEnabled(false);
+    buttonSuaLot.addActionListener(homeController);
+
+    buttonLamMoiLot = new JButton("Làm Mới");
+    buttonLamMoiLot.setBackground(new Color(152, 201, 226, 255));
+    buttonLamMoiLot.setOpaque(true);
+    buttonLamMoiLot.setBorderPainted(false);
+    buttonLamMoiLot.addActionListener(homeController);
+
+
 
     button4 = new JButton("Nhập");
     button4.setBackground(new Color(152, 201, 226, 255));
@@ -693,7 +703,7 @@ public class HomePanel extends JPanel {
             // Cập nhật lại trạng thái trong bảng
             modelTableLot.setValueAt("Nhập", selectedRow, 13); // Cột 13 là cột "Trạng Thái"
             DialogHelper.alert(null, "Cập nhật trạng thái thành công!");
-
+            RefreshT();
             // Gọi lại phương thức để làm mới dữ liệu trong bảng
             SwingUtilities.invokeLater(this::updateTableLot);
           }
@@ -706,9 +716,9 @@ public class HomePanel extends JPanel {
     });
 
     // Thêm nút vào buttonPanel
-    buttonPanel.add(button1);
-    buttonPanel.add(button2);
-    buttonPanel.add(button3);
+    buttonPanel.add(buttonXoaLot);
+    buttonPanel.add(buttonSuaLot);
+    buttonPanel.add(buttonLamMoiLot);
     buttonPanel.add(button4);
 
     // Tạo bảng JTable
@@ -946,8 +956,10 @@ public class HomePanel extends JPanel {
         Lot selectedLot = daoLot.selectbyID(LotID);
 
         if (selectedLot != null) {
+          lotSendController = selectedLot;
           button4.setEnabled(true);
-
+          buttonXoaLot.setEnabled(true);
+          buttonSuaLot.setEnabled(true);
           // Gán giá trị cho các trường combo box và text field
           getMaHangComboBox().setSelectedItem(selectedLot.getProduct().getProductName());
 
@@ -975,6 +987,179 @@ public class HomePanel extends JPanel {
   }
 
 
+  public void updateSearchTableLot(List<Lot> lots) {
+    DaoLot daoLot = new DaoLot();
+    DaoPallet daoPallet = new DaoPallet();
+
+    // Chuyển đổi danh sách thành mảng hai chiều
+    Object[][] data = new Object[lots.size()][14]; // Thêm cột "LotID"
+    Object[][] originalData = new Object[lots.size()][14]; // Lưu dữ liệu ban đầu
+
+    for (int i = 0; i < lots.size(); i++) {
+      Lot lot = lots.get(i);
+      data[i][0] = i + 1; // STT
+      data[i][1] = lot.getProduct().getProductName(); // Mã Hàng
+      data[i][2] = lot.getLotIDU(); // Số Lô
+      data[i][3] = lot.getProductionGroup().getGroupName(); // Tổ
+      data[i][4] = lot.getShift().getShiftName(); // Ca
+      data[i][5] = lot.getProductionTime(); // Thời Gian SX
+      data[i][6] = lot.getWarehouseWeight(); // KL Cân
+      data[i][7] = lot.getWeightDeviation(); // KL Bì
+      data[i][8] = lot.getWeight(); // KL Hàng
+      data[i][9] = lot.getWarehouseStaff().getStaffName(); // Thủ Kho
+      data[i][10] = lot.getExpirationDate(); // HSD
+      data[i][11] = daoPallet.selectByLotID(lot.getLotID()).getPalletIDU(); // Số Pallet
+      data[i][12] = lot.getLotID(); // LotID (ẩn)
+      data[i][13] = "Chờ";
+
+      System.arraycopy(data[i], 0, originalData[i], 0, data[i].length);
+    }
+
+    // Định nghĩa DefaultTableModel với đầy đủ cột, bao gồm cả "LotID" (ẩn)
+    modelTableLot = new DefaultTableModel(data, new Object[]{
+            "Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Thời Gian SX", "KL Cân",
+            "KL Bì", "KL Tịnh", "Thủ Kho", "HSD", "Số Pallet", "LotID", "Trạng Thái" // Thêm cột "Trạng Thái"
+    }) {
+      @Override
+      public boolean isCellEditable(int row, int column) {
+        return column != 0 && column != 1 && column != 3 && column != 4 && column != 5 && column != 6 && column != 8 && column != 9 && column != 10 && column != 12; // Không cho phép chỉnh sửa cột trạng thái
+      }
+    };
+
+    tableLot.setModel(modelTableLot);
+
+    // Ẩn cột "LotID"
+    tableLot.getColumnModel().getColumn(12).setMinWidth(0);
+    tableLot.getColumnModel().getColumn(12).setMaxWidth(0);
+    tableLot.getColumnModel().getColumn(12).setWidth(0);
+
+    styleTable(tableLot); // Gọi hàm styleTable để định dạng bảng
+
+    // Đăng ký TableModelListener để xử lý sự kiện thay đổi dữ liệu
+    modelTableLot.addTableModelListener(new TableModelListener() {
+      @Override
+      public void tableChanged(TableModelEvent e) {
+        if (e.getType() == TableModelEvent.UPDATE) {
+          int row = e.getFirstRow();
+          int column = e.getColumn();
+
+          // Chỉ xử lý khi sửa cột cần thiết
+          if (column == 2 || column == 7 || column == 11) {
+            String updatedValue = modelTableLot.getValueAt(row, column).toString();
+            String originalValue = originalData[row][column].toString();
+
+            // Kiểm tra xem giá trị mới có khác giá trị cũ không
+            if (!updatedValue.equals(originalValue)) {
+              try {
+                Integer lotID = (Integer) modelTableLot.getValueAt(row, 12);
+
+                // Kiểm tra nhập liệu
+                if (column == 2 && updatedValue.isEmpty()) {
+                  DialogHelper.alert(null, "Vui lòng nhập Mã Lô trong bảng!");
+                  return;
+                }
+
+                if ((column == 7)) {
+                  try {
+                    new BigDecimal(updatedValue); // Kiểm tra giá trị là số hợp lệ
+                  } catch (NumberFormatException ex) {
+                    DialogHelper.alert(null, "Khối lượng phải là một số hợp lệ!");
+                    return;
+                  }
+                }
+
+                if (column == 11 && updatedValue.isEmpty()) {
+                  DialogHelper.alert(null, "Vui lòng nhập Số Pallet trong bảng!");
+                  return;
+                }
+
+
+                // Cập nhật dữ liệu
+
+
+                Lot updatedLot = new Lot();
+
+                // Gán các thuộc tính từng bước
+                updatedLot.setLotID(lotID);
+                updatedLot.setLotIDU(modelTableLot.getValueAt(row, 2).toString());
+                updatedLot.setProduct(lots.get(row).getProduct());
+                updatedLot.setProductionTime(lots.get(row).getProductionTime());
+                updatedLot.setExpirationDate(lots.get(row).getExpirationDate());
+                updatedLot.setWeight(
+                        new BigDecimal(modelTableLot.getValueAt(row, 6).toString())
+                                .subtract(new BigDecimal(modelTableLot.getValueAt(row, 7).toString()))
+                );
+                updatedLot.setWarehouseWeight(new BigDecimal(modelTableLot.getValueAt(row, 6).toString()));
+                updatedLot.setWeightDeviation(new BigDecimal(modelTableLot.getValueAt(row, 7).toString()));
+                updatedLot.setShift(lots.get(row).getShift());
+                updatedLot.setProductionGroup(lots.get(row).getProductionGroup());
+                updatedLot.setWarehouseStaff(lots.get(row).getWarehouseStaff());
+
+                Pallet palletUpdate = daoPallet.selectByLotID(lotID);
+                palletUpdate.setPalletIDU(modelTableLot.getValueAt(row, 11).toString());
+
+
+                daoLot.update(updatedLot); // Gọi phương thức update từ DAO
+                daoPallet.update(palletUpdate);
+                // Cập nhật giá trị ban đầu
+                originalData[row][column] = updatedValue;
+                DialogHelper.alert(null, "Dữ liệu đã được cập nhật.");
+                updateTableLot(); // Cập nhật lại bảng
+              } catch (Exception ex) {
+                if (ex.getMessage().contains("UNIQUE")) {
+                  DialogHelper.alert(null, "Mã Lô đã tồn tại! Vui lòng nhập mã khác.");
+                } else {
+                  DialogHelper.alert(null, "Lỗi khi cập nhật Lô: " + ex.getMessage());
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+
+    // Thêm sự kiện lắng nghe khi người dùng chọn dòng
+    tableLot.getSelectionModel().addListSelectionListener(e -> {
+      if (!e.getValueIsAdjusting() && tableLot.getSelectedRow() != -1) {
+
+
+        int selectedRow = tableLot.getSelectedRow();
+        Integer LotID = (Integer) modelTableLot.getValueAt(selectedRow, 12);
+
+        // Lấy sản phẩm từ cơ sở dữ liệu
+        Lot selectedLot = daoLot.selectbyID(LotID);
+
+        if (selectedLot != null) {
+          lotSendController = selectedLot;
+          button4.setEnabled(true);
+          buttonXoaLot.setEnabled(true);
+          buttonSuaLot.setEnabled(true);
+          // Gán giá trị cho các trường combo box và text field
+          getMaHangComboBox().setSelectedItem(selectedLot.getProduct().getProductName());
+
+          getSoLoField().setText(selectedLot.getLotIDU());
+          getKlBiField().setText(selectedLot.getWeightDeviation().toString());
+
+          getToSXComboBox().setSelectedItem(selectedLot.getProductionGroup().getGroupName());
+          getCaSanxuatComboBox().setSelectedItem(selectedLot.getShift().getShiftName());
+          getThukhoComboBox().setSelectedItem(selectedLot.getWarehouseStaff().getStaffName());
+          getSoPalletTe().setText(daoPallet.selectByLotID(selectedLot.getLotID()).getPalletIDU());
+
+          // Chuyển đổi LocalDate sang java.util.Date
+          LocalDate expirationDate = selectedLot.getProductionTime();
+          Date utilDate = Date.from(expirationDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+// Gán giá trị vào JDateChooser
+          getNSXDate().setDate(utilDate);
+
+          getKLCLabel().setText(selectedLot.getWarehouseWeight().toString());
+          getKLTField().setText(selectedLot.getWeight().toString());
+        }
+      }
+    });
+
+  }
 
 
   //getter
@@ -1041,13 +1226,53 @@ public class HomePanel extends JPanel {
     return KLTField;
   }
 
+  //button lot
+  public JButton getButtonXoaLot() {
+    return buttonXoaLot;
+  }
+
+  public JButton getButtonSuaLot() {
+    return buttonSuaLot;
+  }
+
+  public JButton getButtonLamMoiLot() {
+    return buttonLamMoiLot;
+  }
+
+  public Lot getLotSendController() {
+    return lotSendController;
+  }
+  public JTextField getsearchField() {
+    return searchField;
+  }
+
+
+  public JButton gettimButton() {
+    return timButton;
+  }
+
+  public JButton getlamMoiButton() {
+    return lamMoiButton;
+  }
+
 
   public void  RefreshT() {
-      getSoLoField().setText("");
-      getKlBiField().setText("0");
+    getSoLoField().setText("");
+    getKlBiField().setText("0");
     getSoPalletTe().setText("");
     getNSXDate().setDate(new Date());
     getKLCLabel().setText("100.00");
+    getKLTField().setText("0.00");
+    getsearchField().setText("");
+    button4.setEnabled(false);
+    buttonSuaLot.setEnabled(false);
+    buttonXoaLot.setEnabled(false);
+    refreshComboBoxData();
+    refreshprinter();
+    refreshToSXComboBoxData();
+    refreshcaSanxuatComboBoxData();
+    refreshThukhoComboBoxData();
+    updateTableLot();
   }
 
 

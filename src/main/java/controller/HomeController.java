@@ -8,6 +8,7 @@ import Utils.DialogHelper;
 import model.SettingSystem;
 import view.HomePanel;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 public class HomeController implements ActionListener {
 
@@ -78,7 +80,12 @@ public class HomeController implements ActionListener {
                         lot.setLotIDU("BD" + currentYear + homePanel.getSoLoField().getText().trim());
                         lot.setProduct(daoProduct.selectbyName((String) homePanel.getMaHangComboBox().getSelectedItem()));
                         lot.setProductionTime(homePanel.getNSXDate().getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-                        lot.setExpirationDate(LocalDate.now().plusDays((int) Math.floor(Double.parseDouble(homePanel.getHanSDField().getText().trim()))));
+// Tính ExpirationDate từ ProductionTime
+                        lot.setExpirationDate(
+                                lot.getProductionTime().plusDays(
+                                        (int) Math.floor(Double.parseDouble(homePanel.getHanSDField().getText().trim()))
+                                )
+                        );
                         lot.setWeight(new BigDecimal(homePanel.getKLCLabel().getText().trim())
                                 .subtract(new BigDecimal(homePanel.getKlBiField().getText().trim())));
                         lot.setWarehouseWeight(new BigDecimal(homePanel.getKLCLabel().getText().trim()));
@@ -89,7 +96,6 @@ public class HomeController implements ActionListener {
 
                         // Thêm Lot và lấy LotID
                         int lotID = daoLot.insertAndGetID(lot);
-                        System.out.println(lotID);
 
                         if (lotID > 0) {
                             // Tạo đối tượng Pallet
@@ -112,20 +118,123 @@ public class HomeController implements ActionListener {
                     }
                 }
                 break;
+            case "Xóa":
+                RemoveLot();
+                break;
+            case "Làm Mới":
+                ResetForm();
+                JOptionPane.showMessageDialog(homePanel, "Trang Chủ Đã Làm Mới!");
+                break;
+            case "Sửa":
+                UpdateLot();
+                break;
+
+        }
+
+        // Kiểm tra nguồn sự kiện
+        Object source = e.getSource();
+
+        if (source instanceof JButton && source == homePanel.gettimButton()) {
+            // Xử lý logic khi nhấn nút tìm kiếm
+            String searchText = homePanel.getsearchField().getText().trim();
+
+            // Kiểm tra nội dung tìm kiếm có rỗng không
+            if (searchText.isEmpty()) {
+                DialogHelper.alert(null, "Vui lòng nhập nội dung tìm kiếm!");
+                return;
+            }
+
+            // Thực hiện tìm kiếm theo LotIDU hoặc PalletIDU
+            List<Lot> searchResults = daoLot.searchByLotIDUOrPalletIDU(searchText);
+
+            // Kiểm tra kết quả tìm kiếm
+            if (searchResults.isEmpty()) {
+                DialogHelper.alert(null, "Không tìm thấy lô hàng nào phù hợp với từ khóa tìm kiếm!");
+            } else {
+                // Cập nhật bảng hiển thị với dữ liệu tìm kiếm
+                homePanel.updateSearchTableLot(searchResults);
+            }
+
+
+        }
+
+        if (source instanceof JButton && source == homePanel.getlamMoiButton()) {
+            homePanel.updateTableLot();
+            homePanel.getsearchField().setText("");
         }
 
 
     }
+    public void RemoveLot() {
+        Lot lotHomeToDelete = homePanel.getLotSendController();
+        if (lotHomeToDelete != null) {
+            int confirm = JOptionPane.showConfirmDialog(homePanel,
+                    "Bạn có chắc chắn muốn xóa lô hàng " +lotHomeToDelete.getLotIDU() ,
+                    "Xác nhận xóa",
+                    JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                try {
+                    // Gọi phương thức xóa từ DAO
+                    daoPallet.deleteByLotId(lotHomeToDelete.getLotID());
+                    daoLot.delete(lotHomeToDelete.getLotID());
+                        DialogHelper.alert(homePanel, "Lô hàng đã được xóa thành công!");
+                        ResetForm(); // Làm mới giao diện
+
+                } catch (Exception ex) {
+                    System.out.println(ex);
+                    DialogHelper.alert(homePanel, "Lỗi khi xóa dữ liệu: " + ex.getMessage());
+                }
+            }
+        } else {
+            DialogHelper.alert(homePanel, "Không tìm thấy lô hàng để xóa!");
+        }
+    }
+
+    public void UpdateLot() {
+        Lot lotHome = homePanel.getLotSendController();
+        if (lotHome != null) {
+            if (CheckValid()) { // Kiểm tra các trường có hợp lệ không
+                try {
+                    // Cập nhật thông tin Lot từ giao diện
+                    lotHome.setLotIDU(homePanel.getSoLoField().getText().trim());
+                    lotHome.setProduct(daoProduct.selectbyName((String) homePanel.getMaHangComboBox().getSelectedItem()));
+                    lotHome.setProductionTime(homePanel.getNSXDate().getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+                    // Tính ExpirationDate từ ProductionTime
+                    lotHome.setExpirationDate(
+                            lotHome.getProductionTime().plusDays(
+                                    (int) Math.floor(Double.parseDouble(homePanel.getHanSDField().getText().trim()))
+                            )
+                    );
+                    lotHome.setWeight(new BigDecimal(homePanel.getKLCLabel().getText().trim())
+                            .subtract(new BigDecimal(homePanel.getKlBiField().getText().trim())));
+                    lotHome.setWarehouseWeight(new BigDecimal(homePanel.getKLCLabel().getText().trim()));
+                    lotHome.setWeightDeviation(new BigDecimal(homePanel.getKlBiField().getText().trim()));
+                    lotHome.setShift(daoShift.selectbyName((String) homePanel.getCaSanxuatComboBox().getSelectedItem()));
+                    lotHome.setProductionGroup(daoProductionGroup.selectbyName((String) homePanel.getToSXComboBox().getSelectedItem()));
+                    lotHome.setWarehouseStaff(daoWarehouseStaff.selectbyName((String) homePanel.getThukhoComboBox().getSelectedItem()));
+
+                    Pallet palletupdate= daoPallet.selectByLotID(lotHome.getLotID());
+                    palletupdate.setPalletIDU(homePanel.getSoPalletTe().getText().trim());
+
+                    // Cập nhật Lot trong cơ sở dữ liệu
+                    daoLot.update(lotHome);
+                    daoPallet.update(palletupdate);
+                    DialogHelper.alert(homePanel, "Lô hàng đã được cập nhật thành công!");
+                    ResetForm();
+
+                } catch (Exception ex) {
+                    System.out.println(ex);
+                    DialogHelper.alert(homePanel, "Lỗi khi cập nhật dữ liệu: " + ex.getMessage());
+                }
+            }
+        } else {
+            DialogHelper.alert(homePanel, "Không tìm thấy lô hàng để sửa!");
+        }
+    }
 
 
     public void ResetForm() {
-        homePanel.refreshComboBoxData();
-        homePanel.refreshprinter();
         homePanel.RefreshT();
-        homePanel.refreshToSXComboBoxData();
-        homePanel.refreshcaSanxuatComboBoxData();
-        homePanel.refreshThukhoComboBoxData();
-        homePanel.updateTableLot();
     }
 
 

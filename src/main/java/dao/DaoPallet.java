@@ -49,6 +49,13 @@ public class DaoPallet extends WHMA<Pallet, Integer> {
     return pallets.isEmpty() ? null : pallets.get(0);
   }
 
+  public void deleteByLotId(Integer id) {
+    String sql = "DELETE FROM Pallets WHERE LotID = ?";
+    JdbcHelper.executeUpdate(sql, id);
+  }
+
+
+
   @Override
   public List<Pallet> selectbyID(String sql, Object... args) {
     return selectBySql(sql, args);
