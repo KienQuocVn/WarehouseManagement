@@ -56,7 +56,8 @@ public class DaoLot extends WHMA<Lot, Integer> {
         Weight = ?, 
         WarehouseWeight = ?, 
         WeightDeviation = ?, 
-        WarehouseStaffID = ?
+        WarehouseStaffID = ?,
+        Status = ?
         WHERE LotID = ?
         """;
 
@@ -72,6 +73,7 @@ public class DaoLot extends WHMA<Lot, Integer> {
         entity.getWarehouseWeight(),
         entity.getWeightDeviation(),
         entity.getWarehouseStaff().getStaffId(),
+        entity.getStatus(),
         entity.getLotID()
     );
   }
@@ -343,6 +345,38 @@ public class DaoLot extends WHMA<Lot, Integer> {
       ex.printStackTrace(); // Xử lý lỗi
     }
     return lotIDs;
+  }
+
+  public List<Lot> selectAllStatus() {
+    String sql = """
+        SELECT 
+            l.LotID,
+            l.LotIDU,
+            p.ProductID,
+            p.ProductName,
+            pg.GroupID,
+            pg.GroupName,
+            s.ShiftID,
+            s.ShiftName,
+            l.ProductionTime,
+            l.ExpirationDate,
+            l.Weight,
+            l.WarehouseWeight,
+            l.WeightDeviation,
+            ws.StaffID,
+            ws.StaffName,
+            pal.PalletID,
+            pal.palletIDU,
+            l.Status
+        FROM Lots l
+        JOIN Products p ON l.ProductID = p.ProductID
+        JOIN ProductionGroups pg ON l.GroupID = pg.GroupID
+        JOIN Shifts s ON l.ShiftID = s.ShiftID
+        JOIN WarehouseStaff ws ON l.WarehouseStaffID = ws.StaffID
+        LEFT JOIN Pallets pal ON pal.LotID = l.LotID
+        WHERE l.Status IS NULL OR l.Status = ''
+        """;
+    return selectBySql(sql);
   }
 
 }
