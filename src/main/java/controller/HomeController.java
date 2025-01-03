@@ -8,6 +8,7 @@ import Utils.DialogHelper;
 import model.SettingSystem;
 import view.HomePanel;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -111,6 +112,15 @@ public class HomeController implements ActionListener {
                     }
                 }
                 break;
+            case "Xóa":
+                break;
+            case "Làm Mới":
+                ResetForm();
+                JOptionPane.showMessageDialog(homePanel, "Trang Chủ Đã Làm Mới!");
+                break;
+            case "Sửa":
+                break;
+
         }
 
 
@@ -125,6 +135,8 @@ public class HomeController implements ActionListener {
         homePanel.refreshcaSanxuatComboBoxData();
         homePanel.refreshThukhoComboBoxData();
         homePanel.updateTableLot();
+        homePanel.getButtonSuaLot().setEnabled(false);
+        homePanel.getButtonXoaLot().setEnabled(false);
     }
 
 

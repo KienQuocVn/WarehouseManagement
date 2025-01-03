@@ -652,22 +652,33 @@ public class HomePanel extends JPanel {
   // Phương thức tạo bảng JTable
   DefaultTableModel modelTableLot;
   JTable tableLot;
+  JButton buttonXoaLot;
+  JButton buttonSuaLot;
+  JButton buttonLamMoiLot;
   private JPanel createTablePanel() {
     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-    JButton button1 = new JButton("Thêm");
-    button1.setBackground(new Color(152, 201, 226, 255));
-    button1.setOpaque(true);
-    button1.setBorderPainted(false);
 
-    JButton button2 = new JButton("Xóa");
-    button2.setBackground(new Color(152, 201, 226, 255));
-    button2.setOpaque(true);
-    button2.setBorderPainted(false);
+     buttonXoaLot = new JButton("Xóa");
+    buttonXoaLot.setBackground(new Color(152, 201, 226, 255));
+    buttonXoaLot.setOpaque(true);
+    buttonXoaLot.setBorderPainted(false);
+    buttonXoaLot.setEnabled(false);
+    buttonXoaLot.addActionListener(homeController);
 
-    JButton button3 = new JButton("Sửa");
-    button3.setBackground(new Color(152, 201, 226, 255));
-    button3.setOpaque(true);
-    button3.setBorderPainted(false);
+    buttonSuaLot = new JButton("Sửa");
+    buttonSuaLot.setBackground(new Color(152, 201, 226, 255));
+    buttonSuaLot.setOpaque(true);
+    buttonSuaLot.setBorderPainted(false);
+    buttonSuaLot.setEnabled(false);
+    buttonSuaLot.addActionListener(homeController);
+
+    buttonLamMoiLot = new JButton("Làm Mới");
+    buttonLamMoiLot.setBackground(new Color(152, 201, 226, 255));
+    buttonLamMoiLot.setOpaque(true);
+    buttonLamMoiLot.setBorderPainted(false);
+    buttonLamMoiLot.addActionListener(homeController);
+
+
 
     button4 = new JButton("Nhập");
     button4.setBackground(new Color(152, 201, 226, 255));
@@ -676,9 +687,9 @@ public class HomePanel extends JPanel {
     button4.setEnabled(false);
 
     // Thêm nút vào buttonPanel
-    buttonPanel.add(button1);
-    buttonPanel.add(button2);
-    buttonPanel.add(button3);
+    buttonPanel.add(buttonXoaLot);
+    buttonPanel.add(buttonSuaLot);
+    buttonPanel.add(buttonLamMoiLot);
     buttonPanel.add(button4);
 
     // Tạo bảng JTable
@@ -895,7 +906,8 @@ public class HomePanel extends JPanel {
 
         if (selectedLot != null) {
           button4.setEnabled(true);
-
+          buttonXoaLot.setEnabled(true);
+          buttonSuaLot.setEnabled(true);
           // Gán giá trị cho các trường combo box và text field
           getMaHangComboBox().setSelectedItem(selectedLot.getProduct().getProductName());
 
@@ -989,13 +1001,30 @@ public class HomePanel extends JPanel {
     return KLTField;
   }
 
+  //button lot
+  public JButton getButtonXoaLot() {
+    return buttonXoaLot;
+  }
+
+  public JButton getButtonSuaLot() {
+    return buttonSuaLot;
+  }
+
+  public JButton getButtonLamMoiLot() {
+    return buttonLamMoiLot;
+  }
+
+
 
   public void  RefreshT() {
-      getSoLoField().setText("");
-      getKlBiField().setText("0");
+    getSoLoField().setText("");
+    getKlBiField().setText("0");
     getSoPalletTe().setText("");
     getNSXDate().setDate(new Date());
     getKLCLabel().setText("100.00");
+    button4.setEnabled(false);
+    buttonSuaLot.setEnabled(false);
+    buttonXoaLot.setEnabled(false);
   }
 
 
