@@ -89,7 +89,6 @@ public class HomeController implements ActionListener {
 
                         // Thêm Lot và lấy LotID
                         int lotID = daoLot.insertAndGetID(lot);
-                        System.out.println(lotID);
 
                         if (lotID > 0) {
                             // Tạo đối tượng Pallet
