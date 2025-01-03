@@ -685,6 +685,36 @@ public class HomePanel extends JPanel {
     button4.setOpaque(true);
     button4.setBorderPainted(false);
     button4.setEnabled(false);
+    button4.addActionListener(e -> {
+      int selectedRow = tableLot.getSelectedRow(); // Lấy dòng được chọn
+
+      if (selectedRow != -1) { // Kiểm tra xem có dòng nào được chọn không
+        try {
+          // Lấy LotID của dòng được chọn
+          Integer lotID = (Integer) modelTableLot.getValueAt(selectedRow, 12);
+
+          // Cập nhật trạng thái trong cơ sở dữ liệu
+          DaoLot daoLot = new DaoLot();
+          Lot selectedLot = daoLot.selectbyID(lotID); // Lấy thông tin lô từ cơ sở dữ liệu
+
+          if (selectedLot != null) {
+            selectedLot.setStatus("Nhập"); // Cập nhật trạng thái thành "Nhập"
+            daoLot.update(selectedLot); // Ghi lại thay đổi vào cơ sở dữ liệu
+
+            // Cập nhật lại trạng thái trong bảng
+            modelTableLot.setValueAt("Nhập", selectedRow, 13); // Cột 13 là cột "Trạng Thái"
+            DialogHelper.alert(null, "Cập nhật trạng thái thành công!");
+
+            // Gọi lại phương thức để làm mới dữ liệu trong bảng
+            SwingUtilities.invokeLater(this::updateTableLot);
+          }
+        } catch (Exception ex) {
+          DialogHelper.alert(null, "Lỗi khi cập nhật trạng thái: " + ex.getMessage());
+        }
+      } else {
+        DialogHelper.alert(null, "Vui lòng chọn một dòng trước khi nhấn nút Nhập.");
+      }
+    });
 
     // Thêm nút vào buttonPanel
     buttonPanel.add(buttonXoaLot);
@@ -759,16 +789,37 @@ public class HomePanel extends JPanel {
     for (int i = 0; i < table.getColumnCount(); i++) {
       table.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
     }
+
+    table.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+      @Override
+      public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        if (column == 13) { // Cột "Trạng Thái"
+          String status = value.toString();
+          if (status.equals("Nhập")) {
+            component.setBackground(new Color(152, 251, 152)); // Xanh lá
+          } else if (status.equals("Chờ")) {
+            component.setBackground(new Color(255, 255, 224)); // Vàng nhạt
+          } else {
+            component.setBackground(Color.WHITE);
+          }
+        } else if (!isSelected) {
+          component.setBackground(row % 2 == 0 ? Color.WHITE : new Color(240, 240, 240));
+        }
+        return component;
+      }
+    });
+
   }
 
   public void updateTableLot() {
     DaoLot daoLot = new DaoLot();
     DaoPallet daoPallet = new DaoPallet();
-    List<Lot> lots = daoLot.selectAll(); // Lấy danh sách lô từ cơ sở dữ liệu
+    List<Lot> lots = daoLot.selectAllStatus(); // Lấy danh sách lô từ cơ sở dữ liệu
 
     // Chuyển đổi danh sách thành mảng hai chiều
-    Object[][] data = new Object[lots.size()][13]; // Thêm cột "LotID"
-    Object[][] originalData = new Object[lots.size()][13]; // Lưu dữ liệu ban đầu
+    Object[][] data = new Object[lots.size()][14]; // Thêm cột "LotID"
+    Object[][] originalData = new Object[lots.size()][14]; // Lưu dữ liệu ban đầu
 
     for (int i = 0; i < lots.size(); i++) {
       Lot lot = lots.get(i);
@@ -785,18 +836,19 @@ public class HomePanel extends JPanel {
       data[i][10] = lot.getExpirationDate(); // HSD
       data[i][11] = daoPallet.selectByLotID(lot.getLotID()).getPalletIDU(); // Số Pallet
       data[i][12] = lot.getLotID(); // LotID (ẩn)
+      data[i][13] = "Chờ";
 
       System.arraycopy(data[i], 0, originalData[i], 0, data[i].length);
     }
 
     // Định nghĩa DefaultTableModel với đầy đủ cột, bao gồm cả "LotID" (ẩn)
     modelTableLot = new DefaultTableModel(data, new Object[]{
-            "Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Thời Gian SX", "KL Cân",
-            "KL Bì", "KL Tịnh", "Thủ Kho", "HSD", "Số Pallet", "LotID"
+        "Số Phiếu", "Mã Hàng", "Số Lô", "Tổ", "Ca", "Thời Gian SX", "KL Cân",
+        "KL Bì", "KL Tịnh", "Thủ Kho", "HSD", "Số Pallet", "LotID", "Trạng Thái" // Thêm cột "Trạng Thái"
     }) {
       @Override
       public boolean isCellEditable(int row, int column) {
-        return column != 0 && column != 1 && column != 3 && column != 4 && column != 5 && column != 6 && column != 8 && column != 9 && column != 10 && column != 12; // Không cho phép chỉnh sửa cột STT và LotID
+        return column != 0 && column != 1 && column != 3 && column != 4 && column != 5 && column != 6 && column != 8 && column != 9 && column != 10 && column != 12; // Không cho phép chỉnh sửa cột trạng thái
       }
     };
 
