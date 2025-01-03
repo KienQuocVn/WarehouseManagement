@@ -35,7 +35,7 @@ public class HomePanel extends JPanel {
   private JPopupMenu popupMenu;
   HomeController homeController = new HomeController(this);
   public Lot lotSendController;
-
+  JButton button4 = new JButton();
   public HomePanel() {
     setLayout(new BorderLayout());
 
@@ -119,8 +119,7 @@ public class HomePanel extends JPanel {
   // Phương thức tạo panel header (Left, Center, Right)
   private JPanel createHeaderPanel() {
     JPanel headerPanel = new JPanel(new GridLayout(1, 3, 6, 0));
-    headerPanel.setBorder(new EmptyBorder(6, 4, 6, 4));
-
+    headerPanel.setBorder(new EmptyBorder(6, 4, 0, 4));
     headerPanel.add(createLeftPanel());
     headerPanel.add(createCenterPanel());
     headerPanel.add(createRightPanel());
@@ -144,7 +143,7 @@ public class HomePanel extends JPanel {
 
 
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(5, 5, 5, 5); // Khoảng cách giữa các thành phần
+    gbc.insets = new Insets(3, 5, 3, 5); // Khoảng cách giữa các thành phần
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weightx = 1;
 
@@ -297,7 +296,7 @@ public class HomePanel extends JPanel {
     CentePanel.setBackground(Color.WHITE);
 
     GridBagConstraints gbc = new GridBagConstraints();
-    gbc.insets = new Insets(5, 5, 5, 5); // Khoảng cách giữa các thành phần
+    gbc.insets = new Insets(3, 5, 2, 5); // Khoảng cách giữa các thành phần
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbc.weightx = 1;
 
@@ -648,21 +647,63 @@ public class HomePanel extends JPanel {
   }
 
 
-//may cai nut nam o tren cai bang
 
 
   // Phương thức tạo bảng JTable
   DefaultTableModel modelTableLot;
   JTable tableLot;
-  private JScrollPane createTablePanel() {
+  private JPanel createTablePanel() {
+    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    JButton button1 = new JButton("Thêm");
+    button1.setBackground(new Color(152, 201, 226, 255));
+    button1.setOpaque(true);
+    button1.setBorderPainted(false);
 
+    JButton button2 = new JButton("Xóa");
+    button2.setBackground(new Color(152, 201, 226, 255));
+    button2.setOpaque(true);
+    button2.setBorderPainted(false);
 
+    JButton button3 = new JButton("Sửa");
+    button3.setBackground(new Color(152, 201, 226, 255));
+    button3.setOpaque(true);
+    button3.setBorderPainted(false);
+
+    button4 = new JButton("Nhập");
+    button4.setBackground(new Color(152, 201, 226, 255));
+    button4.setOpaque(true);
+    button4.setBorderPainted(false);
+    button4.setEnabled(false);
+
+    // Thêm nút vào buttonPanel
+    buttonPanel.add(button1);
+    buttonPanel.add(button2);
+    buttonPanel.add(button3);
+    buttonPanel.add(button4);
+
+    // Tạo bảng JTable
     tableLot = new JTable();
     updateTableLot();
     styleTable(tableLot);
 
-    return new JScrollPane(tableLot);
+    // Tạo JScrollPane cho bảng
+    JScrollPane tableScrollPane = new JScrollPane(tableLot);
+
+    // Tạo JPanel lớn hơn để chứa cả buttonPanel và bảng
+    JPanel containerPanel = new JPanel();
+    containerPanel.setLayout(new BorderLayout());
+
+    // Thêm buttonPanel vào phía trên
+    containerPanel.add(buttonPanel, BorderLayout.NORTH);
+
+    // Thêm bảng vào giữa
+    containerPanel.add(tableScrollPane, BorderLayout.SOUTH);
+
+    // Trả về containerPanel
+    return containerPanel;
   }
+
+
 
   // Phương thức tùy chỉnh bảng JTable
   private void styleTable(JTable table) {
@@ -853,6 +894,8 @@ public class HomePanel extends JPanel {
         Lot selectedLot = daoLot.selectbyID(LotID);
 
         if (selectedLot != null) {
+          button4.setEnabled(true);
+
           // Gán giá trị cho các trường combo box và text field
           getMaHangComboBox().setSelectedItem(selectedLot.getProduct().getProductName());
 
