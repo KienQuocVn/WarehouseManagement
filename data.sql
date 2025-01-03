@@ -37,6 +37,8 @@ VALUES
 ('KKQ2'),
 ('KKQ3');
 
+
+
 -- Table: Lot
 INSERT INTO Lots (LotIDU, ProductID, ProductionTime, ExpirationDate, Weight, WarehouseWeight, WeightDeviation, ShiftID, GroupID, WarehouseStaffID,Status)
 VALUES 
